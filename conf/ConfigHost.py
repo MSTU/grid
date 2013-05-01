@@ -24,19 +24,21 @@ import solvers.PRADISSolver as PRADISSolver
 import solvers.ModelicaSolver as ModelicaSolver
 import solvers.PythonSolver as PythonSolver
 
-# класс конфигурации хоста
+HOST_IP_ADDRESS = 'localhost'
+MASTER_IP_ADDRESS = 'localhost'
+PORT = 9000
 
 class ConfigHost:
-	# инициализация объекта
+
 	def __init__(self):
 		sys.excepthook=Pyro4.util.excepthook
 		Pyro4.config.DETAILED_TRACEBACK = True
 		Pyro4.config.COMPRESSION = False
 		Pyro4.config.ONEWAY_THREADED = False
 		Pyro4.config.HMAC_KEY = None
+		Pyro4.config.HOST = HOST_IP_ADDRESS
 		self.Solvers()
 
-	# инициализация решателей
 	def Solvers(self):
 		self.solvers = dict()
 
@@ -49,6 +51,5 @@ class ConfigHost:
 		pythonsolver = PythonSolver.PythonSolver()
 		self.solvers[pythonsolver.name] = pythonsolver
 
-	# адрес мастер-хоста
 	def MasterURL(self):
-		return "localhost"
+		return MASTER_IP_ADDRESS

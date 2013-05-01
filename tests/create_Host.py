@@ -17,12 +17,11 @@
 #***************************************************************************/
 
 import Pyro4
-import sys
 import Host
 import multiprocessing as mp
 
+
 def main():
-        Pyro4.config.HOST = sys.argv[1]
         host = Host.Host()
         daemon=Pyro4.Daemon()
         daemon.register(host)

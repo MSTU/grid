@@ -17,17 +17,16 @@
 #***************************************************************************/
 
 import Pyro4
-import sys
 import Master
 import multiprocessing as mp
+from conf import ConfigMaster
+import Constants
+
 
 def main():
-	Pyro4.config.HOST = sys.argv[1]
 	master = Master.Master()
-	daemon=Pyro4.Daemon()
-	uri=daemon.register(master)
-	ns=Pyro4.locateNS()
-	ns.register("Master", uri)
+	daemon=Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
+	daemon.register(master, Constants.MASTER_NAME)
 	master.RunBalancer()
 	daemon.requestLoop()
 

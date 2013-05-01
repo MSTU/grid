@@ -19,6 +19,7 @@
 import uuid
 
 import Pyro4
+import Constants
 
 from conf import ConfigClient
 import Task
@@ -36,8 +37,7 @@ class ModelGrid:
 		self.config = ConfigClient.ConfigClient()
 		self.counter = 0 # Счетчик задач. У каждого клиента свой.
 
-		ns = Pyro4.naming.locateNS()
-		uri = ns.lookup("Master")
+		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(ConfigClient.PORT)
 		self.master = Pyro4.core.Proxy(uri)
 
 	# установка расчетных случаев и подгтовка данных

@@ -17,6 +17,7 @@
 #***************************************************************************/
 
 import Pyro4
+import Constants
 import conf.ConfigHost as ConfigHost
 import Monitor
 
@@ -31,8 +32,7 @@ class Host:
 		# Сейчас задачи почему-то хранятся в словаре. Не понятно зачем. На список нужно заменить скорее всего
 		self.tasks = {}
 		self.monitor = Monitor.Monitor("host.log")
-		ns = Pyro4.naming.locateNS()
-		uri = ns.lookup("Master")
+		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigHost.MASTER_IP_ADDRESS + ":" + str(ConfigHost.PORT)
 		self.master = Pyro4.core.Proxy(uri)
 
 	def RegisterOnMaster(self):

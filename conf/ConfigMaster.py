@@ -22,6 +22,8 @@ import Pyro4.util
 import Pyro4
 import sys
 
+MASTER_IP_ADDRESS = 'localhost'
+PORT = 9000
 
 class ConfigMaster:
 	# инициализация объекта
@@ -31,4 +33,5 @@ class ConfigMaster:
 		Pyro4.config.COMPRESSION = False
 		Pyro4.config.ONEWAY_THREADED = False
 		Pyro4.config.HMAC_KEY = None
+		Pyro4.config.HOST = MASTER_IP_ADDRESS
 
