@@ -1,0 +1,133 @@
+# -*- coding: cp1251 -*-
+
+#***************************************************************************
+#
+#    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
+#                                       Anton Lapshin
+#                                       Anton Kargin
+#    email                : laduga@laduga.com
+#***************************************************************************
+#***************************************************************************
+#*                                                                         *
+#*   This program is free software; you can redistribute it and/or modify  *
+#*   it under the terms of the GNU General Public License as published by  *
+#*   the Free Software Foundation; either version 2 of the License, or     *
+#*   (at your option) any later version.                                   *
+#*                                                                         *
+#***************************************************************************/
+
+
+import threading
+import time
+
+import Pyro4
+
+import conf.ConfigMaster as ConfigMaster
+import Constants
+import Monitor
+
+
+class Master:
+	# инициализаци€ объекта
+	def __init__(self):
+		self.config = ConfigMaster.ConfigMaster()
+		self.monitor = Monitor.Monitor("master.log")
+		self.hosts_list = []  # —писок Proxy хостов
+		self.asynchosts_list = []  # —писок Proxy хостов дл€ асинхронных вызовов
+		self.asyncresults = []  # «десь хран€тс€ результаты всех задач
+		# TODO: хранить все задачи в словаре. ƒл€ каждого клиента свои задачи
+		self.tasks_list = []  # список всех задач
+		# √отвые задачи дл€ каждого клиента сваливаютс€ сюда.  люч - id клиента, занчение - список решенных задач
+		self.ready_tasks = dict()
+		self.clientTasksCounter = dict()  #ƒл€ каждого клиента хранит количество его невыполненнных задач
+
+	# (возможно надо сделать потокобезопасной)
+	#«адача ставитс€ в очередь
+	def RunTask(self, task):
+		self.tasks_list.append(task)
+		if task.clientId in self.clientTasksCounter:
+			self.clientTasksCounter[task.clientId] += 1
+		else:
+			self.clientTasksCounter[task.clientId] = 1
+		self.monitor.Log("get task with parameters: " + str(task.ma.GetParameters()))
+
+	#’ост вызывает этот метод, чтобы зарегистрировать себ€
+	def RegisterHost(self, host_uri):
+		host = Pyro4.Proxy(host_uri)
+		if host not in self.hosts_list:
+			self.hosts_list.append(host)
+			self.asynchosts_list.append(Pyro4.async(host))
+			self.asyncresults.append(None)
+
+	#∆дет выполени€ всех задач клиента в очереди и возвращает все решенные задачи
+	def WaitAll(self, clientId):
+		# TODO:
+		# ќжидание завершени€ задач происходит в цикле. Ќа каждой итерации вызываетс€ sleep(1),
+		# так что все это тратит не так много ресурсов. Ќо правильнее поставить поток в ожидание
+		# и возобновить работу когда количество нерешенных задач будте 0.
+		while not self.clientTasksCounter[clientId] is 0:
+			time.sleep(1)
+		for i in range(len(self.hosts_list)):
+			if not self.asyncresults[i] is None:
+				self.ready_tasks[clientId].append(self.asyncresults[i].value)
+		self.monitor.Log("All tasks calculated")
+		ready_tasks = self.ready_tasks[clientId]
+		self.ready_tasks[clientId] = []
+		self.asyncresults = []
+		for i in range(len(self.hosts_list)):
+			self.asyncresults.append(None)
+		return ready_tasks
+
+	def RunBalancer(self):
+		def a():
+			while True:
+				if not len(self.tasks_list) is 0:
+					task = self.tasks_list[0]
+				else:
+					# TODO:
+					# «десь тоже хорошо бы заменить sleep(1) на что-то типа wait()
+					time.sleep(1)
+					continue
+
+				# TODO:
+				# ¬озможно нужно сделать так, чтобы на одном хосте могло одновременно выполн€тс€ несколько задач,
+				# но с разными "расчетными случи€ми". Ќо тогда эти "расчетные случаи" на должны иметь доступ
+				# к общим данным.
+
+				for i in range(len(self.hosts_list)):
+					if self.asyncresults[i] is None:
+						self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
+						#self.tasks_list.pop(0)
+						#self.clientTasksCounter[task.clientId] -= 1
+						# TODO:
+						# ≈сли задача не выполнилась, то ее нужно оп€ть попробовать выполнить. ”меньшать счетчик нужно
+						# после успешнго решени€ задачи
+						self.monitor.Log("send task " + str(task.GetId()) + " to Host " + str(i))
+						break
+					if self.asyncresults[i].ready is True:
+						value = self.asyncresults[i].value
+						# ѕроверка на ошибки
+						# TODO:
+						# ≈сли с хостом что неладно, возможно ему не нужно ничего посылать.
+						if value.ma.GetStatus() != Constants.TASK_SUCCESS:
+							value.ma.ClearResults()
+							value.ma.SetStatus(Constants.TASK_DEFAULT)
+							task = value
+						else:
+							self.monitor.Log(
+								"Host " + str(i) + " return task with parameters " + str(value.ma.GetResults()))
+							if not value.clientId in self.ready_tasks:
+								self.ready_tasks[value.clientId] = []
+							else:
+								self.ready_tasks[value.clientId].append(value)
+							self.tasks_list.pop(0)
+							self.clientTasksCounter[task.clientId] -= 1
+						self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
+						self.monitor.Log("send task number " + str(task.GetId()) + "to Host " + str(i))
+						break
+
+
+		thread = threading.Thread(target=a)
+		#		thread.setDaemon(True)
+		thread.start()
+
