@@ -40,8 +40,8 @@ class Master:
 		# √отвые задачи дл€ каждого клиента сваливаютс€ сюда.  люч - id клиента, занчение - список решенных задач
 		self.ready_tasks = dict()
 		self.clientTasksCounter = dict()  #ƒл€ каждого клиента хранит количество его невыполненнных задач
+		# (возможно надо сделать потокобезопасной)
 
-	# (возможно надо сделать потокобезопасной)
 	#«адача ставитс€ в очередь
 	def RunTask(self, task):
 		self.tasks_list.append(task)
@@ -53,11 +53,14 @@ class Master:
 
 	#’ост вызывает этот метод, чтобы зарегистрировать себ€
 	def RegisterHost(self, host_uri):
-		host = Pyro4.Proxy(host_uri)
-		if host not in self.hosts_list:
-			self.hosts_list.append(host)
+		try:
+			host = Pyro4.Proxy(host_uri)
+			if host not in self.hosts_list:
+				self.hosts_list.append(host)
 			self.asynchosts_list.append(Pyro4.async(host))
 			self.asyncresults.append(None)
+		except TypeError:
+			pass
 
 	#∆дет выполени€ всех задач клиента в очереди и возвращает все решенные задачи
 	def WaitAll(self, clientId):
@@ -96,13 +99,16 @@ class Master:
 
 				for i in range(len(self.hosts_list)):
 					if self.asyncresults[i] is None:
-						self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
+						try:
+							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
+							self.monitor.Log("send task " + str(task.GetId()) + " to Host " + str(i))
+						except:
+							pass
 						#self.tasks_list.pop(0)
 						#self.clientTasksCounter[task.clientId] -= 1
 						# TODO:
 						# ≈сли задача не выполнилась, то ее нужно оп€ть попробовать выполнить. ”меньшать счетчик нужно
 						# после успешнго решени€ задачи
-						self.monitor.Log("send task " + str(task.GetId()) + " to Host " + str(i))
 						break
 					if self.asyncresults[i].ready is True:
 						value = self.asyncresults[i].value
@@ -122,8 +128,11 @@ class Master:
 								self.ready_tasks[value.clientId].append(value)
 							self.tasks_list.pop(0)
 							self.clientTasksCounter[task.clientId] -= 1
-						self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
-						self.monitor.Log("send task number " + str(task.GetId()) + "to Host " + str(i))
+						try:
+							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
+							self.monitor.Log("send task number " + str(task.GetId()) + "to Host " + str(i))
+						except:
+							pass
 						break
 
 

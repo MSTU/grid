@@ -33,19 +33,25 @@ class Host:
 		self.tasks = {}
 		self.monitor = Monitor.Monitor("host.log")
 		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigHost.MASTER_IP_ADDRESS + ":" + str(ConfigHost.PORT)
-		self.master = Pyro4.core.Proxy(uri)
+		try:
+			self.master = Pyro4.core.Proxy(uri)
+		except:
+			pass
 
 	def RegisterOnMaster(self):
-		uri = self._pyroDaemon.uriFor(self)
+		try:
+			uri = self._pyroDaemon.uriFor(self)
+			self.master._pyroOneway.add("RegisterHost")
+			self.monitor.Log("Send registration request")
+			self.master.RegisterHost(uri)
+		except:
+			pass
 		#Говорим, что при вызове RegisterHost на Мастере не нужно ждать завершения этого метода.
 		# Тоесть управление возвращается сразу же.
 		#Это сделано потому, что в момент вызова RegisterHost на Мастере,
 		# должен быть запущен requestloop демона, на котором запущен этот хост.
 		#А запускается он сразу после вызова текущего метода. Надо это пофиксить.
 		# Наверное requestloop запустить в отдельном потоке.
-		self.master._pyroOneway.add("RegisterHost")
-		self.monitor.Log("Send registration request")
-		self.master.RegisterHost(uri)
 
 	# запуск задачи на расчет
 	def RunTask(self, task):
@@ -53,13 +59,17 @@ class Host:
 		for i in task.lc:
 			solver = self.config.solvers[i.Solver]
 			solver.Init()
-			status = solver.Run(i, task.ma)
-			#  TODO:
-			# Нужно наконец разобраться со статусами и корректно их обрабатывать
+			try:
+				status = solver.Run(i, task.ma)
+				#  TODO:
+				# Нужно наконец разобраться со статусами и корректно их обрабатывать
 
-			# Это немного странно. Если это с делать, то наверное != нужно поставить.
-			if status < task.GetModelAnalysis().GetStatus():
-				task.ma.SetStatus(status)
+				# Это немного странно. Если это с делать, то наверное != нужно поставить.
+				if status < task.GetModelAnalysis().GetStatus():
+					task.ma.SetStatus(status)
+			except:
+				pass
+
 		print "Parameters = " + str(task.ma.GetParameters())
 		print "Results = " + str(task.ma.GetResults())
 		# TODO: ???
