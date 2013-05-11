@@ -17,24 +17,35 @@
 #***************************************************************************/
 
 import Pyro4
+import sys
 import Master
 import multiprocessing as mp
 from conf import ConfigMaster
 import Constants
+from daemon import Daemon
 
 
-def main():
-	master = Master.Master()
-	daemon=Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
-	daemon.register(master, Constants.MASTER_NAME)
-	master.RunBalancer()
-	daemon.requestLoop()
+class MasterDaemon(Daemon):
+	def run(self):
+		master = Master.Master()
+		daemon = Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
+		daemon.register(master, Constants.MASTER_NAME)
+		master.RunBalancer()
+		daemon.requestLoop()
 
-if __name__=="__main__":
-	p = mp.Process(target=main)
-	p.daemon = True
-	p.start()
-	file = open('master_pid.txt','w')
-	file.write(str(p.pid))
-	file.close()
-	#p.join()
+if __name__ == "__main__":
+	daemon = MasterDaemon('/tmp/master_daemon.pid')
+	if len(sys.argv) == 2:
+		if 'start' == sys.argv[1]:
+			daemon.start()
+		elif 'stop' == sys.argv[1]:
+			daemon.stop()
+		elif 'restart' == sys.argv[1]:
+			daemon.restart()
+		else:
+			print "Unknown command"
+			sys.exit(2)
+		sys.exit(0)
+	else:
+		print "usage: %s start|stop|restart" % sys.argv[0]
+		sys.exit(2)
