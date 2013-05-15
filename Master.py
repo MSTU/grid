@@ -15,7 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-
+import logging
 
 import threading
 import time
@@ -24,14 +24,14 @@ import Pyro4
 
 import conf.ConfigMaster as ConfigMaster
 import Constants
-import Monitor
+import GridLogger
 
 
 class Master:
 	# инициализация объекта
 	def __init__(self):
 		self.config = ConfigMaster.ConfigMaster()
-		self.monitor = Monitor.Monitor("master.log")
+		self.logger = GridLogger.GridLogger("master")
 		self.hosts_list = []  # Список Proxy хостов
 		self.asynchosts_list = []  # Список Proxy хостов для асинхронных вызовов
 		self.asyncresults = []  # Здесь хранятся результаты всех задач
@@ -49,7 +49,7 @@ class Master:
 			self.clientTasksCounter[task.clientId] += 1
 		else:
 			self.clientTasksCounter[task.clientId] = 1
-		self.monitor.Log("get task with parameters: " + str(task.ma.GetParameters()))
+		self.logger.Log(logging.INFO, "run task " + str(task.id))
 
 	#Хост вызывает этот метод, чтобы зарегистрировать себя
 	def RegisterHost(self, host_uri):
@@ -59,6 +59,8 @@ class Master:
 				self.hosts_list.append(host)
 			self.asynchosts_list.append(Pyro4.async(host))
 			self.asyncresults.append(None)
+			self.logger.Log(logging.INFO, "Host " + host_uri + "registered")
+
 		except TypeError:
 			pass
 
@@ -73,7 +75,7 @@ class Master:
 		for i in range(len(self.hosts_list)):
 			if not self.asyncresults[i] is None:
 				self.ready_tasks[clientId].append(self.asyncresults[i].value)
-		self.monitor.Log("All tasks calculated")
+		self.logger.Log(logging.INFO, "All tasks calculated")
 		ready_tasks = self.ready_tasks[clientId]
 		self.ready_tasks[clientId] = []
 		self.asyncresults = []
@@ -101,7 +103,7 @@ class Master:
 					if self.asyncresults[i] is None:
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
-							self.monitor.Log("send task " + str(task.GetId()) + " to Host " + str(i))
+							self.logger.Log(logging.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
 						except:
 							pass
 						#self.tasks_list.pop(0)
@@ -120,7 +122,7 @@ class Master:
 							value.ma.SetStatus(Constants.TASK_DEFAULT)
 							task = value
 						else:
-							self.monitor.Log(
+							self.logger.Log(logging.INFO,
 								"Host " + str(i) + " return task with parameters " + str(value.ma.GetResults()))
 							if not value.clientId in self.ready_tasks:
 								self.ready_tasks[value.clientId] = []
@@ -130,7 +132,7 @@ class Master:
 							self.clientTasksCounter[task.clientId] -= 1
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
-							self.monitor.Log("send task number " + str(task.GetId()) + "to Host " + str(i))
+							self.logger.Log(logging.INFO, "send task number " + str(task.GetId()) + "to Host " + str(i))
 						except:
 							pass
 						break

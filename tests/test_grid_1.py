@@ -15,17 +15,18 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import logging
 
 import Loadcase
 import ModelGrid
 import ModelAnalysis
 import tests.test_lib as test_lib
-import Monitor
+import GridLogger
 
 # пример работы с grid 
 
 def test_1():
-	monitor = Monitor.Monitor("test_1.log")
+	logger = GridLogger.GridLogger("test_1")
 	# описание расчетного случая
 	lc1 = Loadcase.Loadcase([], [test_lib.func_1, '', '', 'Python'], desc = 'lc1')
 
@@ -44,13 +45,12 @@ def test_1():
 		ma_list.append(ma)
 	# расчет 
 	mg.Calculate(ma_list)
-	monitor.Log("Calculate begin...")
+	logger.Log(logging.INFO, "Calculate begin...")
 
 	# ожидание выполняения расчета
 	ma_list = mg.Wait()
-	monitor.Log("Calculate end...")
+	logger.Log(logging.INFO, "Calculate end...")
 	# обработка результатов
-	monitor.Log("Results:")
 	for i in ma_list:
 		if (i.GetStatus() == 0):
 		#			monitor.Log("x = " + str(i.getParameter('x')) + " y = " + str(i.getResults()['lc1']))

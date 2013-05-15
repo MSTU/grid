@@ -16,7 +16,7 @@
 #***************************************************************************/
 
 import solvers.Launcher as Launcher
-import Monitor
+import GridLogger
 
 # Python решатель. Расчет функции на Python 
 
@@ -25,7 +25,7 @@ class PythonSolver(Launcher.Launcher):
 	def __init__(self):
 		self.name = "Python"
 		#		self.value = None
-		self.monitor = Monitor.Monitor("host.log")
+		self.monitor = GridLogger.GridLogger("host.log")
 
 	# подговка данных к расчету 
 	def LoadData(self, lc):

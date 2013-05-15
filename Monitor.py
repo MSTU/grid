@@ -16,27 +16,11 @@
 #*                                                                         *
 #***************************************************************************/
 
-import logging
-
 # Монитор сервера
 
 class Monitor:
-	# инициализация объекта
-	def __init__(self, filename):
-		self.logger = logging.getLogger("Monitor")
-		self.logger.setLevel(logging.INFO)
-
-		handler = logging.FileHandler(filename)
-		handler.setLevel(logging.INFO)
-
-		formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-		handler.setFormatter(formatter)
-
-		self.logger.addHandler(handler)
-
-	def Log(self, message):
-		self.logger.info(message)
+	def __init__(self):
+		pass
 
 	# возвращает список задач 
 	def GetTaskList(self):
@@ -53,5 +37,3 @@ class Monitor:
 	# вовращает список событий
 	def GetEventsList(self):
 		pass
-
-	

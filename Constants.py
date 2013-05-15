@@ -20,3 +20,12 @@ TASK_SUCCESS = 0
 TASK_DEFAULT = 1
 
 MASTER_NAME = 'Master'
+
+# logger constants
+
+# System levels
+
+USER = "USER"
+ADMIN = "ADMIN"
+DEV = "DEV"
+

@@ -37,4 +37,4 @@ if __name__=="__main__":
 	file = open('master_pid.txt','w')
 	file.write(str(p.pid))
 	file.close()
-	#p.join()
+	p.join()

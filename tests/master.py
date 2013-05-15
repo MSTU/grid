@@ -26,12 +26,13 @@ from daemon import Daemon
 
 
 class MasterDaemon(Daemon):
+
 	def run(self):
-		master = Master.Master()
-		daemon = Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
-		daemon.register(master, Constants.MASTER_NAME)
-		master.RunBalancer()
-		daemon.requestLoop()
+		self.daemon.requestLoop()
+		self.master = Master.Master()
+		self.daemon = Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
+		self.daemon.register(self.master, Constants.MASTER_NAME)
+		self.master.RunBalancer()
 
 if __name__ == "__main__":
 	daemon = MasterDaemon('/tmp/master_daemon.pid')

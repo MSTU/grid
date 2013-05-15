@@ -15,11 +15,13 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import logging
 
 import uuid
 
 import Pyro4
 import Constants
+import GridLogger
 
 from conf import ConfigClient
 import Task
@@ -29,12 +31,15 @@ import Task
 class ModelGrid:
 	# инициализация объекта
 	def __init__(self):
+
+		self.config = ConfigClient.ConfigClient()
 		self.id = uuid.uuid4() # Каждому клиенту генерируется уникальный id.
+		self.logger = GridLogger.GridLogger("client" + str(self.id))
+		self.logger.Log(logging.DEBUG, "uuid = " + str(self.id))
 		self.lc = []
 		# TODO:
 		# Не пойму зачем сделал словарем. Надо разобарться.
 		self.task_dict = dict()
-		self.config = ConfigClient.ConfigClient()
 		self.counter = 0 # Счетчик задач. У каждого клиента свой.
 
 		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(ConfigClient.PORT)
@@ -67,10 +72,12 @@ class ModelGrid:
 			self.counter += 1
 			self.task_dict[i] = task
 			self.master.RunTask(task)
+			self.logger.Log(logging.INFO, "Run task number " + str(self.counter))
 
 	# ждать пока выполнится весь список ma_list
 	def Wait(self):
 		tasks = self.master.WaitAll(self.id)
+		self.logger.Log(logging.INFO, "Get all tasks for client " + str(self.id))
 		ma_list = [task.ma for task in tasks]
 		return ma_list
 

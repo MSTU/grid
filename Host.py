@@ -15,11 +15,12 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import logging
 
 import Pyro4
 import Constants
 import conf.ConfigHost as ConfigHost
-import Monitor
+import GridLogger
 
 
 # класс хоста
@@ -31,7 +32,7 @@ class Host:
 		# TODO:
 		# Сейчас задачи почему-то хранятся в словаре. Не понятно зачем. На список нужно заменить скорее всего
 		self.tasks = {}
-		self.monitor = Monitor.Monitor("host.log")
+		self.logger = GridLogger.GridLogger("host")
 		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigHost.MASTER_IP_ADDRESS + ":" + str(ConfigHost.PORT)
 		try:
 			self.master = Pyro4.core.Proxy(uri)
@@ -40,9 +41,10 @@ class Host:
 
 	def RegisterOnMaster(self):
 		try:
+			# it works only when this instance registered on PyroDaemon
 			uri = self._pyroDaemon.uriFor(self)
 			self.master._pyroOneway.add("RegisterHost")
-			self.monitor.Log("Send registration request")
+			self.logger.Log(logging.INFO,"Send registration request")
 			self.master.RegisterHost(uri)
 		except:
 			pass
@@ -74,7 +76,7 @@ class Host:
 		print "Results = " + str(task.ma.GetResults())
 		# TODO: ???
 		self.tasks[task.GetId()] = task
-		self.monitor.Log("Task " + str(task.GetId()) + " is calculated")
+		self.logger.Log(logging.INFO, "Task " + str(task.GetId()) + " is calculated")
 		return task
 
 	def SetTasks(self, tasks):

@@ -15,10 +15,11 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import logging
 
 import ModelAnalysis
 import tests.test_lib as test_lib
-import Monitor
+import GridLogger
 import Loadcase
 import ModelGrid
 import matplotlib.pyplot as plt
@@ -28,7 +29,7 @@ import matplotlib.pyplot as plt
 
 def test_1 ():
 
-	monitor = Monitor.Monitor("test_1.log")
+	logger = GridLogger.GridLogger("test_1")
 	# описание расчетного случая
 	lc1 = Loadcase.Loadcase ([],[test_lib.f1, '', '', 'Python'], desc = 'lc1')
 	lc2 = Loadcase.Loadcase ([],[test_lib.f2, '', '', 'Python'], desc = 'lc2')
@@ -51,13 +52,12 @@ def test_1 ():
 
 	# расчет
 	mg.Calculate (ma_list)
-	monitor.Log("Calculate begin...")
+	logger.Log(logging.INFO, "Calculate begin...")
 
 	# ожидание выполняения расчета
 	ma_list = mg.Wait()
-	monitor.Log("Calculate end...")
+	logger.Log(logging.INFO, "Calculate end...")
 	# обработка результатов
-	monitor.Log("Results:")
 	for i in ma_list:
 		if (i.GetStatus()==0):
 			print("x = " + str(i.GetParameter('x')) + " y = "  + str(i.GetParameter('y')) +  " f1 = " +  str(i.GetResults()['lc1'])  +  " f2 = "  + str(i.GetResults()['lc2']))
