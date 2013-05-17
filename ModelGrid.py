@@ -30,19 +30,22 @@ import Task
 
 class ModelGrid:
 	# инициализация объекта
-	def __init__(self):
-
-		self.config = ConfigClient.ConfigClient()
-		self.id = uuid.uuid4() # Каждому клиенту генерируется уникальный id.
-		self.logger = GridLogger.GridLogger("client" + str(self.id))
+	def __init__(self, config=None):
+		if config is None:
+			self.config = ConfigClient.ConfigClient()
+		else:
+			self.config = config
+		self.id = uuid.uuid4()  # Каждому клиенту генерируется уникальный id.
+		#self.logger = GridLogger.GridLogger("client" + str(self.id))
+		self.logger = GridLogger.GridLogger("client")
 		self.logger.Log(logging.DEBUG, "uuid = " + str(self.id))
 		self.lc = []
 		# TODO:
 		# Не пойму зачем сделал словарем. Надо разобарться.
 		self.task_dict = dict()
-		self.counter = 0 # Счетчик задач. У каждого клиента свой.
+		self.counter = 0  # Счетчик задач. У каждого клиента свой.
 
-		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(ConfigClient.PORT)
+		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
 		self.master = Pyro4.core.Proxy(uri)
 
 	# установка расчетных случаев и подгтовка данных
@@ -76,7 +79,7 @@ class ModelGrid:
 
 	# ждать пока выполнится весь список ma_list
 	def Wait(self):
-		tasks = self.master.WaitAll(self.id)
+		tasks = self.master.Wait(self.id)
 		self.logger.Log(logging.INFO, "Get all tasks for client " + str(self.id))
 		ma_list = [task.ma for task in tasks]
 		return ma_list

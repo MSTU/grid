@@ -31,6 +31,7 @@ PORT = 9000
 class ConfigHost:
 
 	def __init__(self):
+		self.masterPort = PORT
 		sys.excepthook=Pyro4.util.excepthook
 		Pyro4.config.DETAILED_TRACEBACK = True
 		Pyro4.config.COMPRESSION = False

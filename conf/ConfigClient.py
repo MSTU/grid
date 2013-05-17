@@ -28,6 +28,7 @@ PORT = 9000
 class ConfigClient:
 	# инициализация объекта
 	def __init__(self):
+		self.masterPort = PORT
 		sys.excepthook=Pyro4.util.excepthook
 		Pyro4.config.DETAILED_TRACEBACK = True
 		Pyro4.config.COMPRESSION = False

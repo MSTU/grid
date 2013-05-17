@@ -29,8 +29,11 @@ import GridLogger
 
 class Master:
 	# инициализация объекта
-	def __init__(self):
-		self.config = ConfigMaster.ConfigMaster()
+	def __init__(self, config=None):
+		if config is None:
+			self.config = ConfigMaster.ConfigMaster()
+		else:
+			self.config = config
 		self.logger = GridLogger.GridLogger("master")
 		self.hosts_list = []  # Список Proxy хостов
 		self.asynchosts_list = []  # Список Proxy хостов для асинхронных вызовов
@@ -65,7 +68,7 @@ class Master:
 			pass
 
 	#Ждет выполения всех задач клиента в очереди и возвращает все решенные задачи
-	def WaitAll(self, clientId):
+	def Wait(self, clientId):
 		# TODO:
 		# Ожидание завершения задач происходит в цикле. На каждой итерации вызывается sleep(1),
 		# так что все это тратит не так много ресурсов. Но правильнее поставить поток в ожидание
@@ -126,6 +129,7 @@ class Master:
 								"Host " + str(i) + " return task with parameters " + str(value.ma.GetResults()))
 							if not value.clientId in self.ready_tasks:
 								self.ready_tasks[value.clientId] = []
+								self.ready_tasks[value.clientId].append(value)
 							else:
 								self.ready_tasks[value.clientId].append(value)
 							self.tasks_list.pop(0)

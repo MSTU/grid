@@ -30,7 +30,7 @@ from conf import ConfigMaster, ConfigHost, ConfigClient
 from tests import test_lib
 
 
-class SimpleTestCase(unittest.TestCase):
+class MultipleClientsTestCase(unittest.TestCase):
 
 	master = Master.Master()
 	hosts = []
@@ -69,38 +69,54 @@ class SimpleTestCase(unittest.TestCase):
 
 		lc1 = Loadcase.Loadcase([], [test_lib.func_1, '', '', 'Python'], desc = 'lc1')
 
-		# подготовка объекта решателя
+		clients = []
+		ma_lists = []
+		clientsToParamsSize = {}
+
+		clientsNumber = 6
+
 		clientConfig = ConfigClient.ConfigClient()
 		clientConfig.masterPort = self.port
-		mg = ModelGrid.ModelGrid(clientConfig)
-		mg.Init()
-		mg.SetLoadcases([lc1])
+
+		# подготовка объекта решателя
+		for i in range(clientsNumber):
+			mg = ModelGrid.ModelGrid(clientConfig)
+			mg.Init()
+			mg.SetLoadcases([lc1])
+			clients.append(mg)
 
 		# подготовка параметров
-		ma_list = []
-		for i in xrange(3):
-			ma = ModelAnalysis.ModelAnalysis()
-			par = dict()
-			par['x'] = i
-			ma.SetParameters(par)
-			ma_list.append(ma)
-		# расчет
-		mg.Calculate(ma_list)
+		for client in clients:
+			ma_list = []
+			numberOfParametes = random.randint(0, 20)
+			clientsToParamsSize[client] = numberOfParametes
+			for i in range(numberOfParametes):
+				ma = ModelAnalysis.ModelAnalysis()
+				par = dict()
+				par['x'] = i
+				ma.SetParameters(par)
+				ma_list.append(ma)
+			ma_lists.append(ma_list)
+			# расчет
+			client.Calculate(ma_list)
+		#  Выбираем случайного клиента
+		client = clients[random.randint(0, clientsNumber - 1)]
 		# ожидание выполняения расчета
-		ma_list = mg.Wait()
+		ma_list = client.Wait()
 		# обработка результатов
 		result = {}
 		for i in ma_list:
 			if (i.GetStatus() == 0):
 				result[i.GetParameter('x')] = i.GetResults()['lc1']
-		# сброс параметров предыдущего расчета
-		mg.Init()
 
 		real = {}
-		for i in xrange(3):
-			self.assertEqual(result[i][0], i ** 2)
+		for i in range(0, clientsToParamsSize[client]):
+			res = result[i][0]
+			self.assertEqual(res, i ** 2)
+		# сброс параметров предыдущего расчета
+		client.Init()
 
-		self.isRun = False
+		# self.isRun = False
 		# for thread in self.hostsTheads:
 		# 	thread.join()
 		# self.masterThread.join()

@@ -27,13 +27,16 @@ import GridLogger
 
 class Host:
 	# инициализация объекта
-	def __init__(self):
-		self.config = ConfigHost.ConfigHost()
+	def __init__(self, config=None):
+		if config is None:
+			self.config = ConfigHost.ConfigHost()
+		else:
+			self.config = config
 		# TODO:
 		# Сейчас задачи почему-то хранятся в словаре. Не понятно зачем. На список нужно заменить скорее всего
 		self.tasks = {}
 		self.logger = GridLogger.GridLogger("host")
-		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigHost.MASTER_IP_ADDRESS + ":" + str(ConfigHost.PORT)
+		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigHost.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
 		try:
 			self.master = Pyro4.core.Proxy(uri)
 		except:
@@ -44,7 +47,7 @@ class Host:
 			# it works only when this instance registered on PyroDaemon
 			uri = self._pyroDaemon.uriFor(self)
 			self.master._pyroOneway.add("RegisterHost")
-			self.logger.Log(logging.INFO,"Send registration request")
+			self.logger.Log(logging.INFO, "Send registration request")
 			self.master.RegisterHost(uri)
 		except:
 			pass
