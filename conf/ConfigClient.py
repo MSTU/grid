@@ -23,14 +23,14 @@ from solvers import PRADISSolver, ModelicaSolver, PythonSolver
 
 MASTER_IP_ADDRESS = 'localhost'
 CLIENT_IP_ADDRESS = 'localhost'
-PORT = 9000
+PORT = 9001
 
 class ConfigClient:
 	# инициализация объекта
 	def __init__(self):
 		self.masterPort = PORT
 		sys.excepthook=Pyro4.util.excepthook
-		Pyro4.config.DETAILED_TRACEBACK = True
+		Pyro4.config.DETAILED_TRACEBACK = False
 		Pyro4.config.COMPRESSION = False
 		Pyro4.config.ONEWAY_THREADED = False
 		Pyro4.config.HMAC_KEY = None
