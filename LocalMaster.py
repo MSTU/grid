@@ -15,27 +15,22 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-
-import Pyro4
-import Master
-import multiprocessing as mp
-import PyroMaster
-from conf import ConfigMaster
-import Constants
+from Host import Host
+from Master import Master
 
 
-def main():
-	master = PyroMaster.PyroMaster()
-	daemon=Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
-	daemon.register(master, Constants.MASTER_NAME)
-	master.RunBalancer()
-	daemon.requestLoop()
+class LocalMaster(Master):
+	# инициализация объекта
+	def __init__(self, config=None):
+		Master.__init__(self)
+		self.ready_tasks = []
+		self.host = Host()
 
-if __name__=="__main__":
-	p = mp.Process(target=main)
-	p.daemon = True
-	p.start()
-	file = open('master_pid.txt','w')
-	file.write(str(p.pid))
-	file.close()
-	p.join()
+	#Задача ставится в очередь
+	def RunTask(self, task):
+		self.ready_tasks.append(self.host.RunTask(task))
+
+	#Ждет выполения всех задач клиента в очереди и возвращает все решенные задачи
+	def Wait(self, clientId):
+		return self.ready_tasks
+

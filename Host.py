@@ -17,11 +17,15 @@
 #***************************************************************************/
 import logging
 
-import Pyro4
 import Constants
 import conf.ConfigHost as ConfigHost
+import conf.ConfigClient as ConfigClient
 import GridLogger
 
+try:
+	import Pyro4
+except ImportError:
+	pass
 
 # класс хоста
 
@@ -37,10 +41,12 @@ class Host:
 		self.tasks = {}
 		self.logger = GridLogger.GridLogger("host")
 		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigHost.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
-		try:
-			self.master = Pyro4.core.Proxy(uri)
-		except:
-			pass
+		if not ConfigClient.LOCAL_WORK:
+			try:
+				self.master = Pyro4.core.Proxy(uri)
+				Pyro4.config.HOST = ConfigHost.HOST_IP_ADDRESS
+			except:
+				pass
 
 	def RegisterOnMaster(self):
 		try:

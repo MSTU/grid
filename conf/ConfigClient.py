@@ -17,24 +17,26 @@
 #***************************************************************************/
 
 # класс конфигурации клиента
-import Pyro4.util
 import sys
 from solvers import PRADISSolver, ModelicaSolver, PythonSolver
 
 MASTER_IP_ADDRESS = 'localhost'
 CLIENT_IP_ADDRESS = 'localhost'
-PORT = 9001
+PORT = 9000
+
+LOCAL_WORK = False
 
 class ConfigClient:
 	# инициализация объекта
 	def __init__(self):
 		self.masterPort = PORT
-		sys.excepthook=Pyro4.util.excepthook
-		Pyro4.config.DETAILED_TRACEBACK = False
-		Pyro4.config.COMPRESSION = False
-		Pyro4.config.ONEWAY_THREADED = False
-		Pyro4.config.HMAC_KEY = None
-		Pyro4.config.HOST = CLIENT_IP_ADDRESS
+		#sys.excepthook=Pyro4.util.excepthook
+		#Pyro4.config.DETAILED_TRACEBACK = False
+		#Pyro4.config.COMPRESSION = False
+		#Pyro4.config.ONEWAY_THREADED = False
+		#Pyro4.config.HMAC_KEY = None
+		#Pyro4.config.HOST = CLIENT_IP_ADDRESS
+		self.isLocalWork = LOCAL_WORK
 		self.Solvers()
 
 	# инициализация решателей

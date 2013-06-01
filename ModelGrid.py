@@ -19,12 +19,17 @@ import logging
 
 import uuid
 
-import Pyro4
 import Constants
 import GridLogger
+from LocalMaster import LocalMaster
 
 from conf import ConfigClient
 import Task
+
+try:
+	import Pyro4
+except ImportError:
+	pass
 
 # Интерфейс для работы с системой
 
@@ -44,9 +49,12 @@ class ModelGrid:
 		# Не пойму зачем сделал словарем. Надо разобарться.
 		self.task_dict = dict()
 		self.counter = 0  # Счетчик задач. У каждого клиента свой.
-
-		uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
-		self.master = Pyro4.core.Proxy(uri)
+		if not ConfigClient.LOCAL_WORK:
+			uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
+			Pyro4.config.HOST = ConfigClient.CLIENT_IP_ADDRESS
+			self.master = Pyro4.core.Proxy(uri)
+		else:
+			self.master = LocalMaster()
 
 	# установка расчетных случаев и подгтовка данных
 	def SetLoadcases(self, loadcases):
