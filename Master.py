@@ -106,7 +106,7 @@ class Master:
 					if self.asyncresults[i] is None:
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
-							self.tasks_list.pop(0)
+							self.deleteTask()
 							self.logger.Log(logging.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
 						except:
 							pass
@@ -116,7 +116,7 @@ class Master:
 						# Если задача не выполнилась, то ее нужно опять попробовать выполнить. Уменьшать счетчик нужно
 						# после успешнго решения задачи
 						break
-					elif self.asyncresults[i].ready is True:
+					if self.asyncresults[i].ready is True:
 						value = self.asyncresults[i].value
 						# Проверка на ошибки
 						# TODO:
@@ -125,6 +125,7 @@ class Master:
 							value.ma.ClearResults()
 							value.ma.SetStatus(Constants.TASK_DEFAULT)
 							task = value
+							self.clientTasksCounter[value.clientId] += 1
 						else:
 							self.logger.Log(logging.INFO,
 								"Host " + str(i) + " return task with parameters " + str(value.ma.GetResults()))
@@ -133,8 +134,7 @@ class Master:
 								self.ready_tasks[value.clientId].append(value)
 							else:
 								self.ready_tasks[value.clientId].append(value)
-							self.tasks_list.pop(0)
-							self.clientTasksCounter[task.clientId] -= 1
+							self.deleteTask()
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
 							self.logger.Log(logging.INFO, "send task number " + str(task.GetId()) + "to Host " + str(i))
@@ -146,4 +146,8 @@ class Master:
 		thread = threading.Thread(target=a)
 		#		thread.setDaemon(True)
 		thread.start()
+
+	def deleteTask(self):
+		self.clientTasksCounter[self.tasks_list[0].clientId] -= 1
+		self.tasks_list.pop(0)
 
