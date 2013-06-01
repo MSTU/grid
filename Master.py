@@ -106,6 +106,7 @@ class Master:
 					if self.asyncresults[i] is None:
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
+							self.tasks_list.pop(0)
 							self.logger.Log(logging.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
 						except:
 							pass
@@ -115,7 +116,7 @@ class Master:
 						# Если задача не выполнилась, то ее нужно опять попробовать выполнить. Уменьшать счетчик нужно
 						# после успешнго решения задачи
 						break
-					if self.asyncresults[i].ready is True:
+					elif self.asyncresults[i].ready is True:
 						value = self.asyncresults[i].value
 						# Проверка на ошибки
 						# TODO:
