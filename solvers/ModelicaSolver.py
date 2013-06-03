@@ -97,10 +97,19 @@ class ModelicaSolver(Launcher.Launcher):
             print 'can not determine your platform'
             return Constants.TASK_ERROR
         '''
-        if (os.path.isfile(class_name + '.exe')):
-            pass
+        if sys.platform.startswith('win'):
+            if (os.path.isfile(class_name + '.exe')):
+                pass
+            else:
+                self.Compile(self.MOS_filename) # получение exe-файла по mos-файлу
+        elif sys.platform.startswith('linux'):
+            if (os.path.isfile(class_name)):
+                pass
+            else:
+                self.Compile(self.MOS_filename) # получение exe-файла по mos-файлу
         else:
-            self.Compile(self.MOS_filename) # получение exe-файла по mos-файлу
+            print 'can not determine your platform'
+            return Constants.TASK_ERROR
 
         PAR_filename = 'pl.txt'
         RES_filename = 'results.plt'
@@ -108,7 +117,13 @@ class ModelicaSolver(Launcher.Launcher):
         # создание файлов входных параметров по словарям входных параметров
         self.CreateParFilesFromParDicts(PAR_filename, parameters.GetParameters())
 
-        command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
+        if sys.platform.startswith('win'):
+            command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
+        elif sys.platform.startswith('linux'):
+            command = './' + class_name + ' -overrideFile ' + PAR_filename + ' -r ' + RES_filename
+        else:
+            print 'can not determine your platform'
+            return Constants.TASK_ERROR
         #startupinfo = subprocess.STARTUPINFO()
         #startupinfo.dwFlags = subprocess.STARTF_USESHOWWINDOW
         print 'executing'
