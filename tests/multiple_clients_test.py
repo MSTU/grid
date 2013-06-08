@@ -23,7 +23,7 @@ import Pyro4
 import Constants
 import Host
 import Loadcase
-import Master
+import PyroMaster
 import ModelAnalysis
 import ModelGrid
 from conf import ConfigMaster, ConfigHost, ConfigClient
@@ -32,7 +32,7 @@ from tests import test_lib
 
 class MultipleClientsTestCase(unittest.TestCase):
 
-	master = Master.Master()
+	master = PyroMaster.PyroMaster()
 	hosts = []
 	hostsDaemons = []
 	hostsTheads = []
