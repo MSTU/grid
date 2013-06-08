@@ -44,8 +44,8 @@ class SimpleTestCase(unittest.TestCase):
 		return self.isRun
 
 	def setUp(self):
-		#Pyro4.config.COMMTIMEOUT = 0.5
-		#Pyro4.config.SERVERTYPE = "multiplex"
+		#Pyro4.config.COMMTIMEOUT = 5
+		Pyro4.config.SERVERTYPE = "multiplex"
 		self.port = 4000 + random.randint(0, 12000)
 		daemonMaster = Pyro4.Daemon(port=self.port)
 		daemonMaster.register(self.master, Constants.MASTER_NAME)
@@ -101,9 +101,10 @@ class SimpleTestCase(unittest.TestCase):
 			self.assertEqual(result[i][0], i ** 2)
 
 		self.isRun = False
-		# for thread in self.hostsTheads:
-		# 	thread.join()
-		# self.masterThread.join()
+		for thread in self.hostsTheads:
+			thread.join()
+		self.master.stopBalancer()
+		self.masterThread.join()
 
 
 if __name__ == '__main__':

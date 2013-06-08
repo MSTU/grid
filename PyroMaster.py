@@ -42,6 +42,7 @@ class PyroMaster(Master):
 		self.clientTasksCounter = dict()  #Для каждого клиента хранит количество его невыполненнных задач
 		# (возможно надо сделать потокобезопасной)
 		Pyro4.config.HOST = ConfigMaster.MASTER_IP_ADDRESS
+		self.isRunning = True
 
 	#Задача ставится в очередь
 	def RunTask(self, task):
@@ -86,7 +87,7 @@ class PyroMaster(Master):
 
 	def RunBalancer(self):
 		def a():
-			while True:
+			while self.isRunning:
 				if not len(self.tasks_list) is 0:
 					task = self.tasks_list[0]
 				else:
@@ -141,11 +142,14 @@ class PyroMaster(Master):
 						break
 
 
-		thread = threading.Thread(target=a)
+		self.maintThread = threading.Thread(target=a)
 		#		thread.setDaemon(True)
-		thread.start()
+		self.maintThread.start()
 
 	def deleteTask(self):
 		self.clientTasksCounter[self.tasks_list[0].clientId] -= 1
 		self.tasks_list.pop(0)
 
+	def stopBalancer(self):
+		self.isRunning = False
+		self.maintThread.join()
