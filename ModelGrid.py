@@ -43,7 +43,7 @@ class ModelGrid:
 		self.id = uuid.uuid4()  # Каждому клиенту генерируется уникальный id.
 		#self.logger = GridLogger.GridLogger("client" + str(self.id))
 		self.logger = GridLogger.GridLogger("client")
-		self.logger.Log(logging.DEBUG, "uuid = " + str(self.id))
+		self.logger.Log(GridLogger.DEBUG, "uuid = " + str(self.id))
 		self.lc = []
 		# TODO:
 		# Не пойму зачем сделал словарем. Надо разобарться.
@@ -83,12 +83,12 @@ class ModelGrid:
 			self.counter += 1
 			self.task_dict[i] = task
 			self.master.RunTask(task)
-			self.logger.Log(logging.INFO, "Run task number " + str(self.counter))
+			self.logger.Log(GridLogger.INFO, "Run task number " + str(self.counter))
 
 	# ждать пока выполнится весь список ma_list
 	def Wait(self):
 		tasks = self.master.Wait(self.id)
-		self.logger.Log(logging.INFO, "Get all tasks for client " + str(self.id))
+		self.logger.Log(GridLogger.INFO, "Get all tasks for client " + str(self.id))
 		ma_list = [task.ma for task in tasks]
 		return ma_list
 

@@ -15,7 +15,6 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import logging
 
 import ModelAnalysis
 import tests.test_lib as test_lib
@@ -52,11 +51,11 @@ def test_1 ():
 
 	# расчет
 	mg.Calculate (ma_list)
-	logger.Log(logging.INFO, "Calculate begin...")
+	logger.Log(GridLogger.INFO, "Calculate begin...")
 
 	# ожидание выполняения расчета
 	ma_list = mg.Wait()
-	logger.Log(logging.INFO, "Calculate end...")
+	logger.Log(GridLogger.INFO, "Calculate end...")
 	# обработка результатов
 	for i in ma_list:
 		if (i.GetStatus()==0):

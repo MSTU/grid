@@ -77,7 +77,7 @@ class PyroMaster(Master):
 		for i in range(len(self.hosts_list)):
 			if not self.asyncresults[i] is None:
 				self.ready_tasks[clientId].append(self.asyncresults[i].value)
-		self.logger.Log(logging.INFO, "All tasks calculated")
+		self.logger.Log(GridLogger.INFO, "All tasks calculated")
 		ready_tasks = self.ready_tasks[clientId]
 		self.ready_tasks[clientId] = []
 		self.asyncresults = []
@@ -106,7 +106,7 @@ class PyroMaster(Master):
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
 							self.deleteTask()
-							self.logger.Log(logging.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
+							self.logger.Log(GridLogger.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
 						except:
 							pass
 						#self.tasks_list.pop(0)
@@ -126,7 +126,7 @@ class PyroMaster(Master):
 							task = value
 							self.clientTasksCounter[value.clientId] += 1
 						else:
-							self.logger.Log(logging.INFO,
+							self.logger.Log(GridLogger.INFO,
 								"Host " + str(i) + " return task with parameters " + str(value.ma.GetResults()))
 							if not value.clientId in self.ready_tasks:
 								self.ready_tasks[value.clientId] = []
@@ -136,7 +136,7 @@ class PyroMaster(Master):
 							self.deleteTask()
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
-							self.logger.Log(logging.INFO, "send task number " + str(task.GetId()) + "to Host " + str(i))
+							self.logger.Log(GridLogger.INFO, "send task number " + str(task.GetId()) + "to Host " + str(i))
 						except:
 							pass
 						break

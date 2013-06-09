@@ -53,7 +53,7 @@ class Host:
 			# it works only when this instance registered on PyroDaemon
 			uri = self._pyroDaemon.uriFor(self)
 			self.master._pyroOneway.add("RegisterHost")
-			self.logger.Log(logging.INFO, "Send registration request")
+			self.logger.Log(GridLogger.INFO, "Send registration request")
 			self.master.RegisterHost(uri)
 		except:
 			pass
@@ -85,7 +85,7 @@ class Host:
 		print "Results = " + str(task.ma.GetResults())
 		# TODO: ???
 		self.tasks[task.GetId()] = task
-		self.logger.Log(logging.INFO, "Task " + str(task.GetId()) + " is calculated")
+		self.logger.Log(GridLogger.INFO, "Task " + str(task.GetId()) + " is calculated")
 		return task
 
 	def SetTasks(self, tasks):
