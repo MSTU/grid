@@ -102,7 +102,7 @@ class MultipleClientsTestCase(unittest.TestCase):
 		#  ¬ыбираем случайного клиента
 		client = clients[random.randint(0, clientsNumber - 1)]
 		# ожидание выполн€ени€ расчета
-		ma_list = client.Wait()
+		ma_list = client.WaitAll()
 		# обработка результатов
 		result = {}
 		for i in ma_list:

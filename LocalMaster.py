@@ -31,6 +31,9 @@ class LocalMaster(Master):
 		self.ready_tasks.append(self.host.RunTask(task))
 
 	#Ждет выполения всех задач клиента в очереди и возвращает все решенные задачи
-	def Wait(self, clientId):
+	def WaitAll(self, clientId):
 		return self.ready_tasks
+
+	def Wait(self, clientId, taskId):
+		pass
 

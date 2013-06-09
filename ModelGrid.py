@@ -86,8 +86,8 @@ class ModelGrid:
 			self.logger.Log(GridLogger.INFO, "Run task number " + str(self.counter))
 
 	# ждать пока выполнится весь список ma_list
-	def Wait(self):
-		tasks = self.master.Wait(self.id)
+	def WaitAll(self):
+		tasks = self.master.WaitAll(self.id)
 		self.logger.Log(GridLogger.INFO, "Get all tasks for client " + str(self.id))
 		ma_list = [task.ma for task in tasks]
 		return ma_list

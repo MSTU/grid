@@ -56,7 +56,7 @@ def test_1 ():
 	mg.Calculate (ma_list)
 	
 	# ожидание выполняения расчета
-	ma_list = mg.Wait()
+	ma_list = mg.WaitAll()
 
 	# обработка результатов
 	for i in ma_list:

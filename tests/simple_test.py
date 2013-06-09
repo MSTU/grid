@@ -87,7 +87,7 @@ class SimpleTestCase(unittest.TestCase):
 		# расчет
 		mg.Calculate(ma_list)
 		# ожидание выполняения расчета
-		ma_list = mg.Wait()
+		ma_list = mg.WaitAll()
 		# обработка результатов
 		result = {}
 		for i in ma_list:

@@ -48,7 +48,7 @@ def test_1():
 	logger.Log(GridLogger.INFO, "Calculate begin...")
 
 	# ожидание выполняения расчета
-	ma_list = mg.Wait()
+	ma_list = mg.WaitAll()
 	logger.Log(GridLogger.INFO, "Calculate end...")
 	# обработка результатов
 	for i in ma_list:

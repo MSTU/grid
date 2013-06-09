@@ -67,7 +67,7 @@ class PyroMaster(Master):
 			pass
 
 	#∆дет выполени€ всех задач клиента в очереди и возвращает все решенные задачи
-	def Wait(self, clientId):
+	def WaitAll(self, clientId):
 		# TODO:
 		# ќжидание завершени€ задач происходит в цикле. Ќа каждой итерации вызываетс€ sleep(1),
 		# так что все это тратит не так много ресурсов. Ќо правильнее поставить поток в ожидание
@@ -84,6 +84,9 @@ class PyroMaster(Master):
 		for i in range(len(self.hosts_list)):
 			self.asyncresults.append(None)
 		return ready_tasks
+
+	def Wait(self, clientId, taskId):
+		pass
 
 	def RunBalancer(self):
 		def a():
