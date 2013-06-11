@@ -49,9 +49,9 @@ class ModelGrid:
 		# Не пойму зачем сделал словарем. Надо разобарться.
 		self.task_dict = dict()
 		self.counter = 0  # Счетчик задач. У каждого клиента свой.
-		if not self.config.LOCAL_WORK:
-			uri = "PYRO:" + Constants.MASTER_NAME + "@" + self.config.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
-			Pyro4.config.HOST = self.config.CLIENT_IP_ADDRESS
+		if not ConfigClient.LOCAL_WORK:
+			uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
+			Pyro4.config.HOST = ConfigClient.CLIENT_IP_ADDRESS
 			self.master = Pyro4.core.Proxy(uri)
 		else:
 			self.master = LocalMaster()

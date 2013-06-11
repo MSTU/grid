@@ -20,13 +20,13 @@ import threading
 
 import unittest
 import Pyro4
-import Constants
-import Host
-import Loadcase
-import PyroMaster
-import ModelAnalysis
-import ModelGrid
-from conf import ConfigMaster, ConfigHost, ConfigClient
+import grid.Constants as Constants
+import grid.Host as Host
+import grid.Loadcase as Loadcase
+import grid.PyroMaster as PyroMaster
+import grid.ModelAnalysis as ModelAnalysis
+import grid.ModelGrid as ModelGrid
+from grid.conf import ConfigHost, ConfigClient
 from tests import test_lib
 
 
@@ -67,11 +67,7 @@ class MultipleClientsTestCase(unittest.TestCase):
 
 	def test_something(self):
 
-		lc1 = Loadcase.Loadcase([], 
-			['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''],			
-		
-#		[test_lib.func_1, '', '', 'Python'], 
-			desc = 'lc1')
+		lc1 = Loadcase.Loadcase([], ['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''],desc = 'lc1')
 
 		clients = []
 		ma_lists = []

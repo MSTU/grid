@@ -23,8 +23,7 @@ import time
 import Pyro4
 
 import conf.ConfigMaster as ConfigMaster
-import Constants
-import GridLogger
+import Constants as Constants
 from Master import Master
 
 

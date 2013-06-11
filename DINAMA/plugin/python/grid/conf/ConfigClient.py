@@ -17,14 +17,13 @@
 #***************************************************************************/
 
 # класс конфигурации клиента
-import sys
 from grid.solvers import PRADISSolver, ModelicaSolver, PythonSolver
 
 MASTER_IP_ADDRESS = 'localhost'
 CLIENT_IP_ADDRESS = 'localhost'
 PORT = 9000
 
-LOCAL_WORK = False
+LOCAL_WORK = True
 
 class ConfigClient:
 	# инициализация объекта
@@ -36,7 +35,7 @@ class ConfigClient:
 		#Pyro4.config.ONEWAY_THREADED = False
 		#Pyro4.config.HMAC_KEY = None
 		#Pyro4.config.HOST = CLIENT_IP_ADDRESS
-		self.LOCAL_WORK = True
+		self.LOCAL_WORK = LOCAL_WORK
 		self.Solvers()
 
 	# инициализация решателей

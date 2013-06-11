@@ -18,10 +18,6 @@
 
 # класс конфигурации мастер-узла
 
-import Pyro4.util
-import Pyro4
-import sys
-
 MASTER_IP_ADDRESS = 'localhost'
 PORT = 9000
 

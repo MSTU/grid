@@ -16,11 +16,11 @@
 #*                                                                         *
 #***************************************************************************/
 
-import constants
+import Constants
 # класс для описания расчетного случая
 
 class Loadcase:
-	def __init__(self, nl, pl, desc = constants.default):
+	def __init__(self, nl, pl, desc = Constants.DEFAULT_LOADCASE):
 		scheme_name = pl[0]
 		result_name = pl[1]
 		self.functions_list = pl[2]

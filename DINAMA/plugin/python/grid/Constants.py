@@ -29,3 +29,4 @@ USER = "USER"
 ADMIN = "ADMIN"
 DEV = "DEV"
 
+DEFAULT_LOADCASE = "grid_Loadcase"
