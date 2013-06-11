@@ -1,0 +1,53 @@
+# -*- coding: cp1251 -*-
+#import multi
+import af
+import glb
+import misc
+import os
+import math
+from ReportObject import *
+from Curve import *
+import pylab
+import numpy
+from matplotlib import mlab
+#import scipy
+
+MaxValue = 1e36
+
+# Объект Диаграма
+
+class Diagram (ReportObject): # (multi.ModelLC):
+
+	def __init__ (self, nl, pl, desc=misc.default):
+
+		self.description = pl[0]  # описание диаграммы (подпись)
+		self.x  = pl[1]		# переменная оси x
+		self.y = pl[2]  # список кривых, reader-объектов, функций
+		
+		
+		self.parameters  = pl[3] # здесь и дополнительные параметры диаграмы - надо определится с ними.
+								 # например, размер, цвет фона, параметры осей, сетка и т.п.
+        
+       	    
+		if desc != misc.default:
+			self.name = desc
+		else:
+			self.name = ""
+		
+	def GetPicture(self):		
+		xmin=-50
+		xmax=50
+		dx=0.1	
+			
+		xlist= self.x
+		ylist= self.y
+		            
+		fold=ReportObject.MakeDir(self)
+		col, ls, lw, mark = self.description[0].GetStyle()		
+		pylab.plot(xlist,ylist, color = col, linestyle='-', linewidth=lw, marker=mark, label=self.parameters)
+		pylab.legend()
+		pylab.savefig(fold+self.parameters+'.png', dpi=400)
+		pylab.clf()
+		return fold+self.parameters+'.png' 
+	
+	

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="Windows-1251"?>
+<module name="grid">
+	<description>
+		<russian>Модуль GRID</russian>
+		<english></english>
+	</description>
+	<modellist>
+	</modellist>
+	<ovplist>
+	</ovplist>
+	<imagelist>
+	</imagelist>
+	<nodelist>
+	</nodelist>
+	<parameterlist>
+	</parameterlist>
+	<objectlist>
+	</objectlist>
+</module>

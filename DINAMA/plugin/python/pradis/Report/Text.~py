@@ -1,0 +1,42 @@
+# -*- coding: cp1251 -*-
+#import multi
+import af
+import glb
+import misc
+import os
+import math
+
+#import scipy
+
+#from numpy import copy
+
+
+
+MaxValue = 1e36
+
+# Объект Текст
+
+class Text (ReportObject): # (multi.ModelLC):
+
+	def __init__ (self, nl, pl, desc=misc.default):
+
+		
+		self.description = pl[0]  # описание текста (заголовок)
+		self.text  = pl[1]		# текст
+
+		
+		
+		self.parameters  = pl[2] # здесь и дополнительные параметры текста  - надо определится с ними.
+								 # например, размер и т.п.
+
+	
+		if desc != misc.default:
+			self.name = desc
+		else:
+			self.name = ""
+
+
+		
+		
+					
+				

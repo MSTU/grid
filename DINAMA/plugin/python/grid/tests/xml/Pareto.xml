@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="Windows-1251"?>
+<object name="Pareto" module="grid" alias="" priority="6">
+	<description>
+		<russian>Расчет множества Парето</russian>
+		<english></english>
+	</description>
+	<nodelist>
+	</nodelist>
+	<parameterlist>
+		<parameter name="Loadcases" type="list" default="">
+			<description>
+				<russian>Расчетные случаи</russian>
+				<english></english>
+			</description>
+		</parameter>
+		<parameter name="Variables" type="list" default="">
+			<description>
+				<russian>Переменные</russian>
+				<english></english>
+			</description>
+		</parameter>
+		<parameter name="Count" type="" default="6">
+			<description>
+				<russian>Число срезов</russian>
+				<english></english>
+			</description>
+		</parameter>
+
+	</parameterlist>
+	<fieldlist>
+	</fieldlist>
+	<image2d icon = "grid.Pareto" symbol = ""/>
+</object>

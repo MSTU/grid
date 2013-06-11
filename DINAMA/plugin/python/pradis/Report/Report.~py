@@ -1,0 +1,54 @@
+# -*- coding: cp1251 -*-
+#import multi
+import af
+import glb
+import misc
+import os
+import math
+
+#import scipy
+
+#from numpy import copy
+
+
+
+MaxValue = 1e36
+
+# Генератор отчета
+
+class Report: # (multi.ModelLC):
+
+	def __init__ (self, nl, pl, desc=misc.default):
+
+#		self.ma = multi.ModelLC ()
+		
+		
+		self.objects  = pl[0]	# список объектов отчета
+		self.Template_File = pl[1]
+		self.viewType = pl[2]	# тип отчета (html, rtf, pdf, ...)
+		self.Header = pl[3]	# заголовок 
+		self.description = pl [4] # описание отчета
+		self.parameters  = pl[5] # здесь и дополнительные параметры отчета - надо определится с ними.
+
+
+		if desc != misc.default:
+			self.name = desc
+        
+       
+		f=open('C:\\DINAMA\\sysarm\\report.html', 'r')
+		l = f.readlines()
+		f.close()
+		f=open(self.Header+'.html','w')
+		i=0
+		while i != len(self.objects):
+			way = self.objects[-1-i].GetPicture()
+			l[38:38]='	      			<IMG height="600" src=\"'+way+'\"width="800"/>\n'
+			i+=1
+		l[38:38]='				<h3>Добро пожаловать на страницу помощи PRADIS!</h3>'
+		#s=		self.objects[i].write()
+		f.writelines(l)
+	
+				
+	def Run (self):
+		pass
+		

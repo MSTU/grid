@@ -1,0 +1,58 @@
+# -*- coding: cp1251 -*-
+#import multi
+import misc
+
+#import scipy
+
+#from numpy import copy
+
+
+# Кривая
+
+class Curve: # (multi.ModelLC):
+
+	def __init__ (self, nl, pl, desc=misc.default):
+
+#		self.ma = multi.ModelLC ()
+		self.curve = pl[0]	# кривая, reader-объект.критерий, функция
+		self.style = pl[1]  #'-' | '--' | '-.' | ':' | 'None' | ' ' | '' 
+		self.color = pl[2]  #    b - голубой	g - зеленый r - красный c - зеленовато-голубой m - пурпурный y - желтый k - черный w - белый 
+		self.thikness = pl[3]
+		self.symbol = 'ellipse'   #7 | 4 | 5 | 6 | 'o' | 'D' | 'h' | 'H' | '_' | '' | | ' ' | '8' | 'p' | ',' | '+' | '.' | 's' | '*' | 'd' | 3 | 0 | 1 | 2 | '1' | '3' | '4' | '2' | 'v' | '<' | '>' | '^' | '|' | 'x' | '$...$'
+	    
+	def GetStyle(self):
+		linestyle=''
+		color=''
+		linewidth=0
+		marker=''
+		
+		if self.style=='Solid': linestyle='-'
+		elif self.style=='Dash': linestyle='--'
+		elif self.style=='Dot': linestyle=':'
+		elif self.style=='DashDot': linestyle='-.'
+		elif self.style=='DashDotDot': linestyle='-.'
+		
+		color = self.color
+		
+		if self.thikness == '1px': linewidth=1
+		elif self.thikness=='2px': linewidth=2
+		elif self.thikness=='3px': linewidth=3
+		elif self.thikness=='4px': linewidth=4
+		elif self.thikness=='5px': linewidth=5
+	
+		if self.symbol=='none': marker='1'
+		elif self.symbol=='ellipse': marker='o'
+		elif self.symbol=='triangle': marker='^'
+	
+		print linestyle, color, linewidth, marker
+		return color, linestyle, linewidth, marker	
+#		if desc != misc.default:
+#			self.ma.SetScheme(desc)
+#			self.ma.SetDescription('Report: '+desc)
+
+	
+		
+
+		
+	
+		

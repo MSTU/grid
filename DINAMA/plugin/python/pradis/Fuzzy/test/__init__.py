@@ -1,0 +1,2 @@
+
+#global  aLauncher=Launcher([],[])
