@@ -1,0 +1,32 @@
+from OVP import *
+from structs import *
+
+class COS3E (OVP):
+	def __init__ (self, nl, pl):
+		pl = misc.Expand (pl)
+
+		prvpname = "mechanics.COS3E"
+	
+		if nl.__class__ != list and nl.__class__ != tuple or pl.__class__ != list and pl.__class__ != tuple:
+			ErrPrnPRVP (2014, prvpname)
+			raise af.LVPS_TException ("")
+			
+		if len (nl) != 1:
+			ErrPrnPRVP (2007, prvpname, 1, len (nl))
+			raise af.LVPS_TException ("")
+
+		if len (pl) != 3:
+			ErrPrnPRVP (2008, prvpname, 3, len (pl))
+			raise af.LVPS_TException ("")
+
+		for i in range(len(nl)):
+			if nl[i].__class__ != DOF and nl[i].__class__ != DOF1 and nl[i].__class__ != OutValue:
+				ErrPrnPRVP (2015, prvpname, i+1, "dof1", "OutValue")
+				raise af.LVPS_TException ("")
+			
+		for i in range(len(pl)):
+			if pl[i].__class__ != pXYZ:
+				ErrPrnPRVP (2004, prvpname, i+1, "pXYZ")
+				raise af.LVPS_TException ("")
+			
+		self.this = OVP (prvpname, nl, [pl[0].GetList(), pl[1].GetList(), pl[2].GetList()])
