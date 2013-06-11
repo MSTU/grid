@@ -31,8 +31,14 @@ def test_1 ():
 
 	logger = GridLogger.GridLogger("test_1")
 	# описание расчетного случая
-	lc1 = Loadcase.Loadcase ([],[test_lib.f1, '', '', 'Python'], desc = 'lc1')
-	lc2 = Loadcase.Loadcase ([],[test_lib.f2, '', '', 'Python'], desc = 'lc2')
+	lc1 = Loadcase.Loadcase ([],
+		['', '', [test_lib.f1], ['[]'], 'Python', '%', '%', ''],	
+#	[test_lib.f1, '', '', 'Python'], 
+		desc = 'lc1')
+	lc2 = Loadcase.Loadcase ([],
+		['', '', [test_lib.f2], ['[]'], 'Python', '%', '%', ''],	
+#	[test_lib.f2, '', '', 'Python'], 
+		desc = 'lc2')
 
 	# подготовка объекта решателя
 	mg = ModelGrid.ModelGrid()

@@ -28,7 +28,10 @@ import grid.GridLogger as GridLogger
 def test_1():
 	logger = GridLogger.GridLogger("test_1")
 	# описание расчетного случая
-	lc1 = Loadcase.Loadcase([], [test_lib.func_1, '', '', 'Python'], desc = 'lc1')
+	lc1 = Loadcase.Loadcase([], 
+		['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''],
+#	[test_lib.func_1, '', '', 'Python'], 
+		desc = 'lc1')
 
 	# подготовка объекта решателя 
 	mg = ModelGrid.ModelGrid()
