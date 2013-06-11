@@ -67,7 +67,11 @@ class MultipleClientsTestCase(unittest.TestCase):
 
 	def test_something(self):
 
-		lc1 = Loadcase.Loadcase([], [test_lib.func_1, '', '', 'Python'], desc = 'lc1')
+		lc1 = Loadcase.Loadcase([], 
+			['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''],			
+		
+#		[test_lib.func_1, '', '', 'Python'], 
+			desc = 'lc1')
 
 		clients = []
 		ma_lists = []

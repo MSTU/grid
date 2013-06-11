@@ -26,7 +26,10 @@ def test_1 ():
 
 #	print grid
 	# описание расчетного случая
-	lc1 = Loadcase.Loadcase ([],['mos/mydcmotor.mos', '', '', 'ModelicaDynamic'], desc = 'lc1')
+	lc1 = Loadcase.Loadcase ([],
+		['mos/mydcmotor.mos', '',[], '', 'ModelicaDynamic', '%', '%', ''],
+	#['mos/mydcmotor.mos', '', '', 'ModelicaDynamic'], 
+		desc = 'lc1')
 
 	# подготовка объекта решателя 
 	mg = ModelGrid.ModelGrid()
