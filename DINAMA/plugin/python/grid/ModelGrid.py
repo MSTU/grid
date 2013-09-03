@@ -31,24 +31,24 @@ try:
 except ImportError:
 	pass
 
-# Интерфейс для работы с системой
+# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 class ModelGrid:
-	# инициализация объекта
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	def __init__(self, config=None):
 		if config is None:
 			self.config = ConfigClient.ConfigClient()
 		else:
 			self.config = config
-		self.id = uuid.uuid4()  # Каждому клиенту генерируется уникальный id.
+		self.id = uuid.uuid4()  # пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ id.
 		#self.logger = GridLogger.GridLogger("client" + str(self.id))
 		self.logger = GridLogger.GridLogger("client")
-		self.logger.Log(logging.DEBUG, "uuid = " + str(self.id))
+		self.logger.Log(GridLogger.DEBUG, "uuid = " + str(self.id))
 		self.lc = []
 		# TODO:
-		# Не пойму зачем сделал словарем. Надо разобарться.
+		# пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 		self.task_dict = dict()
-		self.counter = 0  # Счетчик задач. У каждого клиента свой.
+		self.counter = 0  # пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ. пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ.
 		if not ConfigClient.LOCAL_WORK:
 			uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
 			Pyro4.config.HOST = ConfigClient.CLIENT_IP_ADDRESS
@@ -56,14 +56,14 @@ class ModelGrid:
 		else:
 			self.master = LocalMaster()
 
-	# установка расчетных случаев и подгтовка данных
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	def SetLoadcases(self, loadcases):
 		self.lc = loadcases
 		for i in loadcases:
 			solver = self.config.solvers[i.Solver]
 			solver.LoadData(i)
 
-	# добавление расчетных случев подготовка данных
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	def AddLoadcases(self, loadcases):
 		self.lc.extend(loadcases)
 		for i in loadcases:
@@ -74,27 +74,27 @@ class ModelGrid:
 	def GetLoadCases(self):
 		return self.lc
 
-	# запустить на расчет список объектов ModelAnalysis. Расчет запускается и нет ожидания.
-	# Можно добавлять и другие объекты последующими Calculate
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ModelAnalysis. пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
+	# пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ Calculate
 	def Calculate(self, ma_list):
-		# запуск задач из ma_list
+		# пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ ma_list
 		for i in ma_list:
 			task = Task.Task(self.lc, i, self.counter, self.id)
 			self.counter += 1
 			self.task_dict[i] = task
 			self.master.RunTask(task)
-			self.logger.Log(logging.INFO, "Run task number " + str(self.counter))
+			self.logger.Log(GridLogger.INFO, "Run task number " + str(self.counter))
 
-	# ждать пока выполнится весь список ma_list
-	def Wait(self):
-		tasks = self.master.Wait(self.id)
-		self.logger.Log(logging.INFO, "Get all tasks for client " + str(self.id))
+	# пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ ma_list
+	def WaitAll(self):
+		tasks = self.master.WaitAll(self.id)
+		self.logger.Log(GridLogger.INFO, "Get all tasks for client " + str(self.id))
 		ma_list = [task.ma for task in tasks]
 		return ma_list
 
 	# TODO:
-	# Хорошо бы добавить wait для конкретного "расчетного случая"
+	# пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ wait пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ"
 
-	# инициализировать список расчетов
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	def Init(self):
 		self.task_dict = dict()

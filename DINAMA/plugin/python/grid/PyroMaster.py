@@ -23,27 +23,28 @@ import time
 import Pyro4
 
 import conf.ConfigMaster as ConfigMaster
-import Constants as Constants
+import Constants
+import GridLogger
 from Master import Master
 
 
 class PyroMaster(Master):
-	# инициализация объекта
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	def __init__(self):
 		Master.__init__(self)
-		self.hosts_list = []  # Список Proxy хостов
-		self.asynchosts_list = []  # Список Proxy хостов для асинхронных вызовов
-		self.asyncresults = []  # Здесь хранятся результаты всех задач
-		# TODO: хранить все задачи в словаре. Для каждого клиента свои задачи
-		self.tasks_list = []  # список всех задач
-		# Готвые задачи для каждого клиента сваливаются сюда. Ключ - id клиента, занчение - список решенных задач
+		self.hosts_list = []  # пїЅпїЅпїЅпїЅпїЅпїЅ Proxy пїЅпїЅпїЅпїЅпїЅпїЅ
+		self.asynchosts_list = []  # пїЅпїЅпїЅпїЅпїЅпїЅ Proxy пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		self.asyncresults = []  # пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+		# TODO: пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+		self.tasks_list = []  # пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+		# пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅ - id пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		self.ready_tasks = dict()
-		self.clientTasksCounter = dict()  #Для каждого клиента хранит количество его невыполненнных задач
-		# (возможно надо сделать потокобезопасной)
+		self.clientTasksCounter = dict()  #пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+		# (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 		Pyro4.config.HOST = ConfigMaster.MASTER_IP_ADDRESS
 		self.isRunning = True
 
-	#Задача ставится в очередь
+	#пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	def RunTask(self, task):
 		self.tasks_list.append(task)
 		if task.clientId in self.clientTasksCounter:
@@ -52,7 +53,7 @@ class PyroMaster(Master):
 			self.clientTasksCounter[task.clientId] = 1
 		self.logger.Log(logging.INFO, "run task " + str(task.id))
 
-	#Хост вызывает этот метод, чтобы зарегистрировать себя
+	#пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 	def RegisterHost(self, host_uri):
 		try:
 			host = Pyro4.Proxy(host_uri)
@@ -65,24 +66,27 @@ class PyroMaster(Master):
 		except TypeError:
 			pass
 
-	#Ждет выполения всех задач клиента в очереди и возвращает все решенные задачи
-	def Wait(self, clientId):
+	#пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+	def WaitAll(self, clientId):
 		# TODO:
-		# Ожидание завершения задач происходит в цикле. На каждой итерации вызывается sleep(1),
-		# так что все это тратит не так много ресурсов. Но правильнее поставить поток в ожидание
-		# и возобновить работу когда количество нерешенных задач будте 0.
+		# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ. пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ sleep(1),
+		# пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+		# пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ 0.
 		while not self.clientTasksCounter[clientId] is 0:
 			time.sleep(1)
 		for i in range(len(self.hosts_list)):
 			if not self.asyncresults[i] is None:
 				self.ready_tasks[clientId].append(self.asyncresults[i].value)
-		self.logger.Log(logging.INFO, "All tasks calculated")
+		self.logger.Log(GridLogger.INFO, "All tasks calculated")
 		ready_tasks = self.ready_tasks[clientId]
 		self.ready_tasks[clientId] = []
 		self.asyncresults = []
 		for i in range(len(self.hosts_list)):
 			self.asyncresults.append(None)
 		return ready_tasks
+
+	def Wait(self, clientId, taskId):
+		pass
 
 	def RunBalancer(self):
 		def a():
@@ -91,41 +95,41 @@ class PyroMaster(Master):
 					task = self.tasks_list[0]
 				else:
 					# TODO:
-					# Здесь тоже хорошо бы заменить sleep(1) на что-то типа wait()
+					# пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ sleep(1) пїЅпїЅ пїЅпїЅпїЅ-пїЅпїЅ пїЅпїЅпїЅпїЅ wait()
 					time.sleep(1)
 					continue
 
 				# TODO:
-				# Возможно нужно сделать так, чтобы на одном хосте могло одновременно выполнятся несколько задач,
-				# но с разными "расчетными случиями". Но тогда эти "расчетные случаи" на должны иметь доступ
-				# к общим данным.
+				# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ,
+				# пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ". пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ "пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ" пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+				# пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ.
 
 				for i in range(len(self.hosts_list)):
 					if self.asyncresults[i] is None:
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
 							self.deleteTask()
-							self.logger.Log(logging.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
+							self.logger.Log(GridLogger.INFO, "send task " + str(task.GetId()) + " to Host " + str(i))
 						except:
 							pass
 						#self.tasks_list.pop(0)
 						#self.clientTasksCounter[task.clientId] -= 1
 						# TODO:
-						# Если задача не выполнилась, то ее нужно опять попробовать выполнить. Уменьшать счетчик нужно
-						# после успешнго решения задачи
+						# пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ. пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+						# пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 						break
 					if self.asyncresults[i].ready is True:
 						value = self.asyncresults[i].value
-						# Проверка на ошибки
+						# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 						# TODO:
-						# Если с хостом что неладно, возможно ему не нужно ничего посылать.
+						# пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 						if value.ma.GetStatus() != Constants.TASK_SUCCESS:
 							value.ma.ClearResults()
 							value.ma.SetStatus(Constants.TASK_DEFAULT)
 							task = value
 							self.clientTasksCounter[value.clientId] += 1
 						else:
-							self.logger.Log(logging.INFO,
+							self.logger.Log(GridLogger.INFO,
 								"Host " + str(i) + " return task with parameters " + str(value.ma.GetResults()))
 							if not value.clientId in self.ready_tasks:
 								self.ready_tasks[value.clientId] = []
@@ -135,7 +139,7 @@ class PyroMaster(Master):
 							self.deleteTask()
 						try:
 							self.asyncresults[i] = self.asynchosts_list[i].RunTask(task)
-							self.logger.Log(logging.INFO, "send task number " + str(task.GetId()) + "to Host " + str(i))
+							self.logger.Log(GridLogger.INFO, "send task number " + str(task.GetId()) + "to Host " + str(i))
 						except:
 							pass
 						break

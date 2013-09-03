@@ -17,8 +17,12 @@
 #***************************************************************************/
 
 import logging
-import random
 
+INFO = logging.INFO
+DEBUG = logging.DEBUG
+CRITICAL = logging.CRITICAL
+ERROR = logging.ERROR
+WARNING = logging.WARNING
 
 class GridLogger:
 

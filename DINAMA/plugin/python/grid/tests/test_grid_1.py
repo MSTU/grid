@@ -23,19 +23,19 @@ import grid.ModelAnalysis as ModelAnalysis
 import test_lib as test_lib
 import grid.GridLogger as GridLogger
 
-# пример работы с grid 
+# пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ grid 
 
 def test_1():
 	logger = GridLogger.GridLogger("test_1")
-	# описание расчетного случая
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 	lc1 = Loadcase.Loadcase([], ['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''], desc = 'lc1')
 
-	# подготовка объекта решателя 
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ 
 	mg = ModelGrid.ModelGrid()
 	mg.Init()
 	mg.SetLoadcases([lc1])
 
-	# подготовка параметров
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	ma_list = []
 	for i in xrange(20):
 		ma = ModelAnalysis.ModelAnalysis()
@@ -43,19 +43,19 @@ def test_1():
 		par['x'] = i
 		ma.SetParameters(par)
 		ma_list.append(ma)
-	# расчет 
+	# пїЅпїЅпїЅпїЅпїЅпїЅ 
 	mg.Calculate(ma_list)
 	logger.Log(logging.INFO, "Calculate begin...")
 
-	# ожидание выполняения расчета
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	ma_list = mg.Wait()
 	logger.Log(logging.INFO, "Calculate end...")
-	# обработка результатов
+	# пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	for i in ma_list:
 		if (i.GetStatus() == 0):
 		#			monitor.Log("x = " + str(i.getParameter('x')) + " y = " + str(i.getResults()['lc1']))
 			print "x = " + str(i.GetParameter('x')) + " y = " + str(i.GetResults()['lc1'])
-	# сброс параметров предыдущего расчета
+	# пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	mg.Init()
 
 

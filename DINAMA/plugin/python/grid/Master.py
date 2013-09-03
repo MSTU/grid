@@ -37,7 +37,10 @@ class Master():
 		pass
 
 	#Ждет выполения всех задач клиента в очереди и возвращает все решенные задачи
-	def Wait(self, clientId):
+	def WaitAll(self, clientId):
+		pass
+
+	def Wait(self, clientId, taskId):
 		pass
 
 	def RunBalancer(self):
