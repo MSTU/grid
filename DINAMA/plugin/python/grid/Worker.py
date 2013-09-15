@@ -15,27 +15,21 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from celery import Celery
+import conf.ConfigHost as ConfigHost
 
-import Pyro4
-import Master
-import multiprocessing as mp
-import PyroMaster
-from conf import ConfigMaster
-import Constants
+celery = Celery('Worker', backend='amqp', broker='amqp://guest@localhost//')
 
+@celery.task
+def RunTask(task):
+	config = ConfigHost.ConfigHost()
+	for i in task.lc:
+		solver = config.solvers[i.Solver]
+		solver.Init()
+		status = solver.Run(i, task.ma)
+		if status < task.GetModelAnalysis().GetStatus():
+			task.ma.SetStatus(status)
 
-def main():
-	master = PyroMaster.PyroMaster()
-	daemon=Pyro4.Daemon(host = ConfigMaster.MASTER_IP_ADDRESS, port = ConfigMaster.PORT)
-	daemon.register(master, Constants.MASTER_NAME)
-	master.RunBalancer()
-	daemon.requestLoop()
-
-if __name__=="__main__":
-	p = mp.Process(target=main)
-	p.daemon = True
-	p.start()
-	file = open('master_pid.txt','w')
-	file.write(str(p.pid))
-	file.close()
-	p.join()
+	print "Parameters = " + str(task.ma.GetParameters())
+	print "Results = " + str(task.ma.GetResults())
+	return task

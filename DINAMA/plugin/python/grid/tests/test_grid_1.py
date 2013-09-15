@@ -15,27 +15,18 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import logging
-
 import grid.Loadcase as Loadcase
 import grid.ModelGrid as ModelGrid
 import grid.ModelAnalysis as ModelAnalysis
 import test_lib as test_lib
-import grid.GridLogger as GridLogger
-
-# ������ ������ � grid 
 
 def test_1():
-	logger = GridLogger.GridLogger("test_1")
-	# �������� ���������� ������
 	lc1 = Loadcase.Loadcase([], ['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''], desc = 'lc1')
 
-	# ���������� ������� �������� 
 	mg = ModelGrid.ModelGrid()
 	mg.Init()
 	mg.SetLoadcases([lc1])
 
-	# ���������� ����������
 	ma_list = []
 	for i in xrange(20):
 		ma = ModelAnalysis.ModelAnalysis()
@@ -43,22 +34,12 @@ def test_1():
 		par['x'] = i
 		ma.SetParameters(par)
 		ma_list.append(ma)
-	# ������ 
 	mg.Calculate(ma_list)
-	logger.Log(logging.INFO, "Calculate begin...")
 
-	# �������� ����������� �������
-	ma_list = mg.Wait()
-	logger.Log(logging.INFO, "Calculate end...")
-	# ��������� �����������
+	ma_list = mg.WaitAll()
 	for i in ma_list:
 		if (i.GetStatus() == 0):
-		#			monitor.Log("x = " + str(i.getParameter('x')) + " y = " + str(i.getResults()['lc1']))
 			print "x = " + str(i.GetParameter('x')) + " y = " + str(i.GetResults()['lc1'])
-	# ����� ���������� ����������� �������
 	mg.Init()
-
-
-# main ():	
 
 test_1()

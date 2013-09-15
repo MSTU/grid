@@ -23,7 +23,7 @@ MASTER_IP_ADDRESS = 'localhost'
 CLIENT_IP_ADDRESS = 'localhost'
 PORT = 9000
 
-LOCAL_WORK = True
+LOCAL_WORK = False
 
 class ConfigClient:
 	# инициализация объекта

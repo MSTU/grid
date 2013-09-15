@@ -15,16 +15,9 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-
-# Объект для обмена между клиентом и сервером
-
 class Task:
 	# инициализация объекта
-	def __init__(self, lc, ma, id, clientId):
-		self.id = id
-		# TODO:
-		# Не к чему наверное этот id. Нигде по сути не используется
-		self.clientId = clientId
+	def __init__(self, lc, ma):
 		self.lc = lc    # список расчетных случаев
 		self.ma = ma    # объект ModelAnalysis
 
@@ -39,12 +32,6 @@ class Task:
 
 	def GetModelAnalysis(self):
 		return self.ma
-
-	def SetId(self, id):
-		self.id = id
-
-	def GetId(self):
-		return self.id
 
 	def SetClientId(self, clientId):
 		self.clientId = clientId

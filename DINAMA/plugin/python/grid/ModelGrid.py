@@ -15,86 +15,56 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import logging
-
-import uuid
-
-import Constants
-import GridLogger
-from LocalMaster import LocalMaster
-
 from conf import ConfigClient
 import Task
-
-try:
-	import Pyro4
-except ImportError:
-	pass
-
-# ��������� ��� ������ � ��������
+from Worker import RunTask
 
 class ModelGrid:
-	# ������������� �������
 	def __init__(self, config=None):
 		if config is None:
 			self.config = ConfigClient.ConfigClient()
 		else:
 			self.config = config
-		self.id = uuid.uuid4()  # ������� ������� ������������ ���������� id.
-		#self.logger = GridLogger.GridLogger("client" + str(self.id))
-		self.logger = GridLogger.GridLogger("client")
-		self.logger.Log(GridLogger.DEBUG, "uuid = " + str(self.id))
-		self.lc = []
-		# TODO:
-		# �� ����� ����� ������ ��������. ���� �����������.
-		self.task_dict = dict()
-		self.counter = 0  # ������� �����. � ������� ������� ����.
-		if not ConfigClient.LOCAL_WORK:
-			uri = "PYRO:" + Constants.MASTER_NAME + "@" + ConfigClient.MASTER_IP_ADDRESS + ":" + str(self.config.masterPort)
-			Pyro4.config.HOST = ConfigClient.CLIENT_IP_ADDRESS
-			self.master = Pyro4.core.Proxy(uri)
-		else:
-			self.master = LocalMaster()
+		self.loadcases = []
+		self.inputTasks = []
+		self.readyTasks = []
+		self.taskAsyncResults = dict()
 
-	# ��������� ��������� ������� � ��������� ������
 	def SetLoadcases(self, loadcases):
-		self.lc = loadcases
-		for i in loadcases:
-			solver = self.config.solvers[i.Solver]
-			solver.LoadData(i)
+		self.loadcases = loadcases
+		for loadcase in loadcases:
+			solver = self.config.solvers[loadcase.Solver]
+			solver.LoadData(loadcase)
 
-	# ���������� ��������� ������ ���������� ������
 	def AddLoadcases(self, loadcases):
-		self.lc.extend(loadcases)
+		self.loadcases.extend(loadcases)
 		for i in loadcases:
 			solver = self.config.solvers[i.Solver]
 			solver.LoadData(i)
 
 
-	def GetLoadCases(self):
-		return self.lc
+	def GetLoadcases(self):
+		return self.loadcases
 
-	# ��������� �� ������ ������ �������� ModelAnalysis. ������ ����������� � ��� ��������.
-	# ����� ��������� � ������ ������� ������������ Calculate
+	def clearLoadcases(self):
+		self.loadcases = []
+
 	def Calculate(self, ma_list):
-		# ������ ����� �� ma_list
-		for i in ma_list:
-			task = Task.Task(self.lc, i, self.counter, self.id)
-			self.counter += 1
-			self.task_dict[i] = task
-			self.master.RunTask(task)
-			self.logger.Log(GridLogger.INFO, "Run task number " + str(self.counter))
+		for ma in ma_list:
+			task = Task.Task(self.loadcases, ma)
+			if not self.config.LOCAL_WORK:
+				self.inputTasks.append(task)
+				self.taskAsyncResults[task] = RunTask.delay(task)
+			else:
+				self.readyTasks.append(RunTask.__call__(task))
 
-	# ����� ���� ���������� ���� ������ ma_list
+
 	def WaitAll(self):
-		tasks = self.master.WaitAll(self.id)
-		self.logger.Log(GridLogger.INFO, "Get all tasks for client " + str(self.id))
-		ma_list = [task.ma for task in tasks]
+		for task in self.inputTasks:
+			self.readyTasks.append(self.taskAsyncResults[task].get())
+		ma_list = [task.ma for task in self.readyTasks]
 		return ma_list
 
-	# TODO:
-	# ������ �� �������� wait ��� ����������� "���������� ������"
-
-	# ���������������� ������ ��������
 	def Init(self):
-		self.task_dict = dict()
+		self.readyTasks = []
+		self.taskAsyncResults = dict()

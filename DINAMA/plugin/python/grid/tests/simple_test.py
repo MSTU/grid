@@ -55,7 +55,7 @@ class SimpleTestCase(unittest.TestCase):
 		for i in range(0, 2):
 			hostConfig = ConfigHost.ConfigHost()
 			hostConfig.masterPort = self.port
-			host = Host.Host(hostConfig)
+			host = Host.Worker(hostConfig)
 			daemon = Pyro4.Daemon()
 			daemon.register(host)
 			host.RegisterOnMaster()

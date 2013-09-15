@@ -20,23 +20,16 @@ import Loadcase
 import ModelGrid
 import ModelAnalysis
 
-# ������ ������ � grid 
-
 def test_1 ():
 
-#	print grid
-	# �������� ���������� ������
 	lc1 = Loadcase.Loadcase ([],
 		['mos/mydcmotor.mos', '',[], '', 'ModelicaDynamic', '%', '%', ''],
-	#['mos/mydcmotor.mos', '', '', 'ModelicaDynamic'], 
 		desc = 'lc1')
 
-	# ���������� ������� �������� 
 	mg = ModelGrid.ModelGrid()
 	mg.Init()
 	mg.SetLoadcases ([lc1])
 
-	# ���������� ����������
 	ma_list = []
 
 	ma1 = ModelAnalysis.ModelAnalysis()
@@ -45,7 +38,7 @@ def test_1 ():
 	par1['inductor1.L'] = 0.4
 	par1['load.J'] = 2.0
 	ma1.SetParameters(par1)
-	ma_list.append(ma1)	
+	ma_list.append(ma1)
 
 	ma2 = ModelAnalysis.ModelAnalysis()
 	par2 = dict()
@@ -54,21 +47,14 @@ def test_1 ():
 	par2['load.J'] = 0.5
 	ma2.SetParameters(par2)
 	ma_list.append(ma2)
-		
-	# ������ 
-	mg.Calculate (ma_list)
-	
-	# �������� ����������� �������
-	ma_list = mg.Wait()
 
-	# ��������� �����������
+	mg.Calculate (ma_list)
+	ma_list = mg.WaitAll()
+
 	for i in ma_list:
 		print i.GetResults()
 		print '======================================================'
 
-	# ����� ���������� ����������� �������
 	mg.Init()
-
-# main ():	
 
 test_1()

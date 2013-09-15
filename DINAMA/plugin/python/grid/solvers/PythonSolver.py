@@ -15,23 +15,16 @@
 #*                                                                         *
 #***************************************************************************/
 
-import grid.solvers.Launcher as Launcher
-import grid.GridLogger as GridLogger
+from grid.solvers.Launcher import Launcher
 
-# Python решатель. Расчет функции на Python 
-
-class PythonSolver(Launcher.Launcher):
-	# инициализация объекта
+class PythonSolver(Launcher):
 	def __init__(self):
+		Launcher.__init__(self)
 		self.name = "Python"
-		#		self.value = None
-		self.monitor = GridLogger.GridLogger("host.log")
 
 	# подговка данных к расчету 
 	def LoadData(self, lc):
-
 		lc.inData = lc.Scheme
-
 		return 0
 
 
@@ -40,7 +33,6 @@ class PythonSolver(Launcher.Launcher):
 
 	# запуск расчета схемы и инициализация ее параметрами
 	def Run(self, lc, ma):
-
 		if callable(lc.functions_list[0]):    #lc.Scheme):
 			value = lc.functions_list[0](ma) #lc.Scheme(ma)    - для решателя Python функция пишется в поле functions_list
 

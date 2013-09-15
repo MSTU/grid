@@ -21,6 +21,7 @@ import subprocess # для вызова скриптов командных строк
 import os # для навигации по каталогам
 import sys # для определения типа операционной системы
 import hashlib # для чтения хэша файла
+import Constants
 import grid.Constants
 import grid.solvers.Launcher as Launcher
 
