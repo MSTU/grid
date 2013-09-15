@@ -1,0 +1,782 @@
+<?xml version = "1.0" encoding="UTF-8"?>
+
+<!-- description of the model interface using an extention of the FMI standard -->
+<fmiModelDescription
+  fmiVersion                          = "1.0"
+
+  modelName                           = "dcmotor"
+  modelIdentifier                     = "dcmotor"
+  
+  OPENMODELICAHOME                    = "/usr"
+  
+  guid                                = "{8c4e810f-3df3-4a00-8276-176fa3c9f9e0}"
+  
+  generationTool                      = "OpenModelica Compiler 1.9.0 beta4+dev (r16888)"
+  generationDateAndTime               = "2013-09-15T13:19:30Z"
+  
+  variableNamingConvention            = "structured"
+  
+  numberOfEventIndicators             = "1"  cmt_numberOfEventIndicators             = "NG:       number of zero crossings,                           FMI"
+  numberOfTimeEvents                  = "0"  cmt_numberOfTimeEvents                  = "NG_SAM:   number of zero crossings that are samples,          OMC"
+  
+  numberOfInputVariables              = "0"  cmt_numberOfInputVariables              = "NI:       number of inputvar on topmodel,                     OMC"
+  numberOfOutputVariables             = "0"  cmt_numberOfOutputVariables             = "NO:       number of outputvar on topmodel,                    OMC"
+  
+  numberOfResidualsForInitialization  = "0"  cmt_numberOfResidualsForInitialization  = "NR:       number of residuals for initialialization function, OMC"
+  numberOfExternalObjects             = "0"  cmt_numberOfExternalObjects             = "NEXT:     number of external objects,                         OMC"
+  numberOfFunctions                   = "0"  cmt_numberOfFunctions                   = "NFUNC:    number of functions used by the simulation,         OMC"
+  
+  numberOfContinuousStates            = "3"  cmt_numberOfContinuousStates            = "NX:       number of states,                                   FMI"
+  numberOfRealAlgebraicVariables      = "13"  cmt_numberOfRealAlgebraicVariables      = "NY:       number of real variables,                           OMC"
+  numberOfRealAlgebraicAliasVariables = "32"  cmt_numberOfRealAlgebraicAliasVariables = "NA:       number of alias variables,                          OMC"
+  numberOfRealParameters              = "11"  cmt_numberOfRealParameters              = "NP:       number of parameters,                               OMC"
+  
+  numberOfIntegerAlgebraicVariables   = "0"  cmt_numberOfIntegerAlgebraicVariables   = "NYINT:    number of alg. int variables,                       OMC"
+  numberOfIntegerAliasVariables       = "0"  cmt_numberOfIntegerAliasVariables       = "NAINT:    number of alias int variables,                      OMC"
+  numberOfIntegerParameters           = "1"  cmt_numberOfIntegerParameters           = "NPINT:    number of int parameters,                           OMC"
+  
+  numberOfStringAlgebraicVariables    = "0"  cmt_numberOfStringAlgebraicVariables    = "NYSTR:    number of alg. string variables,                    OMC"
+  numberOfStringAliasVariables        = "0"  cmt_numberOfStringAliasVariables        = "NASTR:    number of alias string variables,                   OMC"
+  numberOfStringParameters            = "0"  cmt_numberOfStringParameters            = "NPSTR:    number of string parameters,                        OMC"
+  
+  numberOfBooleanAlgebraicVariables   = "0"  cmt_numberOfBooleanAlgebraicVariables   = "NYBOOL:   number of alg. bool variables,                      OMC"
+  numberOfBooleanAliasVariables       = "0"  cmt_numberOfBooleanAliasVariables       = "NABOOL:   number of alias bool variables,                     OMC"
+  numberOfBooleanParameters           = "2"  cmt_numberOfBooleanParameters           = "NPBOOL:   number of bool parameters,                          OMC" >
+  
+  
+  <!-- startTime, stopTime, tolerance are FMI specific, all others are OMC specific -->
+  <DefaultExperiment
+    startTime      = "0.0"
+    stopTime       = "10.0"
+    stepSize       = "2.0"
+    tolerance      = "0.000001"
+    solver         = "dassl"
+    outputFormat   = "plt"
+    variableFilter = ".*" />
+    
+  <!-- variables in the model -->
+  <ModelVariables>
+
+  <ScalarVariable
+  name = "load.w"
+  valueReference = "1000"
+  description = "Absolute angular velocity of component (= der(phi))"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "0" classType = "rSta"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1715" startColumn = "7" endLine = "1717" endColumn = "77" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad/s" displayUnit="rad/s" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.phi"
+  valueReference = "1001"
+  description = "Absolute rotation angle of component"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "1" classType = "rSta"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1712" startColumn = "7" endLine = "1714" endColumn = "77" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.i"
+  valueReference = "1002"
+  description = "Current flowing from pin p to pin n"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "2" classType = "rSta"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "176" startColumn = "5" endLine = "176" endColumn = "55" fileWritable = "false">
+  <Real useStart="true" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "der(load.w)"
+  valueReference = "1003"
+  description = "Absolute angular velocity of component (= der(phi))"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "0" classType = "rDer"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1715" startColumn = "7" endLine = "1717" endColumn = "77" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad/s" displayUnit="rad/s" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "der(load.phi)"
+  valueReference = "1004"
+  description = "Absolute rotation angle of component"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "1" classType = "rDer"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1712" startColumn = "7" endLine = "1714" endColumn = "77" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "der(inductor1.i)"
+  valueReference = "1005"
+  description = "Current flowing from pin p to pin n"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "2" classType = "rDer"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "176" startColumn = "5" endLine = "176" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "signalVoltage1.v"
+  valueReference = "1006"
+  description = "Voltage between pin p and n (= p.v - n.v) as input signal"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "0" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Sources.mo" startLine = "13" startColumn = "5" endLine = "18" endColumn = "26" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.a"
+  valueReference = "1007"
+  description = "Absolute angular acceleration of component (= der(w))"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "1" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1718" startColumn = "7" endLine = "1720" endColumn = "77" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad/s2" displayUnit="rad/s2" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.p.v"
+  valueReference = "1008"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "2" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "47" startColumn = "5" endLine = "52" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.v"
+  valueReference = "1009"
+  description = "Voltage drop between the two pins (= p.v - n.v)"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "3" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "175" startColumn = "5" endLine = "175" endColumn = "67" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.internalSupport.tau"
+  valueReference = "1010"
+  description = "External support torque (must be computed via torque balance in model where InternalSupport is used; = flange.tau)"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "4" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5713" startColumn = "7" endLine = "5714" endColumn = "125" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m" displayUnit="N.m" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.phi"
+  valueReference = "1011"
+  description = "Angle of shaft flange with respect to support (= flange.phi - support.phi)"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "5" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "857" startColumn = "5" endLine = "858" endColumn = "83" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.v"
+  valueReference = "1012"
+  description = "Voltage drop between the two pins"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "6" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "855" startColumn = "5" endLine = "855" endColumn = "53" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.LossPower"
+  valueReference = "1013"
+  description = "Loss power leaving component via HeatPort"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "7" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "317" startColumn = "5" endLine = "318" endColumn = "50" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="W" displayUnit="W" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.v"
+  valueReference = "1014"
+  description = "Voltage drop between the two pins (= p.v - n.v)"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "8" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "175" startColumn = "5" endLine = "175" endColumn = "67" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "ground1.p.i"
+  valueReference = "1015"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "9" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "13" startColumn = "5" endLine = "18" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.R_actual"
+  valueReference = "1016"
+  description = "Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "10" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "72" startColumn = "3" endLine = "73" endColumn = "63" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="Ohm" displayUnit="Ohm" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.flange_b.tau"
+  valueReference = "1017"
+  description = "Cut torque in the flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "11" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5574" startColumn = "7" endLine = "5574" endColumn = "52" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m" displayUnit="N.m" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "ground1.p.v"
+  valueReference = "1018"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "12" classType = "rAlg"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "7" startColumn = "5" endLine = "12" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "step1.offset"
+  valueReference = "1019"
+  description = "Offset of output signal y"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "0" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Blocks/Interfaces.mo" startLine = "453" startColumn = "5" endLine = "453" endColumn = "56" fileWritable = "false">
+  <Real useStart="true" start="0.0" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308"   />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "step1.startTime"
+  valueReference = "1020"
+  description = "Output y = offset for time &lt; startTime"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "1" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Blocks/Interfaces.mo" startLine = "454" startColumn = "5" endLine = "454" endColumn = "80" fileWritable = "false">
+  <Real useStart="true" start="0.0" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="s" displayUnit="s" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "step1.height"
+  valueReference = "1021"
+  description = "Height of step"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "2" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Blocks/Sources.mo" startLine = "322" startColumn = "9" endLine = "322" endColumn = "49" fileWritable = "false">
+  <Real useStart="true" start="1.0" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308"   />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.T"
+  valueReference = "1022"
+  description = "Fixed device temperature if useHeatPort = false"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "3" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "312" startColumn = "5" endLine = "313" endColumn = "99" fileWritable = "false">
+  <Real useStart="true" start="288.15" fixed="true" useNominal="true" nominal="300.0" min="0.0" max="1.7976931348623157E+308" unit="K" displayUnit="degC" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.R"
+  valueReference = "1023"
+  description = "Resistance at temperature T_ref"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "4" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "64" startColumn = "3" endLine = "65" endColumn = "40" fileWritable = "false">
+  <Real useStart="true" start="10.0" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="Ohm" displayUnit="Ohm" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.T_ref"
+  valueReference = "1024"
+  description = "Reference temperature"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "5" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "66" startColumn = "3" endLine = "66" endColumn = "78" fileWritable = "false">
+  <Real useStart="true" start="300.15" fixed="true" useNominal="true" nominal="300.0" min="0.0" max="1.7976931348623157E+308" unit="K" displayUnit="degC" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.alpha"
+  valueReference = "1025"
+  description = "Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "6" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "67" startColumn = "3" endLine = "68" endColumn = "93" fileWritable = "false">
+  <Real useStart="true" start="0.0" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="1/K" displayUnit="1/K" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.k"
+  valueReference = "1026"
+  description = "Transformation coefficient"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "7" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "853" startColumn = "5" endLine = "854" endColumn = "35" fileWritable = "false">
+  <Real useStart="true" start="1.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m/A" displayUnit="N.m/A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.fixed.phi0"
+  valueReference = "1027"
+  description = "Fixed offset angle of housing"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "8" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1654" startColumn = "7" endLine = "1654" endColumn = "64" fileWritable = "false">
+  <Real useStart="true" start="0.0" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.L"
+  valueReference = "1028"
+  description = "Inductance"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "9" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "345" startColumn = "5" endLine = "345" endColumn = "52" fileWritable = "false">
+  <Real useStart="true" start="0.2" fixed="true" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="H" displayUnit="H" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.J"
+  valueReference = "1029"
+  description = "Moment of inertia"
+  variability = "parameter" isDiscrete = "false"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "10" classType = "rPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1708" startColumn = "7" endLine = "1708" endColumn = "65" fileWritable = "false">
+  <Real useStart="true" start="1.0" fixed="true" useNominal="false" nominal="1.0" min="0.0" max="1.7976931348623157E+308" unit="kg.m2" displayUnit="kg.m2" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "step1.y"
+  valueReference = "1030"
+  description = "Connector of Real output signal"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="signalVoltage1.v"
+  classIndex = "0" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Blocks/Interfaces.mo" startLine = "272" startColumn = "5" endLine = "273" endColumn = "68" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308"   />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "signalVoltage1.n.v"
+  valueReference = "1031"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="signalVoltage1.v"
+  classIndex = "1" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "87" startColumn = "5" endLine = "92" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.n.v"
+  valueReference = "1032"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.p.v"
+  classIndex = "2" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "87" startColumn = "5" endLine = "92" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.flange_b.phi"
+  valueReference = "1033"
+  description = "Absolute rotation angle of flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="load.phi"
+  classIndex = "3" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5573" startColumn = "7" endLine = "5573" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.flange_a.phi"
+  valueReference = "1034"
+  description = "Absolute rotation angle of flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="load.phi"
+  classIndex = "4" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5512" startColumn = "7" endLine = "5512" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.flange.phi"
+  valueReference = "1035"
+  description = "Absolute rotation angle of flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="load.phi"
+  classIndex = "5" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5573" startColumn = "7" endLine = "5573" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.n.v"
+  valueReference = "1036"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.v"
+  classIndex = "6" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "87" startColumn = "5" endLine = "92" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.n.v"
+  valueReference = "1037"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="ground1.p.v"
+  classIndex = "7" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "87" startColumn = "5" endLine = "92" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "signalVoltage1.p.v"
+  valueReference = "1038"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="ground1.p.v"
+  classIndex = "8" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "47" startColumn = "5" endLine = "52" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.fixed.flange.phi"
+  valueReference = "1039"
+  description = "Absolute rotation angle of flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.fixed.phi0"
+  classIndex = "9" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5573" startColumn = "7" endLine = "5573" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.internalSupport.flange.phi"
+  valueReference = "1040"
+  description = "Absolute rotation angle of flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.fixed.phi0"
+  classIndex = "10" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5512" startColumn = "7" endLine = "5512" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.internalSupport.phi"
+  valueReference = "1041"
+  description = "External support angle (= flange.phi)"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.fixed.phi0"
+  classIndex = "11" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5715" startColumn = "7" endLine = "5715" endColumn = "73" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad" displayUnit="deg" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.internalSupport.flange.tau"
+  valueReference = "1042"
+  description = "Cut torque in the flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.internalSupport.tau"
+  classIndex = "12" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5513" startColumn = "7" endLine = "5513" endColumn = "52" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m" displayUnit="N.m" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.fixed.flange.tau"
+  valueReference = "1043"
+  description = "Cut torque in the flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="emf1.internalSupport.tau"
+  classIndex = "13" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5574" startColumn = "7" endLine = "5574" endColumn = "52" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m" displayUnit="N.m" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.flange.tau"
+  valueReference = "1044"
+  description = "Cut torque in the flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="emf1.internalSupport.tau"
+  classIndex = "14" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5574" startColumn = "7" endLine = "5574" endColumn = "52" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m" displayUnit="N.m" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "load.flange_a.tau"
+  valueReference = "1045"
+  description = "Cut torque in the flange"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.internalSupport.tau"
+  classIndex = "15" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "5513" startColumn = "7" endLine = "5513" endColumn = "52" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="N.m" displayUnit="N.m" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.p.i"
+  valueReference = "1046"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "16" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "53" startColumn = "5" endLine = "58" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.n.i"
+  valueReference = "1047"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="inductor1.i"
+  classIndex = "17" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "93" startColumn = "5" endLine = "98" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.p.i"
+  valueReference = "1048"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "18" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "53" startColumn = "5" endLine = "58" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "signalVoltage1.n.i"
+  valueReference = "1049"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="inductor1.i"
+  classIndex = "19" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "93" startColumn = "5" endLine = "98" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "signalVoltage1.p.i"
+  valueReference = "1050"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "20" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "53" startColumn = "5" endLine = "58" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "signalVoltage1.i"
+  valueReference = "1051"
+  description = "Current flowing from pin p to pin n"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "21" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Sources.mo" startLine = "19" startColumn = "5" endLine = "19" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.i"
+  valueReference = "1052"
+  description = "Current flowing from pin p to pin n"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "22" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "176" startColumn = "5" endLine = "176" endColumn = "55" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "inductor1.n.i"
+  valueReference = "1053"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="inductor1.i"
+  classIndex = "23" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "93" startColumn = "5" endLine = "98" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.p.i"
+  valueReference = "1054"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "24" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "53" startColumn = "5" endLine = "58" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.i"
+  valueReference = "1055"
+  description = "Current flowing from positive to negative pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="inductor1.i"
+  classIndex = "25" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "856" startColumn = "5" endLine = "856" endColumn = "65" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.n.i"
+  valueReference = "1056"
+  description = "Current flowing into the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="inductor1.i"
+  classIndex = "26" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "93" startColumn = "5" endLine = "98" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="A" displayUnit="A" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.T_heatPort"
+  valueReference = "1057"
+  description = "Temperature of HeatPort"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="resistor1.T"
+  classIndex = "27" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "319" startColumn = "5" endLine = "319" endColumn = "70" fileWritable = "false">
+  <Real useStart="true" start="288.15" fixed="false" useNominal="true" nominal="300.0" min="0.0" max="1.7976931348623157E+308" unit="K" displayUnit="degC" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.p.v"
+  valueReference = "1058"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="emf1.v"
+  classIndex = "28" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "47" startColumn = "5" endLine = "52" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "resistor1.p.v"
+  valueReference = "1059"
+  description = "Potential at the pin"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "negatedAlias" aliasVariable="signalVoltage1.v"
+  classIndex = "29" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "47" startColumn = "5" endLine = "52" endColumn = "61" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="V" displayUnit="V" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.w"
+  valueReference = "1060"
+  description = "Angular velocity of flange relative to support"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="load.w"
+  classIndex = "30" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "859" startColumn = "5" endLine = "859" endColumn = "74" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308" unit="rad/s" displayUnit="rad/s" />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "der(emf1.phi)"
+  valueReference = "1061"
+  description = "Angle of shaft flange with respect to support (= flange.phi - support.phi)"
+  variability = "continuous" isDiscrete = "false"
+  causality = "internal"
+  alias = "alias" aliasVariable="load.w"
+  classIndex = "31" classType = "rAli"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "857" startColumn = "5" endLine = "858" endColumn = "83" fileWritable = "false">
+  <Real useStart="false" start="0.0" fixed="false" useNominal="false" nominal="1.0" min="-1.7976931348623157E+308" max="1.7976931348623157E+308"   />
+  </ScalarVariable>
+
+  <ScalarVariable
+  name = "load.stateSelect"
+  valueReference = "1062"
+  description = "Priority to use phi and w as states"
+  variability = "parameter" isDiscrete = "true"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "0" classType = "iPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Mechanics/Rotational.mo" startLine = "1709" startColumn = "7" endLine = "1711" endColumn = "61" fileWritable = "false">
+  <Integer useStart="true" start="3 /*ENUM:StateSelect.default*/" fixed="true"   />
+  </ScalarVariable>
+
+  <ScalarVariable
+  name = "resistor1.useHeatPort"
+  valueReference = "1063"
+  description = "=true, if HeatPort is enabled"
+  variability = "parameter" isDiscrete = "true"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "0" classType = "bPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Interfaces.mo" startLine = "310" startColumn = "5" endLine = "311" endColumn = "71" fileWritable = "false">
+  <Boolean useStart="true" start="false" fixed="true"   />
+  </ScalarVariable>
+  <ScalarVariable
+  name = "emf1.useSupport"
+  valueReference = "1064"
+  description = "= true, if support flange enabled, otherwise implicitly grounded"
+  variability = "parameter" isDiscrete = "true"
+  causality = "internal"
+  alias = "noAlias"
+  classIndex = "1" classType = "bPar"
+  fileName = "/usr/lib/omlibrary/Modelica 3.2.1/Electrical/Analog/Basic.mo" startLine = "850" startColumn = "5" endLine = "852" endColumn = "75" fileWritable = "false">
+  <Boolean useStart="true" start="false" fixed="true"   />
+  </ScalarVariable>
+
+  </ModelVariables>
+  
+  
+</fmiModelDescription>
+

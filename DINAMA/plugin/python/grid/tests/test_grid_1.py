@@ -15,13 +15,23 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import grid.Loadcase as Loadcase
-import grid.ModelGrid as ModelGrid
-import grid.ModelAnalysis as ModelAnalysis
+import Loadcase
+import ModelGrid
+import ModelAnalysis
 import test_lib as test_lib
+import cloudpickle
+
+
+
+def func_2(x):
+	return x**2
+
+def func_1 (ma):
+	ma.Status = 0
+	return func_2(ma.GetParameter ('x'))
 
 def test_1():
-	lc1 = Loadcase.Loadcase([], ['', '', [test_lib.func_1], ['[]'], 'Python', '%', '%', ''], desc = 'lc1')
+	lc1 = Loadcase.Loadcase([], ['', '', [func_1], ['[]'], 'Python', '%', '%', ''], desc = 'lc1')
 
 	mg = ModelGrid.ModelGrid()
 	mg.Init()

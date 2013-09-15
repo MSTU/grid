@@ -14,6 +14,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import pickle
 
 from grid.solvers.Launcher import Launcher
 
@@ -33,19 +34,29 @@ class PythonSolver(Launcher):
 
 	# запуск расчета схемы и инициализация ее параметрами
 	def Run(self, lc, ma):
-		if callable(lc.functions_list[0]):    #lc.Scheme):
-			value = lc.functions_list[0](ma) #lc.Scheme(ma)    - для решателя Python функция пишется в поле functions_list
+		#if callable(lc.functions_list[0]):    #lc.Scheme):
+		#	value = lc.functions_list[0](ma) #lc.Scheme(ma)    - для решателя Python функция пишется в поле functions_list
 
-			res = dict()
-			res[lc.Name] = [value]
-			ma.AddResults(res)
+		#	res = dict()
+		#	res[lc.Name] = [value]
+		#	ma.AddResults(res)
 
-			lc.Status = 0
-		else:
-			lc.Status = -1
+		#	lc.Status = 0
+		#else:
+		#	lc.Status = -1
 
-			lc.log = self.GetLog()
+		#	lc.log = self.GetLog()
+		#return lc.Status
+		func = pickle.loads(lc.functions_list[0])
+		value = func(ma)
+
+		res = dict()
+		res[lc.Name] = [value]
+		ma.AddResults(res)
+
+		lc.Status = 0
 		return lc.Status
+
 
 
 	# получить статус задачи (решается, решена нормально, ошибка)

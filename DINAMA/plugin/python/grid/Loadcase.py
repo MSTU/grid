@@ -15,6 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import cloudpickle
 
 import Constants
 # класс для описания расчетного случая
@@ -23,7 +24,7 @@ class Loadcase:
 	def __init__(self, nl, pl, desc = Constants.DEFAULT_LOADCASE):
 		scheme_name = pl[0]
 		result_name = pl[1]
-		self.functions_list = pl[2]
+		self.functions_list = [cloudpickle.dumps(func) for func in pl[2]]
 		self.criteria_list = pl[3]   # список критериев, читаемых из результатов (м.б. пустым, тогда читаются все критерии)
 		solver = pl[4]
 
