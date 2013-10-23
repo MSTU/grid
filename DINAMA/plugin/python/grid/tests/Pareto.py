@@ -16,50 +16,59 @@
 #*                                                                         *
 #***************************************************************************/
 
-import grid.ModelAnalysis as ModelAnalysis
-import grid.tests.test_lib as test_lib
-import grid.GridLogger as GridLogger
-import grid.Loadcase as Loadcase
-import grid.ModelGrid as ModelGrid
+import Loadcase
+import ModelGrid
+import ModelAnalysis
 import matplotlib.pyplot as plt
 
 
 # пример работы с grid
 
-def test_1 ():
+def func_1(ma):
+	ma.Status = 0
+	x = ma.GetParameter('x')
+	y = ma.GetParameter('y')
+	return (x - 2) ** 2 + (y - 1) ** 2
 
-	logger = GridLogger.GridLogger("test_1")
+
+def func_2(ma):
+	ma.Status = 0
+	x = ma.GetParameter('x')
+	y = ma.GetParameter('y')
+	return (x - 5) ** 2 + (y - 5) ** 2
+
+
+def test_1():
 	# описание расчетного случая
-	lc1 = Loadcase.Loadcase ([],['', '', [test_lib.f1], ['[]'], 'Python', '%', '%', ''],desc = 'lc1')
-	lc2 = Loadcase.Loadcase ([],['', '', [test_lib.f2], ['[]'], 'Python', '%', '%', ''],desc = 'lc2')
+	lc1 = Loadcase.Loadcase([], ['', '', [func_1], ['[]'], 'Python', '%', '%', ''], desc='lc1')
+	lc2 = Loadcase.Loadcase([], ['', '', [func_2], ['[]'], 'Python', '%', '%', ''], desc='lc2')
 
 	# подготовка объекта решателя
 	mg = ModelGrid.ModelGrid()
 	mg.Init()
-	mg.SetLoadcases ([lc1,lc2])
+	mg.SetLoadcases([lc1, lc2])
 
 	# подготовка параметров
 	ma_list = []
-	for x in range (6):
+	for x in range(6):
 		for y in range(6):
-			ma = ModelAnalysis.ModelAnalysis ()
+			ma = ModelAnalysis.ModelAnalysis()
 			par = dict()
 			par['x'] = x
 			par['y'] = y
-			ma.SetParameters (par)
-			ma_list.append (ma)
+			ma.SetParameters(par)
+			ma_list.append(ma)
 
 	# расчет
-	mg.Calculate (ma_list)
-	logger.Log(GridLogger.INFO, "Calculate begin...")
+	mg.Calculate(ma_list)
 
 	# ожидание выполняения расчета
 	ma_list = mg.WaitAll()
-	logger.Log(GridLogger.INFO, "Calculate end...")
 	# обработка результатов
 	for i in ma_list:
-		if (i.GetStatus()==0):
-			print("x = " + str(i.GetParameter('x')) + " y = "  + str(i.GetParameter('y')) +  " f1 = " +  str(i.GetResults()['lc1'])  +  " f2 = "  + str(i.GetResults()['lc2']))
+		if i.GetStatus() == 0:
+			print("x = " + str(i.GetParameter('x')) + " y = " + str(i.GetParameter('y')) + " f1 = " + str(
+				i.GetResults()['lc1']) + " f2 = " + str(i.GetResults()['lc2']))
 	# сброс параметров предыдущего расчета
 	f1 = []
 	f2 = []
@@ -69,11 +78,10 @@ def test_1 ():
 
 	#for i in range(len(ma_list)):
 	#	plt.plot(f1[i],f2[i],marker='o', color='r')
-	plt.scatter(f1,f2)
+	plt.scatter(f1, f2)
 	plt.show()
 
 	mg.Init()
-
 
 
 # main ():

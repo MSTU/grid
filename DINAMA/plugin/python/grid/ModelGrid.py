@@ -17,7 +17,10 @@
 #***************************************************************************/
 from conf import ConfigClient
 import Task
-from Worker import RunTask
+if ConfigClient.LOCAL_WORK:
+	from LocalWorker import RunTask
+else:
+	from Worker import RunTask
 
 class ModelGrid:
 	def __init__(self, config=None):
@@ -26,9 +29,7 @@ class ModelGrid:
 		else:
 			self.config = config
 		self.loadcases = []
-		self.inputTasks = []
-		self.readyTasks = []
-		self.taskAsyncResults = dict()
+		self.Init()
 
 	def SetLoadcases(self, loadcases):
 		self.loadcases = loadcases
@@ -52,19 +53,22 @@ class ModelGrid:
 	def Calculate(self, ma_list):
 		for ma in ma_list:
 			task = Task.Task(self.loadcases, ma)
-			if not self.config.LOCAL_WORK:
+			if not ConfigClient.LOCAL_WORK:
 				self.inputTasks.append(task)
 				self.taskAsyncResults[task] = RunTask.delay(task)
 			else:
-				self.readyTasks.append(RunTask.__call__(task))
-
+				self.readyTasks.append(RunTask(task))
 
 	def WaitAll(self):
+		if ConfigClient.LOCAL_WORK:
+			return [task.ma for task in self.readyTasks]
 		for task in self.inputTasks:
 			self.readyTasks.append(self.taskAsyncResults[task].get())
 		ma_list = [task.ma for task in self.readyTasks]
+		self.Init()
 		return ma_list
 
 	def Init(self):
+		self.inputTasks = []
 		self.readyTasks = []
 		self.taskAsyncResults = dict()

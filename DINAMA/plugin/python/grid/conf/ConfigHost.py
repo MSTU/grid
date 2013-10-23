@@ -15,23 +15,16 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-
-#import sys
-#import Pyro4
-#import Pyro4.util
-
 import grid.solvers.PRADISSolver as PRADISSolver
 import grid.solvers.ModelicaSolver as ModelicaSolver
 import grid.solvers.PythonSolver as PythonSolver
 
-HOST_IP_ADDRESS = 'localhost'
-MASTER_IP_ADDRESS = 'localhost'
-PORT = 9000
+BACKEND = 'amqp'
+BROKER = 'amqp://guest@localhost//'
 
 class ConfigHost:
 
 	def __init__(self):
-		self.masterPort = PORT
 		self.Solvers()
 
 	def Solvers(self):
@@ -45,6 +38,3 @@ class ConfigHost:
 
 		pythonsolver = PythonSolver.PythonSolver()
 		self.solvers[pythonsolver.name] = pythonsolver
-
-	def MasterURL(self):
-		return MASTER_IP_ADDRESS

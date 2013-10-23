@@ -17,8 +17,10 @@
 #***************************************************************************/
 from celery import Celery
 import conf.ConfigHost as ConfigHost
+import conf.celeryconfig as celeryconfig
 
-celery = Celery('Worker', backend='amqp', broker='amqp://guest@localhost//')
+celery = Celery('Worker')
+celery.config_from_object(celeryconfig)
 
 @celery.task
 def RunTask(task):
