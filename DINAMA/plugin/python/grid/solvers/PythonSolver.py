@@ -16,7 +16,7 @@
 #***************************************************************************/
 import pickle
 
-from grid.solvers.Launcher import Launcher
+from solvers.Launcher import Launcher
 
 class PythonSolver(Launcher):
 	def __init__(self):

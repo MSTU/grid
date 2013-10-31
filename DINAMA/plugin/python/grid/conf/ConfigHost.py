@@ -15,9 +15,9 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import grid.solvers.PRADISSolver as PRADISSolver
-import grid.solvers.ModelicaSolver as ModelicaSolver
-import grid.solvers.PythonSolver as PythonSolver
+import solvers.PRADISSolver as PRADISSolver
+import solvers.ModelicaSolver as ModelicaSolver
+import solvers.PythonSolver as PythonSolver
 
 BACKEND = 'amqp'
 BROKER = 'amqp://guest@localhost//'
