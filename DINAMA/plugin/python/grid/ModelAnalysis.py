@@ -19,103 +19,112 @@
 # класс параметров и результатов модели
 
 class ModelAnalysis:
-	# инициализация объекта
-	def __init__(self):
-		self.par_dict = dict()                # словарь параметров
-		self.result_dict = dict()            # словарь функций результата
-		self.status = 1
-		self.layer = 0                        # количество временных слоев
-		self.curvesNumber = 0                # количество выходных переменных
+    # инициализация объекта
+    def __init__(self):
+        self.par_dict = dict()                # словарь параметров
+        self.result_dict = dict()            # словарь функций результата
+        self.status = 1
+        self.layer = 0                        # количество временных слоев
+        self.curvesNumber = 0                # количество выходных переменных
 
 
-	def SetParameters(self, par_dict):
-		self.par_dict = par_dict
+    def SetParameters(self, par_dict):
+        self.par_dict = par_dict
 
-	def GetParameters(self):
-		return self.par_dict
+    def GetParameters(self):
+        return self.par_dict
 
-	def GetParameter(self, name):
-		return self.par_dict[name]
+    def GetParameterValueList(self, name):
+        return self.par_dict[name]
 
-	def AddResults(self, res_dict):
-		self.result_dict.update(res_dict)
+    def GetParameterValueFromLayer(self, name, layer):
+        j = 0
+        for i in self.par_dict[name]:
+            if(j == layer-1):
+                return i
+            else:
+                j += 1
+        return None #if self.par_dict[name] has no such layer
 
-	def SetResults(self, res_dict):
-		self.result_dict = res_dict
+    def AddResults(self, res_dict):
+        self.result_dict.update(res_dict)
 
-	def GetResults(self):
-		return self.result_dict
+    def SetResults(self, res_dict):
+        self.result_dict = res_dict
 
-	def GetStatus(self):
-		return self.status
+    def GetResults(self):
+        return self.result_dict
 
-	def SetStatus(self, status):
-		self.status = status
+    def GetStatus(self):
+        return self.status
 
-	# установить временной слой
-	# layer - номер шага по времени
-	def SetLayer(self, Layer):
-		if (Layer < 0):
-			self.layer = 0
-		else:
-			self.layer = Layer
+    def SetStatus(self, status):
+        self.status = status
 
-	# получить число временных слоев
-	def GetLayerCount(self):
-		return self.layer;
+    # установить временной слой
+    # layer - номер шага по времени
+    def SetLayer(self, Layer):
+        if (Layer < 0):
+            self.layer = 0
+        else:
+            self.layer = Layer
 
-	# установить число выходных переменных
-	def SetCurves(self, number):
-		if (number < 0):
-			self.curvesNumber = 0
-		else:
-			self.curvesNumber = number
+    # получить число временных слоев
+    def GetLayerCount(self):
+        return self.layer;
 
-	# получить число выходных переменных
-	def GetCurvesCount(self):
-		return self.curvesNumber
+    # установить число выходных переменных
+    def SetCurves(self, number):
+        if (number < 0):
+            self.curvesNumber = 0
+        else:
+            self.curvesNumber = number
 
-	# Очистить резултаты
-	def ClearResults(self):
-		self.result_dict = dict()
+    # получить число выходных переменных
+    def GetCurvesCount(self):
+        return self.curvesNumber
 
-	def f(self, name, layer = -1):
-		rs = self.check(name)
-		if rs == None:
-			return None
+    # Очистить результаты
+    def ClearResults(self):
+        self.result_dict = dict()
 
-		return rs.GetValue(layer)
+    def f(self, name, layer = -1):
+        rs = self.check(name)
+        if rs == None:
+            return None
 
-	def fmin(self, name):
-		rs = self.check(name)
-		if rs == None:
-			return None
-		vl = rs.GetValueList()
+        return rs.GetValue(layer)
 
-		return min(vl)
+    def fmin(self, name):
+        rs = self.check(name)
+        if rs == None:
+            return None
+        vl = rs.GetValueList()
 
-	def fmax(self, name):
-		rs = self.check(name)
-		if rs == None:
-			return None
-		vl = rs.GetValueList()
+        return min(vl)
 
-		return max(vl)
+    def fmax(self, name):
+        rs = self.check(name)
+        if rs == None:
+            return None
+        vl = rs.GetValueList()
 
-	def flist(self, name):
-		rs = self.check(name)
-		if rs == None:
-			return None
-		vl = rs.GetValueList()
+        return max(vl)
 
-		return vl
+    def flist(self, name):
+        rs = self.check(name)
+        if rs == None:
+            return None
+        vl = rs.GetValueList()
+
+        return vl
 
 
-	def check(self, name):
-		self.status = 0
-		if name in self.result_dict:
-			rs = self.result_dict[name]
-			return rs
-		else:
-			self.status = -1 # ошибка доступа
-			return None
+    def check(self, name):
+        self.status = 0
+        if name in self.result_dict:
+            rs = self.result_dict[name]
+            return rs
+        else:
+            self.status = -1 # ошибка доступа
+            return None
