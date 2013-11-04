@@ -20,13 +20,11 @@ import threading
 
 import unittest
 import Pyro4
-import grid.Constants as Constants
-import grid.Host as Host
-import grid.Loadcase as Loadcase
-import grid.PyroMaster as PyroMaster
-import grid.ModelAnalysis as ModelAnalysis
-import grid.ModelGrid as ModelGrid
-from grid.conf import ConfigMaster, ConfigHost, ConfigClient
+import Constants
+import Loadcase
+import ModelAnalysis
+import  ModelGrid
+from conf import ConfigHost, ConfigClient
 from tests import test_lib
 
 

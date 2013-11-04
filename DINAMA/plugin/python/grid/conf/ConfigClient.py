@@ -17,7 +17,7 @@
 #***************************************************************************/
 
 # класс конфигурации клиента
-from grid.solvers import PRADISSolver, ModelicaSolver, PythonSolver
+from solvers import PRADISSolver, ModelicaSolver, PythonSolver
 
 LOCAL_WORK = False
 
