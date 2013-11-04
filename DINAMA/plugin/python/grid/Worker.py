@@ -17,10 +17,11 @@
 #***************************************************************************/
 from celery import Celery
 import conf.ConfigHost as ConfigHost
-import conf.celeryconfig as celeryconfig
 
-celery = Celery('Worker')
-celery.config_from_object(celeryconfig)
+celery = Celery('Worker', broker=ConfigHost.BROKER, backend=ConfigHost.BACKEND, include=['Task', 'ModelAnalysis', 'Loadcase', 'cloudpickle'])
+# Лучше бы использовать этот способ конфигурации. Но на Windows 7 64bit он не работает
+#celery.config_from_object(celeryconfig)
+
 
 @celery.task
 def RunTask(task):

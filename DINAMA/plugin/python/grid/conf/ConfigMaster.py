@@ -18,9 +18,6 @@
 
 # класс конфигурации мастер-узла
 
-MASTER_IP_ADDRESS = 'localhost'
-PORT = 9000
-
 class ConfigMaster:
 	# инициализация объекта
 	def __init__(self):

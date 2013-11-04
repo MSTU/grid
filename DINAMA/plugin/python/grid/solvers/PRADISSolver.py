@@ -16,7 +16,7 @@
 #*                                                                         *
 #***************************************************************************/
 
-from  grid.solvers.Launcher import *
+from solvers.Launcher import Launcher
 
 # Лаунчер решателя. Базовый класс
 

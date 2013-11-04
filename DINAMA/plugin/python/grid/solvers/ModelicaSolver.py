@@ -22,8 +22,7 @@ import os # для навигации по каталогам
 import sys # для определения типа операционной системы
 import hashlib # для чтения хэша файла
 import Constants
-import grid.Constants
-import grid.solvers.Launcher as Launcher
+import solvers.Launcher as Launcher
 
 
 class ModelicaSolver(Launcher.Launcher):
@@ -38,7 +37,7 @@ class ModelicaSolver(Launcher.Launcher):
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file strings
 	def LoadData(self, lc):
-		files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+		files_dict = dict()  # files dictionary, where keys are filenames and values are list of file strings
 		with open(lc.Scheme, 'r') as f:
 			mos = f.readlines()
 		files_dict[self.MOS_filename] = mos
