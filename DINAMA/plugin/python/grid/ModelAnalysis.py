@@ -34,6 +34,9 @@ class ModelAnalysis:
     def GetParameters(self):
         return self.par_dict
 
+    def GetParameter(self, name):
+        return self.par_dict[name]
+
     def GetParameterValueList(self, name):
         return self.par_dict[name]
 
