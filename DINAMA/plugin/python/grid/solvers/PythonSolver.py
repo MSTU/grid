@@ -16,7 +16,7 @@
 #***************************************************************************/
 import pickle
 
-from solvers.Launcher import Launcher
+import Launcher
 
 class PythonSolver(Launcher):
 	def __init__(self):

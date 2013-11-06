@@ -22,7 +22,7 @@ import os # для навигации по каталогам
 import sys # для определения типа операционной системы
 import hashlib # для чтения хэша файла
 import Constants
-import solvers.Launcher as Launcher
+import Launcher
 
 
 class ModelicaSolver(Launcher.Launcher):
@@ -134,8 +134,8 @@ class ModelicaSolver(Launcher.Launcher):
 
         os.chdir(cwd)
         return Constants.TASK_SUCCESS
-	# using this function you can specify simulate parameters listed in MOS file
-	# for instance: setSimulateParameters('mos_file.mos', 'stopTime', 35.5)
+    # using this function you can specify simulate parameters listed in MOS file
+    # for instance: setSimulateParameters('mos_file.mos', 'stopTime', 35.5)
     def setSimulateParameter(self, MOS_filename, par_name, par_value):
         temp_file = open('temp', 'w')
         with open(MOS_filename, 'r') as f:
