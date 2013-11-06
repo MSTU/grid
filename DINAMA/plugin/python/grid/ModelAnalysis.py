@@ -37,9 +37,6 @@ class ModelAnalysis:
     def GetParameter(self, name):
         return self.par_dict[name]
 
-    def GetParameterValueList(self, name):
-        return self.par_dict[name]
-
     def GetParameterValueFromLayer(self, name, layer):
         j = 0
         for i in self.par_dict[name]:

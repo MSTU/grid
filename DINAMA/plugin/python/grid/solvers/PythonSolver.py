@@ -16,11 +16,11 @@
 #***************************************************************************/
 import pickle
 
-from solvers.Launcher import Launcher
+import Launcher
 
-class PythonSolver(Launcher):
+class PythonSolver(Launcher.Launcher):
 	def __init__(self):
-		Launcher.__init__(self)
+		#Launcher.__init__(self)
 		self.name = "Python"
 
 	# подговка данных к расчету 

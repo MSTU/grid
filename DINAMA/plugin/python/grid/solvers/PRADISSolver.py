@@ -16,11 +16,11 @@
 #*                                                                         *
 #***************************************************************************/
 
-from solvers.Launcher import Launcher
+import Launcher
 
 # Лаунчер решателя. Базовый класс
 
-class PRADISSolver(Launcher):
+class PRADISSolver(Launcher.Launcher):
 	# инициализация объекта
 	def __init__(self):
 		self.name = "PRADISDynamic"

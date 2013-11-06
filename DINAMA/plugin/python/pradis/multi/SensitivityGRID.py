@@ -1,7 +1,7 @@
 import pradis.multi as multi
-import pradis.grid.ModelGrid as MG
-import pradis.grid.ModelAnalysis as MA
-import pradis.grid.Constants as Constants
+import grid.ModelGrid as MG
+import grid.ModelAnalysis as MA
+import grid.Constants as Constants
 from numpy import empty
 #import af
 #import glb
