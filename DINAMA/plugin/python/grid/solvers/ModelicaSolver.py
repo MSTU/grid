@@ -221,7 +221,6 @@ class ModelicaSolver(Launcher.Launcher):
     # для входных параметров parameters
     # RES_filename - имя файла результатов
     def CreateResultsDict(self, RES_filename, MA_object):
-        layers = 0 # количество временных слоев
         curvesNumber = 0 #количество выходных переменных
         result_dict = dict() #словарь результатов
         value_list = list() #список значений для текущего выходного параметра
@@ -236,17 +235,15 @@ class ModelicaSolver(Launcher.Launcher):
                 key = re.split('DataSet: ', line)[1][:-1]
                 for line in f:
                     if (line != '\n'):
-                        layers += 1
-                        MA_object.SetLayer(layers)
                         value_list.append(float(re.split('[\d.e-], ', line)[1][:-1]))
                     else:
                         break
-                tmp = list(value_list[1:-1]) #убрали первый и последний элементы,
-                #т.к. value_list[первый] = value_list[первый+1],
-                #а value_list[последний] = value_list[последний-1]
+                tmp = list(value_list[:-1]) #убрали последний элемент,
+                #т.к. value_list[последний] = value_list[последний-1]
                 result_dict[key] = tmp
                 del value_list[:] #очистить содержимое всего списка
 
+        MA_object.SetLayer(len(tmp))
         MA_object.SetResults(result_dict)
         MA_object.SetStatus(Constants.TASK_SUCCESS)
 
