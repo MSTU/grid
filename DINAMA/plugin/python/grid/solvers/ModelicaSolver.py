@@ -185,9 +185,11 @@ class ModelicaSolver(Launcher.Launcher):
     def CreateMOfilesDict(self, MOS_file_path):
         files_dict = dict()
         cwd = os.getcwd()
+        print cwd
         #filenames.append(re.search('(\w)+\.mos', MOS_file_path).group())
         with open(MOS_file_path, 'r') as mos:#mos = open(MOS_file_path, 'r')
-            os.chdir(MOS_file_path.rpartition('/')[0])
+            if(MOS_file_path.rpartition('/')[0] != 0):
+                os.chdir(MOS_file_path.rpartition('/')[0])
             for line in mos:
                 if (not line.startswith('loadFile')):
                     pass
