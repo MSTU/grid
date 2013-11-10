@@ -1,4 +1,4 @@
-import pradis.multi as multi
+#import pradis.multi as multi
 import grid.ModelGrid as MG
 import grid.ModelAnalysis as MA
 import grid.Constants as Constants
@@ -17,9 +17,9 @@ from numpy import copy
 
 MaxValue = 1e36
 
-class Sensitivity(multi.ModelLC):
+class Sensitivity():
 
-    def __init__ (self, nl, pl, desc = 'FSG'):#desc=misc.default):
+    def __init__ (self, nl, pl, desc = 'SG'):#desc=misc.default):
 
         #self.ma = multi.ModelLC ()
 
@@ -61,21 +61,18 @@ class Sensitivity(multi.ModelLC):
         #misc.SetPostFile(self.ma.GetHistoryFile())
 
     def Run (self):
-
-        self.iteration = 0
+        #self.iteration = 0
         #self.ma.initHistory()
 
 
         #		vl0 = self.NormX (self.vl0)
         #		print 'vl0=',self.vl0
 
-        if self.method == 'Forward':
+        if(self.method == 'Forward'):
             self.forwback(1.0)
             return
-
-        elif self.method == 'Backward':
+        elif(self.method == 'Backward'):
             self.forwback(-1.0)
-
         else:
             print
             print 'Sensitivity Error: method ', self.method, 'is absent'
@@ -85,8 +82,8 @@ class Sensitivity(multi.ModelLC):
 
         #self.Objective(self.xopt)
 
-    def forwback (self, k):
-        self.iteration = 1
+    def forwback(self, k):
+        #self.iteration = 1
         mg = MG.ModelGrid()
         mg.Init()
         mg.SetLoadcases(self.loadcases)
@@ -108,6 +105,8 @@ class Sensitivity(multi.ModelLC):
             ma_list.append(ma2)
             j += 1
 
+        #for i in ma_list:
+            #print i.GetParameters()
         mg.Calculate(ma_list)
         ma_list = mg.WaitAll()
 
@@ -160,34 +159,61 @@ class Sensitivity(multi.ModelLC):
 
     def Criteria(self, ma_list):
         for element in self.criterias:
-            if(callable(element)): #if element in criterias list is a callable function
+            if(callable(element)): #if element in criterias list is a callable user function
                 for i in ma_list:
                     fvalue = element(i)
                     self.fvalue_list.append(fvalue)
             elif(isinstance(element, basestring)): #if element is a string object
                 for i in ma_list:
                     lastLayerNumber = i.GetLayerCount()
-                    fvalue = i.GetParameterValueFromLayer(element, lastLayerNumber)
+                    fvalue = i.GetValueFromLayerByName(element, lastLayerNumber)
                     self.fvalue_list.append(fvalue)
             else:
                 print 'ERROR in criterias list'
                 return -1
+        #here is an instance
+        #variables: V1, V2
+        #criterias: C1, C2
+        #method: Forward
+        #in fvalue_list we have: [C1V1, C1V1_dx, C2V2, C2V2_dx],
+        #where C1V1 and C2V2 are function's values in V1.Value0 and V2.Value0 points accordingly
+        #C1V1_dx and C2V2_dx are function's values in V1.Value + step and V2.Value0 + step points accordingly
+        #step = self.dx * (V#.xb - V#.xa), where # is variable number (# = 1 or 2)
+        f_x_list = self.fvalue_list[0::2]
+        f_x_dx_list = self.fvalue_list[1::2]
+        #in f_x_list we have only values in V.Value0 points
+        #in our example they are: [C1V1, C2V2]
+        #in f_x_dx_list we have only values in V.Value0 + step points
+        #in our example they are: [C1V1_dx, C2V2_dx]
+        if(self.method == 'Forward'):
+            dfx_list = [f_x_dx - f_x for f_x_dx, f_x in zip(f_x_dx_list, f_x_list)]
+        else:
+            dfx_list = [f_x - f_x_dx for f_x_dx, f_x in zip(f_x_dx_list, f_x_list)]
+        #in forward method we're using forward difference: (f(x + dx) - f(x)) / dx
+        #in backward method we're using backward difference: (f(x) - f(x - dx)) / dx
+        dx_list = [self.dx * (xb - xa) for xa, xb in [] + self.bounds * (len(self.criterias))]
+        #dx_list is a list of calculated steps
+        der_fx_list = [dfx / dx for dfx, dx in zip(dfx_list, dx_list)]
+        #der_fx_list is are list of calculated derivatives which are calculated as dfx / dx
+        #in our example this list contains of: [dC1/dV1, dC1/dV2, dC2/dV1, dC2/dV2]
 
-        #calculate derivative matrix
-        fx = list()
-        for j in range(len(self.fvalue_list) - 1):
-            (xa, xb) = self.bounds[j/2]
-            dx = self.dx * (xb - xa)
-            fx.append((self.fvalue_list[j+1] - self.fvalue_list[j]) / dx)
-
+        #create derivative matrix
         k = 0
         der_matrix = empty((len(self.criterias), len(self.variables)))
         for i in range(len(self.criterias)):
             for j in range(len(self.variables)):
-                der_matrix[i][j] = fx[k]
+                der_matrix[i][j] = der_fx_list[k]
                 k += 1
-        print 'der_matrix:\n'
-        print der_matrix
+        #derivative matrix has a similar structure as Jacobian matrix:
+        #dC1/dV1    dC1/dV2
+        #dC2/dV1    dC2/dV2
+
+        print "f_x_dx_list: " + str(f_x_dx_list)
+        print "f_x_list: " + str(f_x_list)
+        print "dfx_list: " + str(dfx_list)
+        print "dx_list: " + str(dx_list)
+        print "der_fx_list: " + str(der_fx_list)
+        print 'der_matrix: ' + str(der_matrix)
 
         '''
         j = len(self.vl0)
