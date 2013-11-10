@@ -60,7 +60,7 @@ class ModelAnalysis:
     def GetParameter(self, name):
         return self.par_dict[name]
 
-    def GetParameterValueFromLayer(self, name, layer):
+    def GetValueFromLayerByName(self, name, layer):
         j = 0
         for i in self.result_dict[name]:
             if(j == layer-1):
