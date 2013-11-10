@@ -1,8 +1,8 @@
-import misc
+#import misc
 
 class Variable:
 
-	def __init__ (self, nl, pl, desc=misc.default):
+	def __init__ (self, nl, pl, desc='Variable'):#misc.default):
 
 		self.Name = pl[0]
 		self.Value0 = pl[1]
