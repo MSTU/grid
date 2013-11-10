@@ -27,9 +27,32 @@ class ModelAnalysis:
         self.layer = 0                        # количество временных слоев
         self.curvesNumber = 0                # количество выходных переменных
 
-
     def SetParameters(self, par_dict):
-        self.par_dict = par_dict
+        self.par_dict.update(par_dict)
+
+    def SetResults(self, res_dict):
+        self.result_dict.update(res_dict)
+
+    def SetStatus(self, status):
+        self.status = status
+
+    # установить временной слой
+    # layer - номер шага по времени
+    def SetLayer(self, Layer):
+        if (Layer < 0):
+            self.layer = 0
+        else:
+            self.layer = Layer
+
+    # установить число выходных переменных
+    def SetCurves(self, number):
+        if (number < 0):
+            self.curvesNumber = 0
+        else:
+            self.curvesNumber = number
+
+    def AddResults(self, res_dict):
+        self.result_dict.update(res_dict)
 
     def GetParameters(self):
         return self.par_dict
@@ -46,39 +69,15 @@ class ModelAnalysis:
                 j += 1
         return None #if self.par_dict[name] has no such layer
 
-    def AddResults(self, res_dict):
-        self.result_dict.update(res_dict)
-
-    def SetResults(self, res_dict):
-        self.result_dict = res_dict
-
     def GetResults(self):
         return self.result_dict
 
     def GetStatus(self):
         return self.status
 
-    def SetStatus(self, status):
-        self.status = status
-
-    # установить временной слой
-    # layer - номер шага по времени
-    def SetLayer(self, Layer):
-        if (Layer < 0):
-            self.layer = 0
-        else:
-            self.layer = Layer
-
     # получить число временных слоев
     def GetLayerCount(self):
         return self.layer;
-
-    # установить число выходных переменных
-    def SetCurves(self, number):
-        if (number < 0):
-            self.curvesNumber = 0
-        else:
-            self.curvesNumber = number
 
     # получить число выходных переменных
     def GetCurvesCount(self):
@@ -118,7 +117,6 @@ class ModelAnalysis:
         vl = rs.GetValueList()
 
         return vl
-
 
     def check(self, name):
         self.status = 0
