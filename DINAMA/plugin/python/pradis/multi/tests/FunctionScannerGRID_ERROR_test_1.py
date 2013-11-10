@@ -17,8 +17,6 @@
 #***************************************************************************/
 
 import Loadcase
-import ModelGrid
-import ModelAnalysis
 import pradis.multi.Variable as V
 import pradis.multi.FunctionScannerGRID as FSG
 
