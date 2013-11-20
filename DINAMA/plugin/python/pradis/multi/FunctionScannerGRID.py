@@ -172,8 +172,12 @@ class FunctionScanner():
 
     def map_list_to_dict(self, combination, keys):
         result = dict()
-        for i in xrange(len(combination)):
-            result[keys[i].Name] = combination[i]
+        if(len(keys) > 1):
+            for i in xrange(len(combination)):
+                result[keys[i].Name] = combination[i]
+        else:
+            result[keys[0].Name] = combination
+
         return result
 
     def Run(self):
@@ -182,7 +186,10 @@ class FunctionScanner():
         mg.SetLoadcases(self.loadcases)
         ma_list = []        #list of ModelAnalysis objects
         PVV_arrays_list = self.CreateListOfPVVArrays(self.variables)
-        all_combs = self.all_combinations(PVV_arrays_list)
+        if(len(PVV_arrays_list) > 1):
+            all_combs = self.all_combinations(PVV_arrays_list)
+        else:
+            all_combs = PVV_arrays_list[0]
         in_dicts = [self.map_list_to_dict(combination, self.variables) for combination in all_combs]
         for dic in in_dicts:
             ma = MA.ModelAnalysis()
