@@ -17,9 +17,9 @@
 #***************************************************************************/
 
 # класс конфигурации клиента
-from solvers import PRADISSolver, ModelicaSolver, PythonSolver
+from solvers import PRADISSolver, ModelicaSolver, PythonSolver, LSDYNASolver
 
-LOCAL_WORK = False
+LOCAL_WORK = True
 
 class ConfigClient:
 	# инициализация объекта
@@ -39,6 +39,9 @@ class ConfigClient:
 
 		pythonsolver = PythonSolver.PythonSolver()
 		self.solvers[pythonsolver.name] = pythonsolver
+
+		ANSYS_LSDYNA = LSDYNASolver.LSDYNASolver()
+		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
 
 
 	# адрес мастер-хоста
