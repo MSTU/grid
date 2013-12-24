@@ -18,6 +18,7 @@
 import solvers.PRADISSolver as PRADISSolver
 import solvers.ModelicaSolver as ModelicaSolver
 import solvers.PythonSolver as PythonSolver
+import solvers.LSDYNASolver as LSDYNASolver
 
 BACKEND = 'amqp'
 BROKER = 'amqp://guest@localhost//'
@@ -38,3 +39,6 @@ class ConfigHost:
 
 		pythonsolver = PythonSolver.PythonSolver()
 		self.solvers[pythonsolver.name] = pythonsolver
+
+		ANSYS_LSDYNA = LSDYNASolver.LSDYNASolver()
+		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
