@@ -21,11 +21,12 @@
 class ModelAnalysis:
     # инициализация объекта
     def __init__(self):
-        self.par_dict = dict()                # словарь параметров
-        self.result_dict = dict()            # словарь функций результата
+        self.par_dict = {}  # словарь параметров
+        self.result_dict = {}   # словарь функций результата
+        self.options = ""   # command options for solvers
         self.status = 1
-        self.layer = 0                        # количество временных слоев
-        self.curvesNumber = 0                # количество выходных переменных
+        self.layer = 0  # количество временных слоев
+        self.curvesNumber = 0   # количество выходных переменных
 
     def SetParameters(self, par_dict):
         self.par_dict.update(par_dict)
@@ -77,7 +78,7 @@ class ModelAnalysis:
 
     # получить число временных слоев
     def GetLayerCount(self):
-        return self.layer;
+        return self.layer
 
     # получить число выходных переменных
     def GetCurvesCount(self):
