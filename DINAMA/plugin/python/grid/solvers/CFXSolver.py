@@ -172,5 +172,3 @@ class CFXSolver(Launcher.Launcher):
     def DeleteTempDir(self, dir_name):
         if(os.path.isdir(dir_name)):
             shutil.rmtree(dir_name)
-
-
