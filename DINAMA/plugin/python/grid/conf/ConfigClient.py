@@ -17,7 +17,7 @@
 #***************************************************************************/
 
 # класс конфигурации клиента
-from solvers import PRADISSolver, ModelicaSolver, PythonSolver, LSDYNASolver
+from solvers import PRADISSolver, ModelicaSolver, PythonSolver, LSDYNASolver, CFXSolver
 
 LOCAL_WORK = True
 
@@ -43,6 +43,8 @@ class ConfigClient:
 		ANSYS_LSDYNA = LSDYNASolver.LSDYNASolver()
 		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
 
+		ANSYS_CFX = CFXSolver.CFXSolver()
+		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
 
 	# адрес мастер-хоста
 	def MasterURL(self):
