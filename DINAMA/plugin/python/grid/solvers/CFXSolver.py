@@ -77,7 +77,6 @@ class CFXSolver(Launcher.Launcher):
             pass
         elif sys.platform.startswith('linux'):
             print 'executing ANSYS CFX Solver'
-            print cfx + options
             subprocess.call(cfx + options, stderr=error_log_file)
             print 'ANSYS CFX Solver finished'
         else:
