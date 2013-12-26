@@ -20,6 +20,7 @@ import solvers.ModelicaSolver as ModelicaSolver
 import solvers.PythonSolver as PythonSolver
 import solvers.LSDYNASolver as LSDYNASolver
 import solvers.CFXSolver as CFXSolver
+import solvers.MechanicalSolver as MechanicalSolver
 
 BACKEND = 'amqp'
 BROKER = 'amqp://guest@localhost//'
@@ -46,3 +47,6 @@ class ConfigHost:
 
 		ANSYS_CFX = CFXSolver.CFXSolver()
 		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
+
+		ANSYS_Mechanical = MechanicalSolver.MechanicalSolver()
+		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical
