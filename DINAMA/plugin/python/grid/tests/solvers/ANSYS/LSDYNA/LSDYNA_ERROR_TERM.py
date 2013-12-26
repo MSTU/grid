@@ -22,8 +22,8 @@ import ModelAnalysis
 def test_1 ():
 
     lc1 = Loadcase.Loadcase ([],
-        ['k_files/bouncing.k', 'my_result.out',[], '', 'ANSYS_LS-DYNA', '%', '%'],
-        desc = 'loadcase_2(ERROR)')
+        ['k_files/bouncing.k', 'my_result.out', [], '', 'ANSYS_LS-DYNA', '%', '%'],
+        desc='loadcase_2(ERROR)')
 
     mg = ModelGrid.ModelGrid()
     mg.Init()
