@@ -15,48 +15,32 @@
 #*                                                                         *
 #***************************************************************************/
 import pickle
-
+import Constants
 import Launcher
 
+
 class PythonSolver(Launcher.Launcher):
-	def __init__(self):
-		#Launcher.__init__(self)
-		self.name = "Python"
+	name = "Python"
 
-	# подговка данных к расчету 
 	def LoadData(self, lc):
-		lc.inData = lc.Scheme
+		lc.inData = lc.scheme
 		return 0
-
 
 	def Init(self):
 		pass
 
 	# запуск расчета схемы и инициализация ее параметрами
-	def Run(self, lc, ma):
-		#if callable(lc.functions_list[0]):    #lc.Scheme):
-		#	value = lc.functions_list[0](ma) #lc.Scheme(ma)    - для решателя Python функция пишется в поле functions_list
+	def Run(self, lc, task):
+		try:
+			func = pickle.loads(lc.scheme)
+			value = func(task.input_params)
 
-		#	res = dict()
-		#	res[lc.Name] = [value]
-		#	ma.AddResults(res)
+			task.result_params = value
+			task.status = Constants.TASK_SUCCESS
+		except:
+			task.status = Constants.TASK_ERROR
 
-		#	lc.Status = 0
-		#else:
-		#	lc.Status = -1
-
-		#	lc.log = self.GetLog()
-		#return lc.Status
-		func = pickle.loads(lc.functions_list[0])
-		value = func(ma)
-
-		res = dict()
-		res[lc.Name] = [value]
-		ma.AddResults(res)
-
-		lc.Status = 0
-		return lc.Status
-
+		return task.status
 
 
 	# получить статус задачи (решается, решена нормально, ошибка)

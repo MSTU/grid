@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,40 +13,33 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Loadcase
+from loadcases.PythonLoadcase import  PythonLoadcase
 import ModelGrid
-import ModelAnalysis
-
 
 def func_2(x):
 	return x**2
 
 
-def func_1(ma):
-	ma.Status = 0
-	return func_2(ma.GetParameter ('x'))
+def func_1(input_params):
+	return func_2(input_params['x'])
 
 
 def test_1():
-	lc1 = Loadcase.Loadcase([], ['', '', [func_1], ['[]'], 'Python', '%', '%', ''], desc = 'lc1')
-
 	mg = ModelGrid.ModelGrid()
 	mg.Init()
-	mg.SetLoadcases([lc1])
+	mg.SetLoadcases([PythonLoadcase(func_1)])
 
-	ma_list = []
+	input_list = []
 	for i in xrange(20):
-		ma = ModelAnalysis.ModelAnalysis()
 		par = dict()
 		par['x'] = i
-		ma.SetParameters(par)
-		ma_list.append(ma)
-	mg.Calculate(ma_list)
+		input_list.append(par)
+	mg.Calculate(input_list)
 
-	ma_list = mg.WaitAll()
-	for i in ma_list:
-		if (i.GetStatus() == 0):
-			print "x = " + str(i.GetParameter('x')) + " y = " + str(i.GetResults()['lc1'])
+	result_list = mg.WaitAll()
+
+	for (param, result) in zip(input_list, result_list):
+		print "x = " + str(param['x']) + " y = " + str(result)
 	mg.Init()
 
 test_1()

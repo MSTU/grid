@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,39 +13,19 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import Constants
+from Loadcase import Loadcase
+from solvers.PRADISSolver import PRADISSolver
 
-from loadcases.ModelicaLoadcase import ModelicaLoadcase
-import ModelGrid
+class PradisLoadcase(Loadcase):
+	"""
+	Loadcase for PradisSolver.
+	"""
+	def __init__(self, scheme, result_file, criteria_list, solver_params, open_sign, close_sign, desc=Constants.DEFAULT_LOADCASE):
+		Loadcase.__init__(self, scheme, PRADISSolver.name, desc)
 
-def test_1 ():
-
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
-
-	mg = ModelGrid.ModelGrid()
-	mg.Init()
-	mg.SetLoadcases([lc1])
-
-	input_list = []
-
-	par = dict()
-	par['resistor1.R'] = 5.0
-	par['inductor1.L'] = 0.4
-	par['load.J'] = 2.0
-	input_list.append(par)
-
-	par = dict()
-	par['resistor1.R'] = 2.0
-	par['inductor1.L'] = 1.0
-	par['load.J'] = 0.5
-	input_list.append(par)
-
-	mg.Calculate(input_list)
-	result_list = mg.WaitAll()
-
-	for i in result_list:
-		print i
-		print '======================================================'
-
-	mg.Init()
-
-test_1()
+		self.result_file = result_file
+		self.criteria_list = criteria_list
+		self.solver_params = solver_params
+		self.open_sign = open_sign
+		self.close_sign = close_sign

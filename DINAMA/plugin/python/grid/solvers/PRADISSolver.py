@@ -21,9 +21,10 @@ import Launcher
 # Лаунчер решателя. Базовый класс
 
 class PRADISSolver(Launcher.Launcher):
-	# инициализация объекта
+	name = "PRADISDynamic"
+
 	def __init__(self):
-		self.name = "PRADISDynamic"
+		pass
 
 
 	# запуск расчеты схемы (с установленнымм параметрами)

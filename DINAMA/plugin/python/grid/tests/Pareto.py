@@ -16,13 +16,14 @@
 #*                                                                         *
 #***************************************************************************/
 
-import Loadcase
 import ModelGrid
 import ModelAnalysis
 import matplotlib.pyplot as plt
 
 
 # пример работы с grid
+from loadcases import Loadcase
+
 
 def func_1(ma):
 	ma.Status = 0

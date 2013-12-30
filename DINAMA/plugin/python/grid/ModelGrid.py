@@ -16,7 +16,7 @@
 #*                                                                         *
 #***************************************************************************/
 from conf import ConfigClient
-import Task
+from Task import Task
 if ConfigClient.LOCAL_WORK:
 	from LocalWorker import RunTask
 else:
@@ -34,7 +34,7 @@ class ModelGrid:
 	def SetLoadcases(self, loadcases):
 		self.loadcases = loadcases
 		for loadcase in loadcases:
-			solver = self.config.solvers[loadcase.Solver]
+			solver = self.config.solvers[loadcase.solver]
 			solver.LoadData(loadcase)
 
 	def AddLoadcases(self, loadcases):
@@ -50,9 +50,9 @@ class ModelGrid:
 	def clearLoadcases(self):
 		self.loadcases = []
 
-	def Calculate(self, ma_list):
-		for ma in ma_list:
-			task = Task.Task(self.loadcases, ma)
+	def Calculate(self, input_list):
+		for item in input_list:
+			task = Task(self.loadcases, item)
 			if not ConfigClient.LOCAL_WORK:
 				self.inputTasks.append(task)
 				self.taskAsyncResults[task] = RunTask.delay(task)
@@ -61,12 +61,12 @@ class ModelGrid:
 
 	def WaitAll(self):
 		if ConfigClient.LOCAL_WORK:
-			return [task.ma for task in self.readyTasks]
+			return [task.result_params for task in self.readyTasks]
 		for task in self.inputTasks:
 			self.readyTasks.append(self.taskAsyncResults[task].get())
-		ma_list = [task.ma for task in self.readyTasks]
+		result_list = [task.result_params for task in self.readyTasks]
 		self.Init()
-		return ma_list
+		return result_list
 
 	def Init(self):
 		self.inputTasks = []

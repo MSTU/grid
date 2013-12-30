@@ -15,27 +15,14 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import Constants
+
+
 class Task:
-	# инициализация объекта
-	def __init__(self, lc, ma):
-		self.lc = lc    # список расчетных случаев
-		self.ma = ma    # объект ModelAnalysis
 
-	def GetLoadcase(self):
-		return self.lc
-
-	def SetLoadcase(self, lc):
-		self.lc = lc
-
-	def SetModelAnalysis(self, ma):
-		self.ma = ma
-
-	def GetModelAnalysis(self):
-		return self.ma
-
-	def SetClientId(self, clientId):
-		self.clientId = clientId
-
-	def DetClientId(self):
-		return self.clientId
+	def __init__(self, loadcase, input_params):
+		self.lc = loadcase
+		self.input_params = input_params
+		self.result_params = None
+		self.status = Constants.TASK_DEFAULT
 

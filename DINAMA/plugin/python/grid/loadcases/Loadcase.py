@@ -15,39 +15,13 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import Constants
 
-from loadcases.ModelicaLoadcase import ModelicaLoadcase
-import ModelGrid
-
-def test_1 ():
-
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
-
-	mg = ModelGrid.ModelGrid()
-	mg.Init()
-	mg.SetLoadcases([lc1])
-
-	input_list = []
-
-	par = dict()
-	par['resistor1.R'] = 5.0
-	par['inductor1.L'] = 0.4
-	par['load.J'] = 2.0
-	input_list.append(par)
-
-	par = dict()
-	par['resistor1.R'] = 2.0
-	par['inductor1.L'] = 1.0
-	par['load.J'] = 0.5
-	input_list.append(par)
-
-	mg.Calculate(input_list)
-	result_list = mg.WaitAll()
-
-	for i in result_list:
-		print i
-		print '======================================================'
-
-	mg.Init()
-
-test_1()
+class Loadcase:
+	"""
+	Base class for calculation case specification. It's environment in which task will calculated
+	"""
+	def __init__(self, scheme, solver, desc=Constants.DEFAULT_LOADCASE):
+		self.scheme = scheme
+		self.Name = desc
+		self.solver = solver

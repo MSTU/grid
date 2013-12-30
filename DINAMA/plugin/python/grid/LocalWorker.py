@@ -4,12 +4,12 @@ from conf import ConfigHost
 def RunTask(task):
 	config = ConfigHost.ConfigHost()
 	for i in task.lc:
-		solver = config.solvers[i.Solver]
+		solver = config.solvers[i.solver]
 		solver.Init()
-		status = solver.Run(i, task.ma)
-		if status < task.GetModelAnalysis().GetStatus():
-			task.ma.SetStatus(status)
+		status = solver.Run(i, task)
+		if status < task.status:
+			task.status = status
 
-	print "Parameters = " + str(task.ma.GetParameters())
-	print "Results = " + str(task.ma.GetResults())
+	print "Parameters = " + str(task.input_params)
+	print "Results = " + str(task.result_params)
 	return task
