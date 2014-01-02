@@ -23,5 +23,6 @@ class Loadcase:
 	"""
 	def __init__(self, scheme, solver, desc=Constants.DEFAULT_LOADCASE):
 		self.scheme = scheme
-		self.Name = desc
+		self.name = desc
 		self.solver = solver
+		self.status = Constants.DEFAULT_STATUS

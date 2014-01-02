@@ -15,8 +15,8 @@
 #***************************************************************************/
  
 
-TASK_ERROR = -1
-TASK_SUCCESS = 0
-TASK_DEFAULT = 1
+ERROR_STATUS = -1
+DEFAULT_STATUS = 0
+SUCCESS_STATUS = 1
 
 DEFAULT_LOADCASE = "grid_Loadcase"

@@ -13,6 +13,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import Constants
 from loadcases.PythonLoadcase import  PythonLoadcase
 import ModelGrid
 
@@ -25,9 +26,11 @@ def func_1(input_params):
 
 
 def test_1():
+	lc = PythonLoadcase(func_1)
+
 	mg = ModelGrid.ModelGrid()
 	mg.Init()
-	mg.SetLoadcases([PythonLoadcase(func_1)])
+	mg.SetLoadcases([lc])
 
 	input_list = []
 	for i in xrange(20):
@@ -39,7 +42,7 @@ def test_1():
 	result_list = mg.WaitAll()
 
 	for (param, result) in zip(input_list, result_list):
-		print "x = " + str(param['x']) + " y = " + str(result)
+		print "x = " + str(param['x']) + " y = " + str(result[lc.name])
 	mg.Init()
 
 test_1()

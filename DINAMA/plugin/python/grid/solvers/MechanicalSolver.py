@@ -43,7 +43,7 @@ class MechanicalSolver(Launcher.Launcher):
 	def Run(self, loadcase, ma_object):
 		if loadcase.inData is None:
 			print "ERROR: inData contains nothing"
-			return Constants.TASK_ERROR
+			return Constants.ERROR_STATUS
 		cwd = os.getcwd()
 		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
 		os.chdir(loadcase.Name)
@@ -84,15 +84,15 @@ class MechanicalSolver(Launcher.Launcher):
 			print 'ANSYS Mechanical Solver finished'
 		else:
 			print 'ERROR: Ñan not determine your platform'
-			return Constants.TASK_ERROR
+			return Constants.ERROR_STATUS
 
 		self.UpdateGlobalLog(local_error_log_filename)
 		error_flag = self.CheckLog(local_error_log_filename)
 
 		os.chdir(cwd)
 		if (not error_flag):
-			return Constants.TASK_SUCCESS
-		return Constants.TASK_ERROR
+			return Constants.SUCCESS_STATUS
+		return Constants.ERROR_STATUS
 
 	# Creates file from list of strings
 	def CreateFileFromList(self, stringList, filename):

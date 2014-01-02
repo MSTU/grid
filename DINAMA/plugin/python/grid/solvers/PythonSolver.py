@@ -16,54 +16,20 @@
 #***************************************************************************/
 import pickle
 import Constants
-import Launcher
+from Launcher import Launcher
 
 
-class PythonSolver(Launcher.Launcher):
+class PythonSolver(Launcher):
 	name = "Python"
 
-	def LoadData(self, lc):
-		lc.inData = lc.scheme
-		return 0
-
-	def Init(self):
-		pass
-
-	# запуск расчета схемы и инициализация ее параметрами
-	def Run(self, lc, task):
+	def Run(self, lc, input_params):
 		try:
 			func = pickle.loads(lc.scheme)
-			value = func(task.input_params)
+			result = func(input_params)
 
-			task.result_params = value
-			task.status = Constants.TASK_SUCCESS
+			status = Constants.SUCCESS_STATUS
 		except:
-			task.status = Constants.TASK_ERROR
+			status = Constants.ERROR_STATUS
 
-		return task.status
-
-
-	# получить статус задачи (решается, решена нормально, ошибка)
-	def Status(self):
-		return 0
-
-	# получить значение функции
-	def GetValue(self, functionName):
-		pass
-
-	# установить временной слой
-	def SetLayer(self, layer):
-		pass
-
-	# получить число временных слоев
-	def GetLayerCount(self):
-		pass
-
-	# получить словарь пар функция-значение
-	def GetFunctionsDict(self):
-		pass
-
-
-	def GetLog(self):
-		return ""
-	
+		lc.status = status
+		return result

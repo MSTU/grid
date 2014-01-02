@@ -23,39 +23,18 @@ class Launcher:
 	def __init__(self):
 		pass
 
-
-	# подговка данных к расчету 
 	def LoadData(self, lc):
+		"""
+		Подготавливает данные расчетного случая
+		"""
 		return 0
 
 	def Init(self):
 		pass
 
-	# запуск расчета схемы и инициализация ее параметрами
-	def Run(self, lc, ma):
+	def Run(self, lc, input_params):
+		"""
+		Запуск одного расчетного случая. Принимает на вход расчетный случай и входные параметры.
+		Возвращает результат расчета. Устанавливает статус решения расчетного случая.
+		"""
 		pass
-
-	# получить статус задачи (решается, решена нормально, ошибка)
-	def Status(self):
-		pass
-
-	# получить значение функции
-	def GetValue(self, functionName):
-		pass
-
-	# установить временной слой
-	def SetLayer(self, layer):
-		pass
-
-	# получить число временных слоев
-	def GetLayerCount(self):
-		pass
-
-	# получить словарь пар функция-значение
-	def GetFunctionsDict(self):
-		pass
-
-
-	def GetLog(self):
-		pass
-	

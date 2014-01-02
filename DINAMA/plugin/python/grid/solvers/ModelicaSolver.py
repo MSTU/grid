@@ -28,11 +28,10 @@ import Launcher
 
 class ModelicaSolver(Launcher.Launcher):
 	name = "ModelicaDynamic"
-	# object initialization
+
 	def __init__(self):
 		self.MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
 
-	# подговка данных к расчету
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file strings
@@ -58,17 +57,14 @@ class ModelicaSolver(Launcher.Launcher):
 			print 'compiled'
 		else:
 			print 'can not determine your platform'
-			return Constants.TASK_ERROR
+			return Constants.ERROR_STATUS
 
-	# запуск расчета схемы и инициализация ее параметрами
-	# scheme - путь к файлу задачи (mos, mo, py, sch)
-	# словарь параметров и их значений
-	def Run(self, loadcase, task):
+	def Run(self, loadcase, input_params):
 		cwd = os.getcwd()
 		#if not os.path.exists(id): os.makedirs(id)
 		#os.chdir(id)
-		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
-		os.chdir(loadcase.Name)
+		if not os.path.exists(loadcase.name): os.makedirs(loadcase.name)
+		os.chdir(loadcase.name)
 
 		# Host creates all required files
 		for k, v in loadcase.inData.iteritems():
@@ -102,7 +98,7 @@ class ModelicaSolver(Launcher.Launcher):
 		RES_filename = 'results.plt'
 
 		# создание файлов входных параметров по словарям входных параметров
-		self.CreateParFilesFromParDicts(PAR_filename, task.input_params)
+		self.CreateParFilesFromParDicts(PAR_filename, input_params)
 
 		if sys.platform.startswith('win'):
 			if (os.path.isfile(class_name + '.exe')):
@@ -126,14 +122,14 @@ class ModelicaSolver(Launcher.Launcher):
 
 		else:
 			print 'can not determine your platform'
-			return Constants.TASK_ERROR
+			return Constants.ERROR_STATUS
 
 		# получение словаря выходных параметров
-		self.CreateResultsDict(RES_filename, task)
-		print task.result_params
+		result = self.CreateResultsDict(RES_filename)
+		loadcase.status = Constants.SUCCESS_STATUS
 
 		os.chdir(cwd)
-		return Constants.TASK_SUCCESS
+		return result
 
 	# using this function you can specify simulate parameters listed in MOS file
 	# for instance: setSimulateParameters('mos_file.mos', 'stopTime', 35.5)
@@ -221,7 +217,7 @@ class ModelicaSolver(Launcher.Launcher):
 	# Создание словаря результатов по файлу результатов RES_filename
 	# для входных параметров parameters
 	# RES_filename - имя файла результатов
-	def CreateResultsDict(self, RES_filename, task):
+	def CreateResultsDict(self, RES_filename):
 		curvesNumber = 0 #количество выходных переменных
 		result_dict = dict() #словарь результатов
 		value_list = list() #список значений для текущего выходного параметра
@@ -245,8 +241,7 @@ class ModelicaSolver(Launcher.Launcher):
 				del value_list[:] #очистить содержимое всего списка
 
 		#MA_object.SetLayer(len(tmp))
-		task.result_params = result_dict
-		task.status = Constants.TASK_SUCCESS
+		return result_dict
 
 	def GetLog(self):
 		pass

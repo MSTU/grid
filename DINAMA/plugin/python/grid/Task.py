@@ -18,11 +18,18 @@
 import Constants
 
 
+
 class Task:
 
-	def __init__(self, loadcase, input_params):
-		self.lc = loadcase
+	def __init__(self, loadcases, input_params):
+		self.id = None
+		self.loadcases = loadcases
 		self.input_params = input_params
-		self.result_params = None
-		self.status = Constants.TASK_DEFAULT
+		self.result_params = dict()
+		self.status = Constants.DEFAULT_STATUS
 
+	# task status is least loadcase status
+	def recalcStatus(self):
+		for loadcase in self.loadcases:
+			if self.status > loadcase.status:
+				self.status = loadcase.status
