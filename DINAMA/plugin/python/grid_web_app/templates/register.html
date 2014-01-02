@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="center span6">
+        <form name="register" method="POST" class="form-horizontal" action="" >
+            {% csrf_token %}
+            {% for error in errors.values %}
+                <div class="alert alert-error">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            <fieldset>
+                <legend>Регистрация</legend>
+                <div class="control-group {% if errors.name %}error{% endif %}">
+                    <label class="control-label" for="Login">Логин</label>
+                    <div class="controls">
+                        <input type="text" name="username" id="Login" placeholder="Логин" value="{{ data.name }}">
+                    </div>
+                </div>
+                <div class="control-group {% if errors.email %}error{% endif %}">
+                    <label class="control-label" for="Email">Email</label>
+                    <div class="controls">
+                        <input type="text" name="email" id="Email" placeholder="Email" value="{{ data.email }}">
+                    </div>
+                </div>
+                <div class="control-group {% if errors.password %}error{% endif %}">
+                    <label class="control-label" for="inputPassword1">Пароль</label>
+                    <div class="controls">
+                        <input type="password" name="password1" id="inputPassword1" placeholder="Пароль">
+                    </div>
+                </div>
+                <div class="control-group {% if errors.password %}error{% endif %}">
+                    <label class="control-label" for="inputPassword2">Повторите пароль</label>
+                    <div class="controls">
+                        <input type="password" name="password2" id="inputPassword2" placeholder="Пароль">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}

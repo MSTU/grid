@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="span8 offset1 ">
+            <form action="/create_job/" method="POST" id="create_job" name="npdata" class="navbar-form offset1">{% csrf_token %}
+                <p>
+                <h4>Название проекта:</h4>
+                <input type="text" id="addjob" name="job_name" class="span3"  placeholder="Job name" >
+                </p>
+
+                <div>
+                    <h4>Описание:</h4>
+                    <textarea rows="3" class="span3" name="description" placeholder="What's this job about?"></textarea>
+                </div>
+
+                <p>
+                <h4>Расчетный случай:</h4>
+                <input type="text" name="loadcase" class="span3"  placeholder="Loadcase">
+                </p>
+
+                <p>
+                <h4>Тип модели:</h4>
+                <input type="text" name="model_type" class="span3"  placeholder="Model type">
+                </p>
+
+                <p>
+                <h4>Модель:</h4>
+                <input type="text" name="model" class="span3"  placeholder="Model">
+                </p>
+
+                <p>
+                <h4>Входные параметры:</h4>
+                <textarea rows="3" class="span3" name="description" placeholder="Input Parameters"></textarea>
+                </p>
+
+                <div>
+                    <button type="button"  class="btn btn-primary center" onclick="checkJobNameAndRedirect('addjob')" >Создать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{%  endblock %}

@@ -1,0 +1,7 @@
+/*.center {margin: 30px auto;}*/
+.center {
+    position: fixed;
+    left: 50%;
+    margin-left: -285px;
+    margin-top: 30px;
+}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="center span6">
+        <form name="login" method="POST" class="form-horizontal span6" action="">
+            {% csrf_token %}
+            {% for error in errors.values %}
+                <div class="alert alert-error">
+                    {{ error }}
+                </div>
+            {% endfor %}
+            <fieldset>
+                <legend>Авторизация</legend>
+                <div class="control-group">
+                    <label class="control-label" for="inputEmail">Логин</label>
+                    <div class="controls">
+                        <input type="text" name="username" id="inputEmail" placeholder="Login"  value="{{ data.username }}">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="inputPassword">Пароль</label>
+                    <div class="controls">
+                        <input type="password" name="password" id="inputPassword" placeholder="Пароль">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <label class="checkbox">
+                            <input type="checkbox">Запомнить меня
+                        </label>
+                        <button type="submit" class="btn btn-primary">Войти</button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <div class="controls">
+                        <a href="/register/">Зарегистрироваться</a>
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
