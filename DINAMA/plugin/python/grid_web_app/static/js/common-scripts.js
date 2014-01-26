@@ -42,6 +42,34 @@ function editUrl(inputId)
     create_job.submit();
 }
 
+function loadcaseSubmit(inputId) {
+    if(document.getElementById(inputId).value =='')
+    {
+        alert("Please, insert a Name of Loadcase!");
+        return false;
+    }
+    else
+    {
+        url = '/ajax/' + inputId + '/';
+        document.getElementById('create_loadcase').action = url;
+        create_loadcase.submit();
+    }
+}
+
+function modelSubmit(inputId) {
+    if(document.getElementById(inputId).value =='')
+    {
+        alert("Please, insert a Name of Model!");
+        return false;
+    }
+    else
+    {
+        url = '/ajax/' + inputId + '/';
+        document.getElementById('create_model').action = url;
+        create_model.submit();
+    }
+}
+
 
 function delJob(job_id, job)
 {
@@ -69,4 +97,13 @@ function setJobName()
 function paginator_url(string)
 {
     document.getElementById(string).href='';
+}
+
+function addLoadcase(inputId)
+{
+    if(document.getElementById(inputId).value =='')
+    {
+        alert("Please, insert a Name of job!");
+        return false;
+    }
 }

@@ -17,6 +17,8 @@
 #***************************************************************************/
 from conf import ConfigClient
 from Task import Task
+from celery.result import AsyncResult
+
 if ConfigClient.LOCAL_WORK:
 	from LocalWorker import RunTask
 else:
@@ -51,13 +53,33 @@ class ModelGrid:
 		self.loadcases = []
 
 	def Calculate(self, input_list):
+		"""
+		For all items in input_list create Task instance and run them.
+		Return ids of created Tasks
+		"""
+		result_ids = []
 		for item in input_list:
 			task = Task(self.loadcases, item)
 			if not ConfigClient.LOCAL_WORK:
 				self.inputTasks.append(task)
-				self.taskAsyncResults[task] = RunTask.delay(task)
+				asyncResult = RunTask.delay(task)
+				task.id = asyncResult.task_id
+				result_ids.append(task.id)
+				self.taskAsyncResults[task] = asyncResult
 			else:
 				self.readyTasks.append(RunTask(task))
+		return result_ids
+
+	def waitTasks(self, task_ids):
+		"""
+		Wait and return result of tasks with ids specified in task_ids list
+		"""
+		results = []
+		for id in task_ids:
+			asyncResult = AsyncResult(id)
+			results.append(asyncResult.get())
+		return results
+
 
 	def WaitAll(self):
 		if ConfigClient.LOCAL_WORK:

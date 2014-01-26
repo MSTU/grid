@@ -40,6 +40,7 @@ INSTALLED_APPS = (
 	'django.contrib.admin',
 	'grid',
 	'grid_frontend',
+	'django_extensions',
 )
 
 MIDDLEWARE_CLASSES = (

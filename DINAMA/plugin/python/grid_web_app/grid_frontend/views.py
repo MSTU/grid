@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 from django.db import models
 from django.http import Http404, HttpResponse
 from django.template.response import TemplateResponse
@@ -7,13 +8,19 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import redirect
+import itertools
+from grid_frontend import Util
 
-import subprocess
-import os
-import datetime
+from grid_frontend.models import Job, MathModel, Loadcase, Task
+
+from grid.loadcases.PythonLoadcase import PythonLoadcase
+from grid.loadcases.ModelicaLoadcase import ModelicaLoadcase
+from grid.solvers.PythonSolver import PythonSolver
+from grid.solvers.ModelicaSolver import ModelicaSolver
+from grid.ModelGrid import ModelGrid
+
 import json
-from grid import ModelGrid
-from grid_frontend.models import Jobs, MathModels, LoadCases
+
 
 
 @login_required
@@ -93,7 +100,7 @@ def logout(request):
 def jobs_list(request):
 	all_jobs, errors, data, num_jobs = {}, {}, {}, {}
 	#num_paginator = Jobs.objects.filter(user=request.user).count()
-	all_jobs = Jobs.objects.filter(user=request.user).order_by("-date")
+	all_jobs = Job.objects.filter(user=request.user).order_by("-date")
 
 	paginator = Paginator(all_jobs, 8)
 	page = request.GET.get('page')
@@ -115,14 +122,14 @@ def search_job(request):
 	else:
 		data, errors,  = {}, {}
 		query = request.POST.get('search_q', 0)
-		data = Jobs.objects.filter(user=request.user,name__icontains=query).order_by("-date")
+		data = Job.objects.filter(user=request.user,name__icontains=query).order_by("-date")
 		return TemplateResponse(request, 'search_jobs.html', {'errors': errors, 'data': data, 'query': query})
 
 @login_required
 def delete_job(request, job_id):
 	try:
-		job = Jobs.objects.get(user=request.user, pk=job_id)
-	except Jobs.DoesNotExist:
+		job = Job.objects.get(user=request.user, pk=job_id)
+	except Job.DoesNotExist:
 		raise Http404
 	job.delete()
 	return redirect('/jobs/')
@@ -132,39 +139,107 @@ def create_job(request):
 	if request.method == 'GET':
 		return TemplateResponse(request, 'create_job.html')
 	response_data = {'status': 'fail'}
-	name = request.POST.get('job_name', 0)
-	#if not name:
-	#    return HttpResponse(json.dumps(response_data), content_type="application/json")
+	name = request.POST.get('job_name', "")
+	input_parameters = request.POST.get('input_parameters', "")
+	loadcases_names = request.POST.get('loadcases').split(',')
 
-	#model = MathModel(name=request.POST.)
-
-	job = Jobs(name=name, user=request.user, description=request.POST.get('description', 0))
+	job = Job(name=name, user=request.user, input_params=input_parameters, description=request.POST.get('job_description', ""))
 	if job:
 		response_data['status'] = 'ok'
 		job.save()
+	for lc_name in loadcases_names:
+		job.loadcases.add(Loadcase.objects.get(name=lc_name))
 	return redirect('/jobs/')
+
+@login_required
+def create_loadcase(request):
+	response_data = {'status': 'fail'}
+
+	name = request.POST.get('loadcase_name', "")
+	description = request.POST.get('loadcase_description', "")
+	model = request.POST.get('model', "")
+
+	mathmodel = MathModel.objects.get(name=model)
+	loadcase = Loadcase(name=name, description=description)
+	loadcase.mathmodel = mathmodel
+	if loadcase:
+		response_data['status'] = 'ok'
+		loadcase.save()
+	return redirect('/create_job/')
+
+@login_required
+def create_model(request):
+	response_data = {'status': 'fail'}
+	model_type = request.POST.get('model_type', None)
+	model = request.POST.get('model', "")
+
+	mathmodel = MathModel(name=model, type=model_type)
+	if mathmodel:
+		response_data['status'] = 'ok'
+		mathmodel.save()
+	return redirect('/create_job/')
 
 @login_required
 def edit_job(request, job_id):
 	data = {}
 	try:
-		data['job'] = Jobs.objects.get(user=request.user, pk=job_id)
-	except Jobs.DoesNotExist:
+		data['job'] = Job.objects.get(user=request.user, pk=job_id)
+	except Job.DoesNotExist:
 		raise Http404
 	if request.method == 'GET':
 		return TemplateResponse(request, 'editjob.html', {'data': data})
 	else:
-		Jobs.objects.filter(id=job_id).update(
+		Job.objects.filter(id=job_id).update(
 			name=request.POST.get('new_name',0),
 			descr=request.POST.get('new_descr',0))
 		return redirect('/jobs/')
 
 @login_required
+def calc_job(request, job_id):
+	job = Job.objects.get(pk=job_id)
+
+	loadcases = []
+	for web_lc in job.loadcases.all():
+		mathmodel = web_lc.mathmodel
+		lc = None
+		if mathmodel.type == PythonSolver.name:
+			pass
+		elif mathmodel.type == ModelicaSolver.name:
+			lc = ModelicaLoadcase(mathmodel.name)
+		loadcases.append(lc)
+
+	mg = ModelGrid()
+	mg.SetLoadcases(loadcases)
+
+	input_parameters_string = job.input_params.split('|') # list of input parameters in string
+	params_list = []
+	for item in input_parameters_string:
+		params_list.append(parse_input_params(item))
+
+	task_ids = mg.Calculate(params_list)
+
+	for task_id, param in zip(task_ids, params_list):
+		task = Task(task_id=task_id, input_params=param, job=job)
+		print task_id
+		print param
+		task.save()
+
+	return redirect('/jobs/')
+
+
+@login_required
 def get_job(request, job_id):
 	data, errors = {}, {}
 	try:
-		job = Jobs.objects.get(user=request.user, pk=job_id)
-	except Jobs.DoesNotExist:
+		job = Job.objects.get(user=request.user, pk=job_id)
+	except Job.DoesNotExist:
 		raise Http404
 	data['job'] = job
 	return TemplateResponse(request, 'job.html', {'errors': errors, 'data': data})
+
+def convert_web_loadcase_to_grid_loadcase(web_lc):
+	pass
+
+def parse_input_params(param):
+	parameter = json.loads(param, object_hook=Util.decode_dict)
+	return parameter

@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class MathModels(models.Model):
+class MathModel(models.Model):
 	name = models.CharField(max_length=255)
 	description = models.TextField()
 	type = models.TextField()
@@ -9,18 +9,29 @@ class MathModels(models.Model):
 	def __unicode__(self):
 		return self.name
 
-class LoadCases(models.Model):
+class Loadcase(models.Model):
 	name = models.CharField(max_length=255)
 	description = models.TextField()
-	mathmodel = models.ForeignKey(MathModels)
+	mathmodel = models.ForeignKey(MathModel)
 	def __unicode__(self):
 		return self.name
 
-class Jobs(models.Model):
+class Job(models.Model):
 	user = models.ForeignKey(User)
 	name = models.CharField(max_length=255)
 	date = models.DateTimeField(auto_now_add=True, blank=True)
 	status = models.FloatField(default=0.0)
 	description = models.TextField()
+	loadcases = models.ManyToManyField(Loadcase)
+	input_params = models.TextField()
+	result_params = models.TextField()
+	def __unicode__(self):
+		return self.name
+
+class Task(models.Model):
+	job = models.ForeignKey(Job)
+	task_id = models.TextField()
+	input_params = models.TextField()
+	result = models.TextField()
 	def __unicode__(self):
 		return self.name

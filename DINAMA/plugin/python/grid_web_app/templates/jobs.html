@@ -38,10 +38,13 @@
                         <td class="span4">{{ item.status }}</td>
                         <td class="span1">
                             <div class="btn-group mini-btn">
-                                <button  class="btn btn-small "  onclick="document.location.href = '/recalc_job/{{item.id}}/';" >
-                                    Пересчитать
+                                <button  class="btn btn-small "  onclick="document.location.href = '/calc_job/{{item.id}}/';" >
+                                    Рассчитать
                                 </button>
-                                <button class="btn btn-small " type="button" onclick='delJob({{item.id}},function(){ return "{{ item.name|escapejs }}"; } )'>
+                                <button  class="btn btn-small "  onclick="document.location.href = '/edit_job/{{item.id}}/';" >
+                                    Изменить
+                                </button>
+                                <button class="btn btn-small " type="button" onclick='delJob({{item.id}},function(){ return "{{ item.name}}"; } )'>
                                     Удалить
                                 </button>
                             </div>
@@ -59,7 +62,7 @@
                         <h3 id="editingJobLabel">Изменить</h3>
                     </div>
                     <div class="modal-body">
-                        <form action="/ajax/" method="POST" id="edit_job" name="cpdata" class="navbar-form pull-left">{% csrf_token %}
+                        <form action="/ajax/" method="POST" id="edit_job" name="edit_data" class="navbar-form pull-left">{% csrf_token %}
                             <p>
                             <h4>Название задачи:&nbsp;&nbsp;&nbsp;&nbsp;
                                 <input type="text" id="edit_job" class="span3"

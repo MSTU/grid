@@ -4,25 +4,89 @@
 
     <div class="row">
         <div class="span8 offset1 ">
-            <form action="/create_job/" method="POST" id="create_job" name="npdata" class="navbar-form offset1">{% csrf_token %}
-                <p>
-                <h4>Название проекта:</h4>
-                <input type="text" id="addjob" name="job_name" class="span3"  placeholder="Job name" >
-                </p>
+            <form action="/create_job/" method="POST" id="create_job" name="project_data" class="navbar-form offset1">{% csrf_token %}
+                <div>
+                    <h4>Название задачи:</h4>
+                    <input type="text" id="job_name_id" name="job_name" class="span3"  placeholder="Job name" >
+                </div>
 
                 <div>
                     <h4>Описание:</h4>
-                    <textarea rows="3" class="span3" name="description" placeholder="What's this job about?"></textarea>
+                    <textarea rows="3" class="span3" name="job_description" placeholder="What's this job about?"></textarea>
                 </div>
 
-                <p>
-                <h4>Расчетный случай:</h4>
-                <input type="text" name="loadcase" class="span3"  placeholder="Loadcase">
-                </p>
+                <div>
+                    <h4>Расчетные случаи:</h4>
+                    <textarea rows="3" class="span3" id="loadcases_id" name="loadcases" placeholder="Loadcases"></textarea>
+                </div>
 
+                <div>
+                    <h4>Входные параметры:</h4>
+                    <textarea rows="3" class="span3" name="input_parameters" placeholder="Input Parameters"></textarea>
+                </div>
+
+                <div>
+                    <a href="#addingLoadcase" role="button" class="btn" data-toggle="modal">Создать расчетный случай</a>
+                    <a href="#addingModel" role="button" class="btn" data-toggle="modal">Создать модель</a>
+                </div>
+
+                <div>
+                    <button type="submit"  class="btn btn-primary center" onclick="checkJobNameAndRedirect('job_name_id')" >Создать задачу</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Create Loadcase BEGIN -->
+
+    <div id="addingLoadcase" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addingLoadcaseLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="addingLoadcaseLabel">Новый расчетный случай</h3>
+        </div>
+        <div class="modal-body">
+            <form action="/ajax/" method="POST" id="create_loadcase" name="loadcase_data" class="navbar-form offset1">{% csrf_token %}
+                <div>
+                    <h4>Название расчетного случая:</h4>
+                    <input type="text" id="add_loadcase" name="loadcase_name" class="span3"  placeholder="Loadcase Name"  onKeyPress="return OnEnterButton(event,this.id)" >
+                </div>
+
+                <div>
+                    <h4>Описание:</h4>
+                    <textarea rows="3" class="span3" name="loadcase_description" placeholder="What's this loadcase about?"></textarea>
+                </div>
+
+                <div>
+                    <h4>Модель:</h4>
+                    <input type="text" id="model_id" name="model" class="span3"  placeholder="MathModel">
+                </div>
+
+                <div>
+                    <button id="crt_button"  type="button"  class="btn btn-primary pull-right" onclick="loadcaseSubmit('add_loadcase')" >Создать</button>
+                </div>
+
+            </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Закрыть</button>
+            <!--<button class="btn" aria-hidden="true">Create</button>-->
+        </div>
+    </div>
+
+    <!-- Create Loadcase END -->
+
+    <!-- Create MathModel BEGIN-->
+
+    <div id="addingModel" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addingModelLabel" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="addingModelLabel">Новая модель</h3>
+        </div>
+        <div class="modal-body">
+            <form action="/ajax/" method="POST" id="create_model" name="model_data" class="navbar-form offset1">{% csrf_token %}
                 <p>
                 <h4>Тип модели:</h4>
-                <input type="text" name="model_type" class="span3"  placeholder="Model type">
+                <input id="add_model" type="text" name="model_type" class="span3"  placeholder="Model type">
                 </p>
 
                 <p>
@@ -30,16 +94,22 @@
                 <input type="text" name="model" class="span3"  placeholder="Model">
                 </p>
 
-                <p>
-                <h4>Входные параметры:</h4>
-                <textarea rows="3" class="span3" name="description" placeholder="Input Parameters"></textarea>
-                </p>
+                <div>
+                    <bЭutton type="button"  class="btn pull-left" >Загрузить модель</button>
+                </div>
 
                 <div>
-                    <button type="button"  class="btn btn-primary center" onclick="checkJobNameAndRedirect('addjob')" >Создать</button>
+                    <button type="button"  class="btn btn-primary pull-right" onclick="modelSubmit('add_model')" >Создать</button>
                 </div>
+
             </form>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Закрыть</button>
         </div>
     </div>
 
+    <!-- Create MathModel END -->
+
 {%  endblock %}
+
