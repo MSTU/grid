@@ -127,14 +127,21 @@ TEMPLATE_LOADERS = (
 	#     'django.template.loaders.eggs.Loader',
 )
 
-ROOT_URLCONF = 'grid_web_app.urls'
-
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'grid_web_app.wsgi.application'
-
 TEMPLATE_DIRS = (
 	"/home/lapshin/work/grid/DINAMA/plugin/python/grid_web_app/templates"
 	# Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
 	# Always use forward slashes, even on Windows.
 	# Don't forget to use absolute paths, not relative paths.
 )
+
+from datetime import timedelta
+
+BROKER_URL = 'amqp://guest@localhost//'
+CELERY_RESULT_BACKEND = 'amqp'
+
+CELERYBEAT_SCHEDULE = {
+	'every-15-seconds': {
+	'task': 'periodic_tasks.check_results',
+	'schedule': timedelta(seconds=15),
+	},
+}
