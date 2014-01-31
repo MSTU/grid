@@ -20,9 +20,9 @@ from Task import Task
 from celery.result import AsyncResult
 
 if ConfigClient.LOCAL_WORK:
-	from LocalWorker import RunTask
+	from grid.LocalWorker import RunTask
 else:
-	from Worker import RunTask
+	from grid.Worker import RunTask
 
 class ModelGrid:
 	def __init__(self, config=None):

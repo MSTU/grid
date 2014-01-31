@@ -25,6 +25,7 @@ class Job(models.Model):
 	loadcases = models.ManyToManyField(Loadcase)
 	input_params = models.TextField()
 	result_params = models.TextField()
+	is_finished = models.BooleanField(default=False)
 	def __unicode__(self):
 		return self.name
 
@@ -33,5 +34,6 @@ class Task(models.Model):
 	task_id = models.TextField()
 	input_params = models.TextField()
 	result = models.TextField()
+	is_finished = models.BooleanField(default=False)
 	def __unicode__(self):
 		return self.name

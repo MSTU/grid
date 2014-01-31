@@ -142,6 +142,8 @@ CELERY_RESULT_BACKEND = 'amqp'
 CELERYBEAT_SCHEDULE = {
 	'every-15-seconds': {
 	'task': 'periodic_tasks.check_results',
-	'schedule': timedelta(seconds=15),
+	'schedule': timedelta(seconds=5),
 	},
 }
+
+CELERY_ROUTES = {'periodic_tasks.check_results': {'queue': 'periodic_queue'}}
