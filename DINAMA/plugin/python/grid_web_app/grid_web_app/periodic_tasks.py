@@ -52,4 +52,3 @@ def check_results():
 			job.is_finished = is_finished
 			job.save()
 			print "Job " + job.name + " is finished"
-	print "finished"

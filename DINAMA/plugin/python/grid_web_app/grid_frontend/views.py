@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
+import json
+
 from django.db import models
 from django.http import Http404, HttpResponse
 from django.template.response import TemplateResponse
@@ -8,19 +10,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import redirect
-import itertools
+
 from grid_frontend import Util
 
 from grid_frontend.models import Job, MathModel, Loadcase, Task
 
-from grid.loadcases.PythonLoadcase import PythonLoadcase
-from grid.loadcases.ModelicaLoadcase import ModelicaLoadcase
-from grid.solvers.PythonSolver import PythonSolver
-from grid.solvers.ModelicaSolver import ModelicaSolver
-from grid.ModelGrid import ModelGrid
-
-import json
-
+from multigrid.loadcases.PythonLoadcase import PythonLoadcase
+from multigrid.loadcases.ModelicaLoadcase import ModelicaLoadcase
+from multigrid.solvers.PythonSolver import PythonSolver
+from multigrid.solvers.ModelicaSolver import ModelicaSolver
+from multigrid.ModelGrid import ModelGrid
 
 
 @login_required
@@ -196,6 +195,7 @@ def edit_job(request, job_id):
 
 @login_required
 def calc_job(request, job_id):
+
 	job = Job.objects.get(pk=job_id)
 
 	loadcases = []
@@ -209,14 +209,15 @@ def calc_job(request, job_id):
 		loadcases.append(lc)
 
 	mg = ModelGrid()
-	mg.SetLoadcases(loadcases)
+	mg.reinit()
+	mg.set_loadcases(loadcases)
 
 	input_parameters_string = job.input_params.split('|') # list of input parameters in string
 	params_list = []
 	for item in input_parameters_string:
 		params_list.append(parse_input_params(item))
 
-	task_ids = mg.Calculate(params_list)
+	task_ids = mg.calculate(params_list)
 
 	for task_id, param in zip(task_ids, params_list):
 		task = Task(task_id=task_id, input_params=param, job=job)

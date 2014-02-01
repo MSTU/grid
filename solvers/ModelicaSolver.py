@@ -36,7 +36,7 @@ class ModelicaSolver(Launcher.Launcher):
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file strings
-	def LoadData(self, lc):
+	def load_data(self, lc):
 		files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
 		with open(lc.Scheme, 'r') as f:
 			mos = f.readlines()
@@ -63,7 +63,7 @@ class ModelicaSolver(Launcher.Launcher):
 	# запуск расчета схемы и инициализация ее параметрами
 	# scheme - путь к файлу задачи (mos, mo, py, sch)
 	# словарь параметров и их значений
-	def Run(self, loadcase, parameters):
+	def run(self, loadcase, parameters):
 		cwd = os.getcwd()
 		#if not os.path.exists(id): os.makedirs(id)
 		#os.chdir(id)
