@@ -233,9 +233,14 @@ def get_job(request, job_id):
 	data, errors = {}, {}
 	try:
 		job = Job.objects.get(user=request.user, pk=job_id)
+		loadcases = job.loadcases.all()
+		lc_names = [lc.name for lc in loadcases]
+		#lc_names = Util.decode_dict(lc_names)
+		result = ', '.join([x for x in lc_names])
 	except Job.DoesNotExist:
 		raise Http404
 	data['job'] = job
+	data['loadcases'] = result
 	return TemplateResponse(request, 'job.html', {'errors': errors, 'data': data})
 
 def convert_web_loadcase_to_grid_loadcase(web_lc):

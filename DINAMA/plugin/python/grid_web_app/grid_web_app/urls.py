@@ -12,6 +12,7 @@ urlpatterns = patterns('',
 
 					# Projects
 					url(r'^jobs/$', 'grid_frontend.views.jobs_list'),
+					url(r'^job/(?P<job_id>\d+)/$', 'grid_frontend.views.get_job'),
 					url(r'^create_job/$', 'grid_frontend.views.create_job'),
 					url(r'^ajax/add_loadcase/$', 'grid_frontend.views.create_loadcase'),
 					url(r'^ajax/add_model/$', 'grid_frontend.views.create_model'),

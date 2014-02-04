@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2>Задача {{ data.job.name }}</h2>
+    <div class="job-entities">
+        <ul class="nav nav-tabs" id="entTab">
+            <li class="active"><a data-toggle="tab" href="#info">Описание</a></li>
+            <li class=""><a data-toggle="tab" href="#tasks">Подзадачи</a></li>
+        </ul>
+        <div class="tab-content" id="entTabContent">
+            <div id="info" class="tab-pane fade active in">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Дата создания</th>
+                        <th>Статус</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% comment %} {% for calculation in data.calculations %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="/calculation/{{ calculation.id }}/">{{ calculation.name }}</a></td>
+                            <td>{{ calculation.date }}</td>
+                        </tr>
+                    {% endfor %} {% endcomment %}
+                    <tr>
+                        <td class="span4">{{ data.job.name }}</td>
+                        <td class="span4">{{ data.job.date }}</td>
+                        <td class="span4">{{ data.job.status }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <h4>Описание:</h4>
+                    {{ data.job.description }}
+                </div>
+
+                <div>
+                    <h4>Расчетные случаи:</h4>
+                    {{ data.loadcases }}
+                </div>
+
+                <div>
+                    <h4>Входные параметры:</h4>
+                    {{ data.job.input_params|linebreaks}}
+                </div>
+            </div>
+
+{% comment %}
+            <div id="tasks" class="tab-pane fade">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for estimation in data.estimations %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><a href="/estimation/{{ estimation.id }}/">{{ estimation.name }}</a></td>
+                            <td>{{ estimation.date }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <a href="/estimation/create/{{ data.project.id }}/" class="btn btn-primary">Создать оценку</a>
+            </div>
+            {% endcomment %}
+        </div>
+    </div>
+
+{% endblock %}
