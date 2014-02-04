@@ -11,11 +11,10 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import redirect
 
-from grid_frontend import Util
+from grid_frontend import util
 
 from grid_frontend.models import Job, MathModel, Loadcase, Task
 
-from multigrid.loadcases.PythonLoadcase import PythonLoadcase
 from multigrid.loadcases.ModelicaLoadcase import ModelicaLoadcase
 from multigrid.solvers.PythonSolver import PythonSolver
 from multigrid.solvers.ModelicaSolver import ModelicaSolver
@@ -25,6 +24,7 @@ from multigrid.ModelGrid import ModelGrid
 @login_required
 def get_main(request):
 	return redirect('/jobs/')
+
 
 def register(request):
 	if request.method == 'GET':
@@ -61,6 +61,7 @@ def register(request):
 	else:
 		return HttpResponse("<html><body>Everything is BAD</body></html>")
 
+
 def login(request):
 	if request.method == 'GET':
 		return TemplateResponse(request, 'login.html')
@@ -91,9 +92,11 @@ def login(request):
 	else:
 		return redirect('/jobs/')
 
+
 def logout(request):
 	auth_logout(request)
 	return TemplateResponse(request, "logout.html")
+
 
 @login_required
 def jobs_list(request):
@@ -112,17 +115,19 @@ def jobs_list(request):
 		data = paginator.page(paginator.num_pages)
 
 	return TemplateResponse(request, 'jobs.html',
-							{'errors': errors, 'data': data, 'num_pages': xrange(1,paginator.num_pages+1)})
+							{'errors': errors, 'data': data, 'num_pages': xrange(1, paginator.num_pages + 1)})
+
 
 @login_required
 def search_job(request):
 	if request.method == 'GET':
 		return redirect('/jobs/')
 	else:
-		data, errors,  = {}, {}
+		data, errors, = {}, {}
 		query = request.POST.get('search_q', 0)
-		data = Job.objects.filter(user=request.user,name__icontains=query).order_by("-date")
+		data = Job.objects.filter(user=request.user, name__icontains=query).order_by("-date")
 		return TemplateResponse(request, 'search_jobs.html', {'errors': errors, 'data': data, 'query': query})
+
 
 @login_required
 def delete_job(request, job_id):
@@ -133,6 +138,7 @@ def delete_job(request, job_id):
 	job.delete()
 	return redirect('/jobs/')
 
+
 @login_required
 def create_job(request):
 	if request.method == 'GET':
@@ -142,13 +148,15 @@ def create_job(request):
 	input_parameters = request.POST.get('input_parameters', "")
 	loadcases_names = request.POST.get('loadcases').split(',')
 
-	job = Job(name=name, user=request.user, input_params=input_parameters, description=request.POST.get('job_description', ""))
+	job = Job(name=name, user=request.user, input_params=input_parameters,
+			  description=request.POST.get('job_description', ""))
 	if job:
 		response_data['status'] = 'ok'
 		job.save()
 	for lc_name in loadcases_names:
 		job.loadcases.add(Loadcase.objects.get(name=lc_name))
 	return redirect('/jobs/')
+
 
 @login_required
 def create_loadcase(request):
@@ -166,6 +174,7 @@ def create_loadcase(request):
 		loadcase.save()
 	return redirect('/create_job/')
 
+
 @login_required
 def create_model(request):
 	response_data = {'status': 'fail'}
@@ -178,24 +187,28 @@ def create_model(request):
 		mathmodel.save()
 	return redirect('/create_job/')
 
+
 @login_required
 def edit_job(request, job_id):
-	data = {}
 	try:
-		data['job'] = Job.objects.get(user=request.user, pk=job_id)
+		job = Job.objects.get(user=request.user, pk=job_id)
 	except Job.DoesNotExist:
 		raise Http404
 	if request.method == 'GET':
-		return TemplateResponse(request, 'editjob.html', {'data': data})
+		data = {}
+		data['job'] = job
+		return TemplateResponse(request, 'edit_job.html', {'data': data})
 	else:
-		Job.objects.filter(id=job_id).update(
-			name=request.POST.get('new_name',0),
-			descr=request.POST.get('new_descr',0))
+		job.name = request.POST.get('job_name', "")
+		job.description = request.POST.get('job_description', "")
+		job.input_params = request.POST.get('input_params', "")
+		job.status = 0.0
+		job.save()
 		return redirect('/jobs/')
+
 
 @login_required
 def calc_job(request, job_id):
-
 	job = Job.objects.get(pk=job_id)
 
 	loadcases = []
@@ -235,7 +248,7 @@ def get_job(request, job_id):
 		job = Job.objects.get(user=request.user, pk=job_id)
 		loadcases = job.loadcases.all()
 		lc_names = [lc.name for lc in loadcases]
-		#lc_names = Util.decode_dict(lc_names)
+		#lc_names = util.decode_dict(lc_names)
 		result = ', '.join([x for x in lc_names])
 	except Job.DoesNotExist:
 		raise Http404
@@ -243,9 +256,11 @@ def get_job(request, job_id):
 	data['loadcases'] = result
 	return TemplateResponse(request, 'job.html', {'errors': errors, 'data': data})
 
+
 def convert_web_loadcase_to_grid_loadcase(web_lc):
 	pass
 
+
 def parse_input_params(param):
-	parameter = json.loads(param, object_hook=Util.decode_dict)
+	parameter = json.loads(param, object_hook=util.decode_dict)
 	return parameter
