@@ -210,6 +210,8 @@ def edit_job(request, job_id):
 @login_required
 def calc_job(request, job_id):
 	job = Job.objects.get(pk=job_id)
+	job.status = 0.0
+	job.save()
 
 	loadcases = []
 	for web_lc in job.loadcases.all():
@@ -234,8 +236,6 @@ def calc_job(request, job_id):
 
 	for task_id, param in zip(task_ids, params_list):
 		task = Task(task_id=task_id, input_params=param, job=job)
-		print task_id
-		print param
 		task.save()
 
 	return redirect('/jobs/')

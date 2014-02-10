@@ -41,6 +41,7 @@ INSTALLED_APPS = (
 	'multigrid',
 	'grid_frontend',
 	'django_extensions',
+	'south',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -25,6 +25,11 @@ import solvers.MechanicalSolver as MechanicalSolver
 BACKEND = 'amqp'
 BROKER = 'amqp://guest@localhost//'
 
+USERNAME = ""
+PASSWORD = ""
+CLIENT_NAME = ""
+SHARE_DIR = 'share'
+
 class ConfigHost:
 
 	def __init__(self):

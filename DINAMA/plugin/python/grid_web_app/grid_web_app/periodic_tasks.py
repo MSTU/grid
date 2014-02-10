@@ -22,33 +22,37 @@ from grid_frontend.models import Job, Task
 @app.task
 def check_results():
 	# Get all unfinished tasks
-	unfinished_tasks = Task.objects.filter(is_finished=False)
+	all_job_tasks = Task.objects.filter(is_finished=False)
 	# Get results if it's ready
-	for task in unfinished_tasks:
-		print task.task_id
+	for task in all_job_tasks:
 		async_result = AsyncResult(task.task_id)
-		print async_result.ready()
 		if async_result.ready():
-			task.result = async_result.get().result_params
+			#task.result = async_result.get().result_params
 			task.is_finished = True
 			task.save()
 			print "Task " + task.task_id + " finished"
 
 	# Check if Job finished
-	for job in Job.objects.filter(is_finished=False):
-		unfinished_tasks = job.task_set.all()
+	for job in Job.objects.filter(status__lt=1.0):
+		all_job_tasks = job.task_set.all()
+		finished_tasks_count = 0
 		# Job can be finished if it had at least on Task
-		if unfinished_tasks.exists():
+		# Count finished tasks rate
+		if all_job_tasks.count():
 			is_finished = True
 		else:
 			is_finished = False
-		for task in unfinished_tasks:
+		for task in all_job_tasks:
 			if task.is_finished:
 				is_finished &= True
+				finished_tasks_count += 1
 			else:
 				is_finished &= False
 
+		job.status = float(finished_tasks_count)/all_job_tasks.count() if all_job_tasks.count() > 0.0 else 0.0
+
 		if is_finished:
-			job.is_finished = is_finished
-			job.save()
+			job.status = 1.0
 			print "Job " + job.name + " is finished"
+
+		job.save()
