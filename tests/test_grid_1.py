@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,23 +13,35 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from celery import Celery
-from multigrid.conf.ConfigHost import ConfigHost
-from conf import celeryconfig
+from multigrid.loadcases.PythonLoadcase import PythonLoadcase
+import multigrid.ModelGrid as ModelGrid
 
-celery = Celery('Worker', include=['Task', 'Loadcase', 'cloudpickle'])
-# Лучше бы использовать этот способ конфигурации. Но на Windows 7 64bit он не работает
-celery.config_from_object(celeryconfig)
+def func_2(x):
+	return x**2
 
-@celery.task(name='grid.Worker.run_task')
-def run_task(task):
-	config = ConfigHost()
-	for lc in task.loadcases:
-		solver = config.solvers[lc.solver]
-		solver.init()
-		task.result_params[lc.name] = solver.run(lc, task.input_params)
-	task.recalc_status()
 
-	#print "Parameters = " + str(task.input_params)
-	#print "Results = " + str(task.result_params)
-	return task
+def func_1(input_params):
+	return func_2(input_params['x'])
+
+
+def test_1():
+	lc = PythonLoadcase(func_1)
+
+	mg = ModelGrid.ModelGrid()
+	mg.reinit()
+	mg.set_loadcases([lc])
+
+	input_list = []
+	for i in xrange(20):
+		par = dict()
+		par['x'] = i
+		input_list.append(par)
+	mg.calculate(input_list)
+
+	result_list = mg.wait_all()
+
+	for (param, result) in zip(input_list, result_list):
+		print "x = " + str(param['x']) + " y = " + str(result[lc.name])
+	mg.reinit()
+
+test_1()

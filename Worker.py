@@ -15,39 +15,23 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from celery import Celery
+from conf.ConfigHost import ConfigHost
+from conf import celeryconfig
 
-from loadcases.ModelicaLoadcase import ModelicaLoadcase
-import ModelGrid
+celery = Celery('Worker', include=['Task', 'Loadcase', 'cloudpickle'])
+# Лучше бы использовать этот способ конфигурации. Но на Windows 7 64bit он не работает
+celery.config_from_object(celeryconfig)
 
-def test_1 ():
+@celery.task(name='grid.Worker.run_task')
+def run_task(task):
+	config = ConfigHost()
+	for lc in task.loadcases:
+		solver = config.solvers[lc.solver]
+		solver.init()
+		task.result_params[lc.name] = solver.run(lc, task.input_params)
+	task.recalc_status()
 
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
-
-	mg = ModelGrid.ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-
-	input_list = []
-
-	par = dict()
-	par['resistor1.R'] = 5.0
-	par['inductor1.L'] = 0.4
-	par['load.J'] = 2.0
-	input_list.append(par)
-
-	par = dict()
-	par['resistor1.R'] = 2.0
-	par['inductor1.L'] = 1.0
-	par['load.J'] = 0.5
-	input_list.append(par)
-
-	mg.calculate(input_list)
-	result_list = mg.wait_all()
-
-	for i in result_list:
-		print i
-		print '======================================================'
-
-	mg.reinit()
-
-test_1()
+	#print "Parameters = " + str(task.input_params)
+	#print "Results = " + str(task.result_params)
+	return task

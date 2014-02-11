@@ -257,10 +257,6 @@ def get_job(request, job_id):
 	return TemplateResponse(request, 'job.html', {'errors': errors, 'data': data})
 
 
-def convert_web_loadcase_to_grid_loadcase(web_lc):
-	pass
-
-
 def parse_input_params(param):
 	parameter = json.loads(param, object_hook=util.decode_dict)
 	return parameter

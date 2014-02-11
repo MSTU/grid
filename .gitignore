@@ -4,14 +4,14 @@
 .idea/
 */.idea/
 
-DINAMA/plugin/python/multigrid/grid_loadcase
-DINAMA/plugin/python/multigrid/lc1
-DINAMA/plugin/python/multigrid/tests/lc1
+grid_loadcase
+lc1
+tests/lc1
 DINAMA/plugin/python/multigrid/mos
-DINAMA/plugin/python/multigrid/tests/mos
+tests/mos
 DINAMA/plugin/python/grid_web_app/mos
 
-multigrid.iml
-DINAMA/plugin/python/grid_web_app/grid_web_app.iml
+multigrid/multigrid.iml
+grid_web_app/grid_web_app.iml
 
 celerybeat-schedule
