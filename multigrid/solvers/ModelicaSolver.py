@@ -24,6 +24,7 @@ import hashlib # для чтения хэша файла
 
 import Constants
 import Launcher
+import debug
 
 
 class ModelicaSolver(Launcher.Launcher):
@@ -31,6 +32,7 @@ class ModelicaSolver(Launcher.Launcher):
 
 	def __init__(self):
 		self.MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
+		self.logger = debug.logger
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
@@ -48,16 +50,15 @@ class ModelicaSolver(Launcher.Launcher):
 	def compile(self, MOS_filename):
 		if sys.platform.startswith('win'):
 			command = '%OPENMODELICAHOME%/bin/omc.exe ' + MOS_filename
-			print 'compiling...'
+			self.logger.info("Begin compiling")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			print 'compiled'
+			self.logger.info("End compiling")
 		elif sys.platform.startswith('linux'):
-			print 'compiling...'
-			print MOS_filename
+			self.logger.info("Begin compiling")
 			subprocess.call(["omc", MOS_filename])
-			print 'compiled'
+			self.logger.info("End compiling")
 		else:
-			print 'can not determine your platform'
+			self.logger.info("Can't determine platform")
 			return Constants.ERROR_STATUS
 
 	def run(self, loadcase, input_params):
@@ -107,9 +108,9 @@ class ModelicaSolver(Launcher.Launcher):
 			else:
 				self.compile(self.MOS_filename) # получение exe-файла по mos-файлу
 			command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
-			print 'executing'
+			self.logger.info("Begin executing")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			print 'executed'
+			self.logger.info("End executing")
 
 		elif sys.platform.startswith('linux'):
 			if (os.path.isfile(class_name)):
@@ -117,12 +118,12 @@ class ModelicaSolver(Launcher.Launcher):
 			else:
 				self.compile(self.MOS_filename) # получение exe-файла по mos-файлу
 			command = ['-overrideFile'] + [PAR_filename] + ['-r'] + [RES_filename]
-			print 'executing'
+			self.logger.info("Begin executing")
 			subprocess.call(["./" + class_name] + command)
-			print 'executed'
+			self.logger.info("End executing")
 
 		else:
-			print 'can not determine your platform'
+			self.logger.info("Can't determine platform")
 			return Constants.ERROR_STATUS
 
 		# получение словаря выходных параметров
