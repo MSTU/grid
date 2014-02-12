@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -13,15 +15,14 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Constants
-from Loadcase import Loadcase
-from solvers.PythonSolver import PythonSolver
-import cloudpickle
+import constants
 
-class PythonLoadcase(Loadcase):
+class Loadcase:
 	"""
-	Loadcase for PradisSolver.
+	Base class for calculation case specification. It's environment in which task will calculated
 	"""
-	def __init__(self, scheme, desc=Constants.DEFAULT_LOADCASE):
-		func_dump = cloudpickle.dumps(scheme)
-		Loadcase.__init__(self, func_dump, PythonSolver.name, desc)
+	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE):
+		self.scheme = scheme
+		self.name = desc
+		self.solver = solver
+		self.status = constants.DEFAULT_STATUS

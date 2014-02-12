@@ -22,11 +22,11 @@ import re
 import sys
 import shutil
 
-import Constants
-import Launcher
+import constants
+import launcher
 
 
-class CFXSolver(Launcher.Launcher):
+class CFXSolver(launcher.Launcher):
 	name = "ANSYS_CFX"
 
 	# Loads content of *.def file in special variable inData
@@ -40,7 +40,7 @@ class CFXSolver(Launcher.Launcher):
 	def run(self, loadcase, ma_object):
 		if loadcase.inData is None:
 			print "ERROR: inData contains nothing"
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		cwd = os.getcwd()
 		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
 		os.chdir(loadcase.Name)
@@ -49,7 +49,7 @@ class CFXSolver(Launcher.Launcher):
 			error_log_file = open(error_log_filename, "w")
 		except IOError:
 			print "Can not create \"" + error_log_filename + "\""
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		# loadcase.scheme.rpartition("/")[2] - actual filename
 		# for example
 		# path = /home/user/cfx/file.def
@@ -79,7 +79,7 @@ class CFXSolver(Launcher.Launcher):
 			print 'ANSYS CFX Solver finished'
 		else:
 			print 'ERROR: Ñan not determine your platform'
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		error_log_file.close()
 		if (os.path.getsize(error_log_filename) == 0):
 			error_flag = False
@@ -89,8 +89,8 @@ class CFXSolver(Launcher.Launcher):
 
 		os.chdir(cwd)
 		if (not error_flag):
-			return Constants.SUCCESS_STATUS
-		return Constants.ERROR_STATUS
+			return constants.SUCCESS_STATUS
+		return constants.ERROR_STATUS
 
 	# Creates file from list of strings
 	def CreateFileFromList(self, stringList, filename):

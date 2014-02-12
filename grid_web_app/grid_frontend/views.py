@@ -15,10 +15,10 @@ from grid_frontend import util
 
 from grid_frontend.models import Job, MathModel, Loadcase, Task
 
-from multigrid.loadcases.ModelicaLoadcase import ModelicaLoadcase
-from multigrid.solvers.PythonSolver import PythonSolver
-from multigrid.solvers.ModelicaSolver import ModelicaSolver
-from multigrid.ModelGrid import ModelGrid
+from multigrid.loadcases.modelicaloadcase import ModelicaLoadcase
+from multigrid.solvers.pythonsolver import PythonSolver
+from multigrid.solvers.modelicasolver import ModelicaSolver
+from multigrid.modelgrid import ModelGrid
 
 
 @login_required
@@ -211,6 +211,10 @@ def edit_job(request, job_id):
 def calc_job(request, job_id):
 	job = Job.objects.get(pk=job_id)
 	job.status = 0.0
+	# if job recalculated delete previous calculated results
+	job_tasks = job.task_set.all()
+	for task in job_tasks:
+		task.delete()
 	job.save()
 
 	loadcases = []

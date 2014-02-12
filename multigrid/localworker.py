@@ -1,8 +1,8 @@
-from conf import ConfigHost
+from conf import confighost
 
 
 def run_task(task):
-	config = ConfigHost.ConfigHost()
+	config = confighost.ConfigHost()
 	for lc in task.loadcases:
 		solver = config.solvers[lc.solver]
 		solver.init()

@@ -19,6 +19,10 @@ app.config_from_object(settings)
 # imports from django must be after config Celery
 from grid_frontend.models import Job, Task
 
+import multigrid.debug as debug
+
+logger = debug.logger
+
 @app.task
 def check_results():
 	# Get all unfinished tasks
@@ -30,7 +34,7 @@ def check_results():
 			#task.result = async_result.get().result_params
 			task.is_finished = True
 			task.save()
-			print "Task " + task.task_id + " finished"
+			logger.info("Task " + task.task_id + " finished")
 
 	# Check if Job finished
 	for job in Job.objects.filter(status__lt=1.0):
@@ -53,6 +57,7 @@ def check_results():
 
 		if is_finished:
 			job.status = 1.0
-			print "Job " + job.name + " is finished"
+			logger.info("Job " + job.name + " is finished")
+			print 'sdf'
 
 		job.save()

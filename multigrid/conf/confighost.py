@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -13,35 +15,37 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.PythonLoadcase import PythonLoadcase
-import multigrid.ModelGrid as ModelGrid
+from solvers import pradissolver, modelicasolver, pythonsolver, lsdynasolver, cfxsolver, mechanicalsolver
 
-def func_2(x):
-	return x**2
+BACKEND = 'amqp'
+BROKER = 'amqp://guest@localhost//'
 
+USERNAME = ""
+PASSWORD = ""
+CLIENT_NAME = ""
+SHARE_DIR = 'share'
 
-def func_1(input_params):
-	return func_2(input_params['x'])
+class ConfigHost:
 
+	def __init__(self):
+		self.Solvers()
 
-def test_1():
-	lc = PythonLoadcase(func_1)
+	def Solvers(self):
+		self.solvers = dict()
 
-	mg = ModelGrid.ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc])
+		pradis = pradissolver.PRADISSolver()
+		self.solvers[pradis.name] = pradis
 
-	input_list = []
-	for i in xrange(20):
-		par = dict()
-		par['x'] = i
-		input_list.append(par)
-	mg.calculate(input_list)
+		modelica = modelicasolver.ModelicaSolver()
+		self.solvers[modelica.name] = modelica
 
-	result_list = mg.wait_all()
+		python = pythonsolver.PythonSolver()
+		self.solvers[python.name] = python
 
-	for (param, result) in zip(input_list, result_list):
-		print "x = " + str(param['x']) + " y = " + str(result[lc.name])
-	mg.reinit()
+		ANSYS_LSDYNA = lsdynasolver.LSDYNASolver()
+		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
 
-test_1()
+		ANSYS_CFX = cfxsolver.CFXSolver()
+		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
+		ANSYS_Mechanical = mechanicalsolver.MechanicalSolver()
+		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical

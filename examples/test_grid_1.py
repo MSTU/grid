@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,39 +13,35 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from multigrid.loadcases.pythonloadcase import PythonLoadcase
+import multigrid.modelgrid as ModelGrid
 
-from multigrid.loadcases.ModelicaLoadcase import ModelicaLoadcase
-import multigrid.ModelGrid as ModelGrid
+def func_2(x):
+	return x**2
 
-def test_1 ():
 
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
+def func_1(input_params):
+	return func_2(input_params['x'])
+
+
+def test_1():
+	lc = PythonLoadcase(func_1)
 
 	mg = ModelGrid.ModelGrid()
 	mg.reinit()
-	mg.set_loadcases([lc1])
+	mg.set_loadcases([lc])
 
 	input_list = []
-
-	par = dict()
-	par['resistor1.R'] = 5.0
-	par['inductor1.L'] = 0.4
-	par['load.J'] = 2.0
-	input_list.append(par)
-
-	par = dict()
-	par['resistor1.R'] = 2.0
-	par['inductor1.L'] = 1.0
-	par['load.J'] = 0.5
-	input_list.append(par)
-
+	for i in xrange(20):
+		par = dict()
+		par['x'] = i
+		input_list.append(par)
 	mg.calculate(input_list)
+
 	result_list = mg.wait_all()
 
-	for i in result_list:
-		print i
-		print '======================================================'
-
+	for (param, result) in zip(input_list, result_list):
+		print "x = " + str(param['x']) + " y = " + str(result[lc.name])
 	mg.reinit()
 
 test_1()

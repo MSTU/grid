@@ -1,4 +1,5 @@
 # -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -14,23 +15,39 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import pickle
-import Constants
-from Launcher import Launcher
 
+from multigrid.loadcases.modelicaloadcase import ModelicaLoadcase
+import multigrid.modelgrid as ModelGrid
 
-class PythonSolver(Launcher):
-	name = "Python"
+def test_1 ():
 
-	def run(self, lc, input_params):
-		result = None
-		try:
-			func = pickle.loads(lc.scheme)
-			result = func(input_params)
+	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
 
-			status = Constants.SUCCESS_STATUS
-		except:
-			status = Constants.ERROR_STATUS
+	mg = ModelGrid.ModelGrid()
+	mg.reinit()
+	mg.set_loadcases([lc1])
 
-		lc.status = status
-		return result
+	input_list = []
+
+	par = dict()
+	par['resistor1.R'] = 5.0
+	par['inductor1.L'] = 0.4
+	par['load.J'] = 2.0
+	input_list.append(par)
+
+	par = dict()
+	par['resistor1.R'] = 2.0
+	par['inductor1.L'] = 1.0
+	par['load.J'] = 0.5
+	input_list.append(par)
+
+	mg.calculate(input_list)
+	result_list = mg.wait_all()
+
+	for i in result_list:
+		print i
+		print '======================================================'
+
+	mg.reinit()
+
+test_1()

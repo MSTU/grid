@@ -21,15 +21,15 @@ import os
 import re
 import sys
 
-import Constants
-import Launcher
+import constants
+import launcher
 
 
-class LSDYNASolver(Launcher.Launcher):
+class LSDYNASolver(launcher.Launcher):
 	name = "ANSYS_LS-DYNA"
 	# object initialization
 	def __init__(self):
-		Launcher.Launcher.__init__(self)
+		launcher.Launcher.__init__(self)
 		self.exec_options = ["G", "D", "F", "T", "A", "M", "S", "Z",
 		                     "L", "B", "W", "E", "X", "C", "K", "V",
 		                     "Y", "BEM", "MEMORY", "NCPU",
@@ -51,7 +51,7 @@ class LSDYNASolver(Launcher.Launcher):
 		if loadcase.inData is None:
 			print "ERROR"
 			print "inData contains nothing"
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		cwd = os.getcwd()
 		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
 		os.chdir(loadcase.Name)
@@ -60,7 +60,7 @@ class LSDYNASolver(Launcher.Launcher):
 			log_file = open(log_filename, "w")
 		except IOError:
 			print "Can not create \"" + log_filename + "\""
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		# loadcase.scheme.rpartition("/")[2] - actual filename
 		#for example
 		#path = /home/user/ls-dyna/file.k
@@ -92,17 +92,17 @@ class LSDYNASolver(Launcher.Launcher):
 			print 'LS-DYNA finished'
 		else:
 			print 'Ñan not determine your platform'
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		log_file.close()
 		return_code = self.CheckTermination(log_filename)
 		os.chdir(cwd)
 
 		if (return_code == 1):
-			return Constants.SUCCESS_STATUS
+			return constants.SUCCESS_STATUS
 		else:
 			print "ERROR Termination"
 			print "Check \"" + log_filename + "\" for a more detailed description"
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 
 	# Creates file from list of strings
 	def CreateFileFromList(self, stringList, filename):

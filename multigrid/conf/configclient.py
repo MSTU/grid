@@ -15,43 +15,39 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import solvers.PRADISSolver as PRADISSolver
-import solvers.ModelicaSolver as ModelicaSolver
-import solvers.PythonSolver as PythonSolver
-import solvers.LSDYNASolver as LSDYNASolver
-import solvers.CFXSolver as CFXSolver
-import solvers.MechanicalSolver as MechanicalSolver
 
-BACKEND = 'amqp'
-BROKER = 'amqp://guest@localhost//'
+# класс конфигурации клиента
+from solvers import pradissolver, modelicasolver, pythonsolver, lsdynasolver, cfxsolver, mechanicalsolver
 
-USERNAME = ""
-PASSWORD = ""
-CLIENT_NAME = ""
-SHARE_DIR = 'share'
+LOCAL_WORK = False
 
-class ConfigHost:
-
+class ConfigClient:
+	# инициализация объекта
 	def __init__(self):
-		self.Solvers()
+		self.LOCAL_WORK = LOCAL_WORK
+		self.init_solvers()
 
-	def Solvers(self):
+	# инициализация решателей
+	def init_solvers(self):
 		self.solvers = dict()
 
-		pradis = PRADISSolver.PRADISSolver()
+		pradis = pradissolver.PRADISSolver()
 		self.solvers[pradis.name] = pradis
 
-		modelica = ModelicaSolver.ModelicaSolver()
+		modelica = modelicasolver.ModelicaSolver()
 		self.solvers[modelica.name] = modelica
 
-		pythonsolver = PythonSolver.PythonSolver()
-		self.solvers[pythonsolver.name] = pythonsolver
+		python = pythonsolver.PythonSolver()
+		self.solvers[python.name] = python
 
-		ANSYS_LSDYNA = LSDYNASolver.LSDYNASolver()
+		ANSYS_LSDYNA = lsdynasolver.LSDYNASolver()
 		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
 
-		ANSYS_CFX = CFXSolver.CFXSolver()
+		ANSYS_CFX = cfxsolver.CFXSolver()
 		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
-
-		ANSYS_Mechanical = MechanicalSolver.MechanicalSolver()
+		ANSYS_Mechanical = mechanicalsolver.MechanicalSolver()
 		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical
+
+	# адрес мастер-хоста
+	def MasterURL(self):
+		return "localhost"

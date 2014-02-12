@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,23 +13,19 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from celery import Celery
-from conf.ConfigHost import ConfigHost
-from conf import celeryconfig
+import constants
+from loadcase import Loadcase
+from solvers.pradissolver import PRADISSolver
 
-celery = Celery('Worker', include=['Task', 'Loadcase', 'cloudpickle'])
-# Лучше бы использовать этот способ конфигурации. Но на Windows 7 64bit он не работает
-celery.config_from_object(celeryconfig)
+class PradisLoadcase(Loadcase):
+	"""
+	Loadcase for PradisSolver.
+	"""
+	def __init__(self, scheme, result_file, criteria_list, solver_params, open_sign, close_sign, desc=constants.DEFAULT_LOADCASE):
+		Loadcase.__init__(self, scheme, PRADISSolver.name, desc)
 
-@celery.task(name='grid.Worker.run_task')
-def run_task(task):
-	config = ConfigHost()
-	for lc in task.loadcases:
-		solver = config.solvers[lc.solver]
-		solver.init()
-		task.result_params[lc.name] = solver.run(lc, task.input_params)
-	task.recalc_status()
-
-	#print "Parameters = " + str(task.input_params)
-	#print "Results = " + str(task.result_params)
-	return task
+		self.result_file = result_file
+		self.criteria_list = criteria_list
+		self.solver_params = solver_params
+		self.open_sign = open_sign
+		self.close_sign = close_sign

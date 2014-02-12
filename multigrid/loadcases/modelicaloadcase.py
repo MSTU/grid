@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,47 +13,16 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import constants
+from loadcase import Loadcase
+from solvers.modelicasolver import ModelicaSolver
 
-import Launcher
+class ModelicaLoadcase(Loadcase):
+	"""
+	Loadcase for PradisSolver.
+	"""
+	def __init__(self, scheme, criteria_list=None, solver_params=None, desc=constants.DEFAULT_LOADCASE):
+		Loadcase.__init__(self, scheme, ModelicaSolver.name, desc)
 
-# Лаунчер решателя. Базовый класс
-
-class PRADISSolver(Launcher.Launcher):
-	name = "PRADISDynamic"
-
-	def __init__(self):
-		pass
-
-
-	# запуск расчеты схемы (с установленнымм параметрами)
-	def run(self, scheme):
-		pass
-
-	# запуск расчета схемы и инициализация ее параметрами
-	def RunW(self, scheme, parameters):
-		pass
-
-	# получить статус задачи (решается, решена нормально, ошибка)
-	def Status(self):
-		pass
-
-	# получить значение функции
-	def GetValue(self, functionName):
-		pass
-
-	# установить временной слой
-	def SetLayer(self, layer):
-		pass
-
-	# получить число временных слоев
-	def GetLayerCount(self):
-		pass
-
-	# получить словарь пар функция-значение
-	def GetFunctionsDict(self):
-		pass
-
-
-	def GetLog(self):
-		pass
-	
+		self.criteria_list = criteria_list
+		self.solver_params = solver_params

@@ -21,15 +21,15 @@ import os
 import re
 import sys
 
-import Constants
-import Launcher
+import constants
+import launcher
 
 
-class MechanicalSolver(Launcher.Launcher):
+class MechanicalSolver(launcher.Launcher):
 	name = "ANSYS_Mechanical"
 	# object initialization
 	def __init__(self):
-		Launcher.Launcher.__init__(self)
+		launcher.Launcher.__init__(self)
 		self.error_log_name = "global.err" #global error log (for all runs)
 
 	# Loads content of *.dat file in special variable inData
@@ -43,7 +43,7 @@ class MechanicalSolver(Launcher.Launcher):
 	def run(self, loadcase, ma_object):
 		if loadcase.inData is None:
 			print "ERROR: inData contains nothing"
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 		cwd = os.getcwd()
 		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
 		os.chdir(loadcase.Name)
@@ -84,15 +84,15 @@ class MechanicalSolver(Launcher.Launcher):
 			print 'ANSYS Mechanical Solver finished'
 		else:
 			print 'ERROR: Ñan not determine your platform'
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 
 		self.UpdateGlobalLog(local_error_log_filename)
 		error_flag = self.CheckLog(local_error_log_filename)
 
 		os.chdir(cwd)
 		if (not error_flag):
-			return Constants.SUCCESS_STATUS
-		return Constants.ERROR_STATUS
+			return constants.SUCCESS_STATUS
+		return constants.ERROR_STATUS
 
 	# Creates file from list of strings
 	def CreateFileFromList(self, stringList, filename):

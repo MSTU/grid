@@ -1,5 +1,4 @@
 # -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,20 +14,23 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Constants
+import pickle
+import constants
+from launcher import Launcher
 
 
-class Task:
+class PythonSolver(Launcher):
+	name = "Python"
 
-	def __init__(self, loadcases, input_params):
-		self.id = None
-		self.loadcases = loadcases
-		self.input_params = input_params
-		self.result_params = dict()
-		self.status = Constants.DEFAULT_STATUS
+	def run(self, lc, input_params):
+		result = None
+		try:
+			func = pickle.loads(lc.scheme)
+			result = func(input_params)
 
-	# task status is least loadcase status
-	def recalc_status(self):
-		for loadcase in self.loadcases:
-			if self.status > loadcase.status:
-				self.status = loadcase.status
+			status = constants.SUCCESS_STATUS
+		except:
+			status = constants.ERROR_STATUS
+
+		lc.status = status
+		return result

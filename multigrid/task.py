@@ -15,39 +15,20 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import constants
 
-# класс конфигурации клиента
-from solvers import PRADISSolver, ModelicaSolver, PythonSolver, LSDYNASolver, CFXSolver, MechanicalSolver
 
-LOCAL_WORK = False
+class Task:
 
-class ConfigClient:
-	# инициализация объекта
-	def __init__(self):
-		self.LOCAL_WORK = LOCAL_WORK
-		self.init_solvers()
+	def __init__(self, loadcases, input_params):
+		self.id = None
+		self.loadcases = loadcases
+		self.input_params = input_params
+		self.result_params = dict()
+		self.status = constants.DEFAULT_STATUS
 
-	# инициализация решателей
-	def init_solvers(self):
-		self.solvers = dict()
-
-		pradis = PRADISSolver.PRADISSolver()
-		self.solvers[pradis.name] = pradis
-
-		modelica = ModelicaSolver.ModelicaSolver()
-		self.solvers[modelica.name] = modelica
-
-		pythonsolver = PythonSolver.PythonSolver()
-		self.solvers[pythonsolver.name] = pythonsolver
-
-		ANSYS_LSDYNA = LSDYNASolver.LSDYNASolver()
-		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
-
-		ANSYS_CFX = CFXSolver.CFXSolver()
-		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
-		ANSYS_Mechanical = MechanicalSolver.MechanicalSolver()
-		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical
-
-	# адрес мастер-хоста
-	def MasterURL(self):
-		return "localhost"
+	# task status is least loadcase status
+	def recalc_status(self):
+		for loadcase in self.loadcases:
+			if self.status > loadcase.status:
+				self.status = loadcase.status

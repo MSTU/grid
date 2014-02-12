@@ -15,14 +15,23 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Constants
+from celery import Celery
+from conf.confighost import ConfigHost
+from conf import celeryconfig
 
-class Loadcase:
-	"""
-	Base class for calculation case specification. It's environment in which task will calculated
-	"""
-	def __init__(self, scheme, solver, desc=Constants.DEFAULT_LOADCASE):
-		self.scheme = scheme
-		self.name = desc
-		self.solver = solver
-		self.status = Constants.DEFAULT_STATUS
+celery = Celery('remoteworker', include=['task', 'cloudpickle'])
+# Лучше бы использовать этот способ конфигурации. Но на Windows 7 64bit он не работает
+celery.config_from_object(celeryconfig)
+
+@celery.task(name='grid.remoteworker.run_task')
+def run_task(task):
+	config = ConfigHost()
+	for lc in task.loadcases:
+		solver = config.solvers[lc.solver]
+		solver.init()
+		task.result_params[lc.name] = solver.run(lc, task.input_params)
+	task.recalc_status()
+
+	#print "Parameters = " + str(task.input_params)
+	#print "Results = " + str(task.result_params)
+	return task

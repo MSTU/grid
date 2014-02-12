@@ -15,19 +15,19 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from conf import ConfigClient
-from Task import Task
+from conf import configclient
+from task import Task
 from celery.result import AsyncResult
 
-if ConfigClient.LOCAL_WORK:
-	from LocalWorker import run_task
+if configclient.LOCAL_WORK:
+	from localworker import run_task
 else:
-	from Worker import run_task
+	from remoteworker import run_task
 
 class ModelGrid:
 	def __init__(self, config=None):
 		if config is None:
-			self.config = ConfigClient.ConfigClient()
+			self.config = configclient.ConfigClient()
 		else:
 			self.config = config
 		self.loadcases = []
@@ -60,7 +60,7 @@ class ModelGrid:
 		result_ids = []
 		for item in input_list:
 			task = Task(self.loadcases, item)
-			if not ConfigClient.LOCAL_WORK:
+			if not configclient.LOCAL_WORK:
 				self.input_tasks.append(task)
 				async_result = run_task.delay(task)
 				task.id = async_result.task_id
@@ -82,7 +82,7 @@ class ModelGrid:
 
 
 	def wait_all(self):
-		if ConfigClient.LOCAL_WORK:
+		if configclient.LOCAL_WORK:
 			return [task.result_params for task in self.ready_tasks]
 		for task in self.input_tasks:
 			self.ready_tasks.append(self.task_async_results[task].get())

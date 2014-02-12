@@ -22,12 +22,12 @@ import os # для навигации по каталогам
 import sys # для определения типа операционной системы
 import hashlib # для чтения хэша файла
 
-import Constants
-import Launcher
+import constants
+import launcher
 import debug
 
 
-class ModelicaSolver(Launcher.Launcher):
+class ModelicaSolver(launcher.Launcher):
 	name = "ModelicaDynamic"
 
 	def __init__(self):
@@ -59,7 +59,7 @@ class ModelicaSolver(Launcher.Launcher):
 			self.logger.info("End compiling")
 		else:
 			self.logger.info("Can't determine platform")
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 
 	def run(self, loadcase, input_params):
 		cwd = os.getcwd()
@@ -124,11 +124,11 @@ class ModelicaSolver(Launcher.Launcher):
 
 		else:
 			self.logger.info("Can't determine platform")
-			return Constants.ERROR_STATUS
+			return constants.ERROR_STATUS
 
 		# получение словаря выходных параметров
 		result = self.CreateResultsDict(RES_filename)
-		loadcase.status = Constants.SUCCESS_STATUS
+		loadcase.status = constants.SUCCESS_STATUS
 
 		os.chdir(cwd)
 		return result
