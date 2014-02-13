@@ -6,6 +6,9 @@ from celery.result import AsyncResult
 from django.conf import settings
 
 # set the default Django settings module for the 'celery' program.
+from django.core.mail import send_mail
+import traceback
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'grid_web_app.settings')
 
 app = Celery('periodic_tasks')
@@ -22,6 +25,11 @@ from grid_frontend.models import Job, Task
 import multigrid.debug as debug
 
 logger = debug.logger
+
+SUBJ = 'multigrid notification'
+SUCCESS_MESSAGE = 'Job %s is finished'
+FROM_EMAIL = settings.EMAIL_HOST_USER
+
 
 @app.task
 def check_results():
@@ -58,6 +66,13 @@ def check_results():
 		if is_finished:
 			job.status = 1.0
 			logger.info("Job " + job.name + " is finished")
-			print 'sdf'
+
+			try:
+				#recipient_list = [job.user.email]
+				#send_mail(SUBJ, SUCCESS_MESSAGE % job.name, FROM_EMAIL, recipient_list)
+				logger.info("Job finish notification send")
+			except Exception:
+				logger.error("Error while send mail")
+				traceback.print_exc()
 
 		job.save()

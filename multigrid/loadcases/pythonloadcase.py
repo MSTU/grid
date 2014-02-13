@@ -20,7 +20,7 @@ import cloudpickle
 
 class PythonLoadcase(Loadcase):
 	"""
-	Loadcase for PradisSolver.
+	Loadcase for PythonSolver.
 	"""
 	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE):
 		func_dump = cloudpickle.dumps(scheme)
