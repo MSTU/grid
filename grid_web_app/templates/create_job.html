@@ -83,19 +83,17 @@
             <h3 id="addingModelLabel">Новая модель</h3>
         </div>
         <div class="modal-body">
-            <form action="/ajax/" method="POST" id="create_model" name="model_data" class="navbar-form offset1">{% csrf_token %}
+            <form action="/ajax/" method="POST" id="create_model" name="model_data" class="navbar-form offset1" enctype="multipart/form-data">{% csrf_token %}
                 <p>
                 <h4>Тип модели:</h4>
                 <input id="add_model" type="text" name="model_type" class="span3"  placeholder="Model type">
-                </p>
 
                 <p>
                 <h4>Модель:</h4>
                 <input type="text" name="model" class="span3"  placeholder="Model">
-                </p>
 
                 <div>
-                    <button type="button"  class="btn pull-left" >Загрузить модель</button>
+                    <input type="file" name="file_model" class="span3">
                 </div>
 
                 <div>

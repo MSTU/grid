@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 from django.db import models
 from django.http import Http404, HttpResponse
@@ -20,6 +22,9 @@ from multigrid.solvers.pythonsolver import PythonSolver
 from multigrid.solvers.modelicasolver import ModelicaSolver
 from multigrid.modelgrid import ModelGrid
 
+import logging
+
+logger = logging.getLogger('multigrid_web_app')
 
 @login_required
 def get_main(request):
@@ -180,6 +185,12 @@ def create_model(request):
 	response_data = {'status': 'fail'}
 	model_type = request.POST.get('model_type', None)
 	model = request.POST.get('model', "")
+
+	file_model = request.FILES.get('file_model', None)
+	if file_model:
+		file_path = 'files/%s' % file_model
+		default_storage.save(file_path, ContentFile(file_model.read()))
+		model = file_model
 
 	mathmodel = MathModel(name=model, type=model_type)
 	if mathmodel:
