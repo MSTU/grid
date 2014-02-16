@@ -17,7 +17,12 @@
 
                 <div>
                     <h4>Расчетные случаи:</h4>
-                    <textarea rows="3" class="span3" id="loadcases_id" name="loadcases" placeholder="Loadcases"></textarea>
+                    {% comment %}<textarea rows="3" class="span3" id="loadcases_id" name="loadcases" placeholder="Loadcases"></textarea>{% endcomment %}
+                    <select name="loadcases" multiple="multiple" class="span3">
+                        {% for name, id in loadcases %}
+                            <option value="{{ id }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div>
@@ -45,7 +50,7 @@
             <h3 id="addingLoadcaseLabel">Новый расчетный случай</h3>
         </div>
         <div class="modal-body">
-            <form action="/ajax/" method="POST" id="create_loadcase" name="loadcase_data" class="navbar-form offset1">{% csrf_token %}
+            <form action="/ajax/add_loadcase/" method="POST" id="create_loadcase" name="loadcase_data" class="navbar-form offset1">{% csrf_token %}
                 <div>
                     <h4>Название расчетного случая:</h4>
                     <input type="text" id="add_loadcase" name="loadcase_name" class="span3"  placeholder="Loadcase Name"  onKeyPress="return OnEnterButton(event,this.id)" >
@@ -58,11 +63,16 @@
 
                 <div>
                     <h4>Модель:</h4>
-                    <input type="text" id="model_id" name="model" class="span3"  placeholder="MathModel">
+                    {% comment %}<input type="text" id="model_id" name="model" class="span3"  placeholder="MathModel">{% endcomment %}
+                    <select name="model" class="span3">
+                        {% for name, id in models %}
+                            <option value="{{ id }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
                 <div>
-                    <button id="crt_button"  type="button"  class="btn btn-primary pull-right" onclick="loadcaseSubmit('add_loadcase')" >Создать</button>
+                    <button id="crt_button"  type="submit"  class="btn btn-primary pull-right">Создать</button>
                 </div>
 
             </form>
@@ -83,10 +93,15 @@
             <h3 id="addingModelLabel">Новая модель</h3>
         </div>
         <div class="modal-body">
-            <form action="/ajax/" method="POST" id="create_model" name="model_data" class="navbar-form offset1" enctype="multipart/form-data">{% csrf_token %}
+            <form action="/ajax/add_model/" method="POST" id="create_model" name="model_data" class="navbar-form offset1" enctype="multipart/form-data">{% csrf_token %}
                 <p>
                 <h4>Тип модели:</h4>
-                <input id="add_model" type="text" name="model_type" class="span3"  placeholder="Model type">
+                {% comment %}<input id="add_model" type="text" name="model_type" class="span3"  placeholder="Model type">{% endcomment %}
+                <select name="model_type" class="span3">
+                    {% for model_type in model_types %}
+                        <option value="{{ model_type }}">{{ model_type }}</option>
+                    {% endfor %}
+                </select>
 
                 <p>
                 <h4>Модель:</h4>
@@ -97,7 +112,7 @@
                 </div>
 
                 <div>
-                    <button type="button"  class="btn btn-primary pull-right" onclick="modelSubmit('add_model')" >Создать</button>
+                    <button type="submit"  class="btn btn-primary pull-right">Создать</button>
                 </div>
 
             </form>

@@ -26,6 +26,8 @@ import logging
 
 logger = logging.getLogger('multigrid_web_app')
 
+MODEL_TYPES = [PythonSolver.name, ModelicaSolver.name]
+
 @login_required
 def get_main(request):
 	return redirect('/jobs/')
@@ -147,19 +149,22 @@ def delete_job(request, job_id):
 @login_required
 def create_job(request):
 	if request.method == 'GET':
-		return TemplateResponse(request, 'create_job.html')
+		loadcases = [(lc.name, lc.id) for lc in Loadcase.objects.all()]
+		mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
+		return TemplateResponse(request, 'create_job.html', {'loadcases': loadcases, 'models': mathmodels, 'model_types': MODEL_TYPES})
 	response_data = {'status': 'fail'}
 	name = request.POST.get('job_name', "")
 	input_parameters = request.POST.get('input_parameters', "")
-	loadcases_names = request.POST.get('loadcases').split(',')
+	loadcases_ids = request.POST.get('loadcases')#.split(',')
+	print loadcases_ids
 
 	job = Job(name=name, user=request.user, input_params=input_parameters,
 			  description=request.POST.get('job_description', ""))
 	if job:
 		response_data['status'] = 'ok'
 		job.save()
-	for lc_name in loadcases_names:
-		job.loadcases.add(Loadcase.objects.get(name=lc_name))
+	for lc_id in loadcases_ids:
+		job.loadcases.add(Loadcase.objects.get(id=lc_id))
 	return redirect('/jobs/')
 
 
@@ -169,9 +174,9 @@ def create_loadcase(request):
 
 	name = request.POST.get('loadcase_name', "")
 	description = request.POST.get('loadcase_description', "")
-	model = request.POST.get('model', "")
+	model_id = request.POST.get('model', 0)
 
-	mathmodel = MathModel.objects.get(name=model)
+	mathmodel = MathModel.objects.get(id=model_id)
 	loadcase = Loadcase(name=name, description=description)
 	loadcase.mathmodel = mathmodel
 	if loadcase:
