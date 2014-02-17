@@ -19,7 +19,7 @@ from solvers.modelicasolver import ModelicaSolver
 
 class ModelicaLoadcase(Loadcase):
 	"""
-	Loadcase for PradisSolver.
+	Loadcase for ModelicaSolver.
 	"""
 	def __init__(self, scheme, criteria_list=None, solver_params=None, desc=constants.DEFAULT_LOADCASE):
 		Loadcase.__init__(self, scheme, ModelicaSolver.name, desc)

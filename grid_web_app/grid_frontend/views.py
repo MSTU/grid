@@ -11,9 +11,10 @@ from django.contrib.auth import authenticate, login as auth_login, logout as aut
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 
 from grid_frontend import util
+from grid_frontend.forms import MathModelForm, JobForm
 
 from grid_frontend.models import Job, MathModel, Loadcase, Task
 
@@ -150,28 +151,56 @@ def delete_job(request, job_id):
 def create_job(request):
 	if request.method == 'GET':
 		loadcases = [(lc.name, lc.id) for lc in Loadcase.objects.all()]
-		mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
-		return TemplateResponse(request, 'create_job.html', {'loadcases': loadcases, 'models': mathmodels, 'model_types': MODEL_TYPES})
-	response_data = {'status': 'fail'}
-	name = request.POST.get('job_name', "")
+		#mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
+		return TemplateResponse(request, 'create_job.html', {'loadcases': loadcases})
+
+	name = request.POST.get('name', "")
 	input_parameters = request.POST.get('input_parameters', "")
-	loadcases_ids = request.POST.get('loadcases')#.split(',')
-	print loadcases_ids
+	loadcases_ids = request.POST.get('loadcases')
 
 	job = Job(name=name, user=request.user, input_params=input_parameters,
 			  description=request.POST.get('job_description', ""))
 	if job:
-		response_data['status'] = 'ok'
 		job.save()
 	for lc_id in loadcases_ids:
 		job.loadcases.add(Loadcase.objects.get(id=lc_id))
 	return redirect('/jobs/')
 
+#@login_required
+#def create_job(request):
+#	if request.method == 'POST':
+#		job_form = JobForm(request.POST)
+#		if job_form.is_valid():
+#			name = job_form.cleaned_data['name']
+#			description = job_form.cleaned_data['description']
+#			input_parameters = job_form.cleaned_data['input_parameters']
+#			loadcases_ids = job_form.cleaned_data['loadcases']
+#
+#			print loadcases_ids
+#
+#			job = Job(name=name, user=request.user, input_params=input_parameters, description=description)
+#
+#			if job:
+#				job.save()
+#
+#			#for lc_id in loadcases_ids:
+#			#	job.loadcases.add(Loadcase.objects.get(id=lc_id))
+#
+#			return redirect('/jobs/')
+#	else:
+#		#mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
+#		job_form = JobForm()
+#	#return TemplateResponse(request, 'create_job.html', {'loadcases': loadcases, 'models': mathmodels, 'model_types': MODEL_TYPES})
+#
+#	#loadcases = [(lc.name, lc.id) for lc in Loadcase.objects.all()]
+#	return render(request, 'create_job.html', {'form': job_form})
+
 
 @login_required
 def create_loadcase(request):
-	response_data = {'status': 'fail'}
-
+	if request.method == 'GET':
+		mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
+		return TemplateResponse(request, 'create_loadcase.html', {'models': mathmodels})
 	name = request.POST.get('loadcase_name', "")
 	description = request.POST.get('loadcase_description', "")
 	model_id = request.POST.get('model', 0)
@@ -180,14 +209,14 @@ def create_loadcase(request):
 	loadcase = Loadcase(name=name, description=description)
 	loadcase.mathmodel = mathmodel
 	if loadcase:
-		response_data['status'] = 'ok'
 		loadcase.save()
 	return redirect('/create_job/')
 
 
 @login_required
 def create_model(request):
-	response_data = {'status': 'fail'}
+	if request.method == 'GET':
+		return TemplateResponse(request, 'create_model.html', {'model_types': MODEL_TYPES})
 	model_type = request.POST.get('model_type', None)
 	model = request.POST.get('model', "")
 
@@ -199,9 +228,8 @@ def create_model(request):
 
 	mathmodel = MathModel(name=model, type=model_type)
 	if mathmodel:
-		response_data['status'] = 'ok'
 		mathmodel.save()
-	return redirect('/create_job/')
+	return redirect('/create_loadcase/')
 
 
 @login_required

@@ -4,7 +4,7 @@
 
     <div class="row">
         <div class="span8 offset1 ">
-            <form action="/create_job/" method="POST" id="create_job" name="project_data" class="navbar-form offset1">{% csrf_token %}
+            <form action="/create_job/" method="POST" id="create_job" class="navbar-form offset1">{% csrf_token %}
                 <div>
                     <h4>Название задачи:</h4>
                     <input type="text" id="job_name_id" name="job_name" class="span3"  placeholder="Job name" >
@@ -23,106 +23,44 @@
                             <option value="{{ id }}">{{ name }}</option>
                         {% endfor %}
                     </select>
+                    <button type="button" onclick="location.href = '/create_loadcase/';">Add new Loadcase</button>
                 </div>
 
                 <div>
                     <h4>Входные параметры:</h4>
                     <textarea rows="3" class="span3" name="input_parameters" placeholder="Input Parameters"></textarea>
                 </div>
-
-                <div>
-                    <a href="#addingLoadcase" role="button" class="btn" data-toggle="modal">Создать расчетный случай</a>
-                    <a href="#addingModel" role="button" class="btn" data-toggle="modal">Создать модель</a>
+                {% comment %}{{ form.non_field_errors }}
+                <div class="fieldWrapper">
+                    {{ form.name.errors }}
+                    <h4>Job name:</h4>
+                    {{ form.name }}
                 </div>
 
+                <div class="fieldWrapper">
+                    {{ form.description.errors }}
+                    <h4>Job description:</h4>
+                    {{ form.description }}
+                </div>
+
+                <div class="fieldWrapper">
+                    {{ form.loadcases.errors }}
+                    <h4>Loadcases:</h4>
+                    {{ form.loadcases }}
+                    <button type="button">Add new Loadcase</button>
+                </div>
+
+                <div class="fieldWrapper">
+                    {{ form.input_params.errors }}
+                    <h4>Input parameters:</h4>
+                    {{ form.input_params }}
+                </div>{% endcomment %}
                 <div>
-                    <button type="submit"  class="btn btn-primary center" onclick="checkJobNameAndRedirect('job_name_id')" >Создать задачу</button>
+                    <button type="submit"  class="btn btn-primary center">Create Job</button>
                 </div>
             </form>
         </div>
     </div>
-
-    <!-- Create Loadcase BEGIN -->
-
-    <div id="addingLoadcase" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addingLoadcaseLabel" aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="addingLoadcaseLabel">Новый расчетный случай</h3>
-        </div>
-        <div class="modal-body">
-            <form action="/ajax/add_loadcase/" method="POST" id="create_loadcase" name="loadcase_data" class="navbar-form offset1">{% csrf_token %}
-                <div>
-                    <h4>Название расчетного случая:</h4>
-                    <input type="text" id="add_loadcase" name="loadcase_name" class="span3"  placeholder="Loadcase Name"  onKeyPress="return OnEnterButton(event,this.id)" >
-                </div>
-
-                <div>
-                    <h4>Описание:</h4>
-                    <textarea rows="3" class="span3" name="loadcase_description" placeholder="What's this loadcase about?"></textarea>
-                </div>
-
-                <div>
-                    <h4>Модель:</h4>
-                    {% comment %}<input type="text" id="model_id" name="model" class="span3"  placeholder="MathModel">{% endcomment %}
-                    <select name="model" class="span3">
-                        {% for name, id in models %}
-                            <option value="{{ id }}">{{ name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                <div>
-                    <button id="crt_button"  type="submit"  class="btn btn-primary pull-right">Создать</button>
-                </div>
-
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Закрыть</button>
-            <!--<button class="btn" aria-hidden="true">Create</button>-->
-        </div>
-    </div>
-
-    <!-- Create Loadcase END -->
-
-    <!-- Create MathModel BEGIN-->
-
-    <div id="addingModel" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addingModelLabel" aria-hidden="true">
-        <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-            <h3 id="addingModelLabel">Новая модель</h3>
-        </div>
-        <div class="modal-body">
-            <form action="/ajax/add_model/" method="POST" id="create_model" name="model_data" class="navbar-form offset1" enctype="multipart/form-data">{% csrf_token %}
-                <p>
-                <h4>Тип модели:</h4>
-                {% comment %}<input id="add_model" type="text" name="model_type" class="span3"  placeholder="Model type">{% endcomment %}
-                <select name="model_type" class="span3">
-                    {% for model_type in model_types %}
-                        <option value="{{ model_type }}">{{ model_type }}</option>
-                    {% endfor %}
-                </select>
-
-                <p>
-                <h4>Модель:</h4>
-                <input type="text" name="model" class="span3"  placeholder="Model">
-
-                <div>
-                    <input type="file" name="file_model" class="span3">
-                </div>
-
-                <div>
-                    <button type="submit"  class="btn btn-primary pull-right">Создать</button>
-                </div>
-
-            </form>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" data-dismiss="modal" aria-hidden="true">Закрыть</button>
-        </div>
-    </div>
-
-    <!-- Create MathModel END -->
 
 {%  endblock %}
 

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    <div id="addingLoadcase">
+        <div class="page-header">
+            <h3 id="addingLoadcaseLabel">Новый расчетный случай</h3>
+        </div>
+        <div>
+            <form action="/create_loadcase/" method="POST" id="create_loadcase" name="loadcase_data" class="navbar-form offset1">{% csrf_token %}
+                <div>
+                    <h4>Название расчетного случая:</h4>
+                    <input type="text" id="add_loadcase" name="loadcase_name" class="span3"  placeholder="Loadcase Name"  onKeyPress="return OnEnterButton(event,this.id)" >
+                </div>
+
+                <div>
+                    <h4>Описание:</h4>
+                    <textarea rows="3" class="span3" name="loadcase_description" placeholder="What's this loadcase about?"></textarea>
+                </div>
+
+                <div>
+                    <h4>Модель:</h4>
+                    {% comment %}<input type="text" id="model_id" name="model" class="span3"  placeholder="MathModel">{% endcomment %}
+                    <select name="model" class="span3">
+                        {% for name, id in models %}
+                            <option value="{{ id }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" onclick="location.href = '/create_model/';">Add new Model</button>
+                </div>
+
+                <div>
+                    <button id="crt_button"  type="submit"  class="btn btn-primary">Создать</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+{%  endblock %}
+
