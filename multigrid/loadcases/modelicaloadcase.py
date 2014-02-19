@@ -20,8 +20,18 @@ from solvers.modelicasolver import ModelicaSolver
 class ModelicaLoadcase(Loadcase):
 	"""
 	Loadcase for ModelicaSolver.
+
+	scheme: string
+		Path to Modelica file.
+	desc: string
+		Loadcase name.
+	criterial_list: list
+		List of result parameters, which will included in result dict
+	solver_parms : dict
+		Dictionary of options which will pass to Modelica. For example:
+		  'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1
 	"""
-	def __init__(self, scheme, criteria_list=None, solver_params=None, desc=constants.DEFAULT_LOADCASE):
+	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
 		Loadcase.__init__(self, scheme, ModelicaSolver.name, desc)
 
 		self.criteria_list = criteria_list
