@@ -174,7 +174,7 @@ def create_job(request):
 
 	name = request.POST.get('name', "")
 	input_parameters = request.POST.get('input_parameters', "")
-	loadcases_ids = request.POST.get('loadcases')
+	loadcases_ids = request.POST.getlist('loadcases')
 
 	job = Job(name=name, user=request.user, input_params=input_parameters,
 			  description=request.POST.get('job_description', ""))
