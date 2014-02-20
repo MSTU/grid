@@ -16,18 +16,18 @@
 #*                                                                         *
 #***************************************************************************/
 
-# класс конфигурации клиента
+# client's configuration class
 from solvers import pradissolver, modelicasolver, pythonsolver, lsdynasolver, cfxsolver, mechanicalsolver
 
 LOCAL_WORK = False
 
 class ConfigClient:
-	# инициализация объекта
+	# object's initialization
 	def __init__(self):
 		self.LOCAL_WORK = LOCAL_WORK
 		self.init_solvers()
 
-	# инициализация решателей
+	# solvers' initialization
 	def init_solvers(self):
 		self.solvers = dict()
 
@@ -48,6 +48,6 @@ class ConfigClient:
 		ANSYS_Mechanical = mechanicalsolver.MechanicalSolver()
 		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical
 
-	# адрес мастер-хоста
+	# master-host address
 	def MasterURL(self):
 		return "localhost"

@@ -19,13 +19,13 @@
 # Лаунчер решателя. Базовый класс
 
 class Launcher:
-	# инициализация объекта
+	# object's initialization
 	def __init__(self):
 		pass
 
 	def load_data(self, lc):
 		"""
-		Подготавливает данные расчетного случая
+		Prepares loadcase data
 		"""
 		return 0
 
@@ -34,7 +34,7 @@ class Launcher:
 
 	def run(self, lc, input_params):
 		"""
-		Запуск одного расчетного случая. Принимает на вход расчетный случай и входные параметры.
-		Возвращает результат расчета. Устанавливает статус решения расчетного случая.
+        Launching one loadcase. Takes loadcase and input parameters as input.
+        Returns result of computation. Sets solution status of loadcase.
 		"""
 		pass
