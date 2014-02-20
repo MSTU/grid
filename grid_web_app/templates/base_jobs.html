@@ -1,0 +1,32 @@
+<div style="margin: 0 auto; display: table;">
+    <table style="margin-bottom: 5px;" class="table table-hover table table-condensed span8" >
+        <thead>
+        <tr rowspan="4">
+            <div class="" style="margin: 0px 0px 10px 0px;">
+                <form action="/search_job/" method="POST" class="navbar-search pull-left">{% csrf_token %}
+                    <input type="text" value="{{ query }}" class="search-query" name="search_q" placeholder="Найти задачу">
+                </form>
+            </div>
+        </tr>
+        <tr>
+            <th ><p>Имя</p></th>
+            <th ><p>Дата</p></th>
+            <th ><p>Статус</p></th>
+            <th ><p class="text-center">Управление</p></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% comment %} With pagination {% endcomment %}
+        {%  if data.object_list %}
+            {% for item in data.object_list %}
+                {%  include "job_list_snippet.html" %}
+            {% endfor %}
+        {%  endif %}
+        {% comment %} Without pagination {% endcomment %}
+        {%  if data.values %}
+            {% for item in data.values %}
+                {%  include "job_list_snippet.html" %}
+            {% endfor %}
+        {% endif %}
+    </table>
+</div>

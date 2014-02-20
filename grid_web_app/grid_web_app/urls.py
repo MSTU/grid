@@ -9,6 +9,7 @@ urlpatterns = patterns('',
 					url(r'^login/$',    'grid_frontend.views.login'),
 					url(r'^logout/$',   'grid_frontend.views.logout'),
 					url(r'^register/$', 'grid_frontend.views.register'),
+					url(r'^profile/$', 'grid_frontend.views.profile'),
 
 					# Projects
 					url(r'^jobs/$', 'grid_frontend.views.jobs_list'),

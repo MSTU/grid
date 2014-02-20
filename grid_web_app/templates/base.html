@@ -9,12 +9,12 @@
         <script src="{{ STATIC_URL }}js/jquery-1.9.1.min.js"></script>
         <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
         <script src="{{ STATIC_URL }}js/common-scripts.js"></script>
-        <title>{% block title %}Операция парето{% endblock %}</title>
+        <title>{% block title %}MultiGrid{% endblock %}</title>
     </head>
     <body>
         <div class="navbar">
             <div class="navbar-inner">
-                <a class="brand" href="#">MultiGRID</a>
+                <a class="brand" href="/jobs/">MultiGrid</a>
                 {% if user.is_authenticated %}
                     <ul class="nav pull-right">
                         <li>
@@ -33,15 +33,6 @@
             </div>
         </div>
         <div class="container">
-            {% if 0 %}
-                <!-- Breadcrumbs BEGIN -->
-                <ul class="breadcrumb">
-                    <li><a href="#">Проекты</a> <span class="divider">/</span></li>
-                    <li><a href="#">Название проекта</a> <span class="divider">/</span></li>
-                    <li class="active">Название оценки</li>
-                </ul>
-                <!-- Breadcrumbs END -->
-            {% endif %}
             {% block content %}{% endblock %}
         </div>
     </body>

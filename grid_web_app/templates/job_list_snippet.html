@@ -1,0 +1,25 @@
+<tr>
+    <td class="span4"><a id="jobName_{{ forloop.counter }}" href="/job/{{ item.id }}/">{{ item.name }}</a></td>
+    <script type="text/javascript">
+        checkLength("{{ item.name }}","{{ forloop.counter }}");
+    </script>
+    <td class="span4">{{ item.date }}</td>
+    <td class="span4">{{ item.status }}</td>
+    <td class="span1">
+        <div class="btn-group mini-btn">
+            <button  class="btn btn-small "  onclick="document.location.href = '/calc_job/{{item.id}}/';" >
+                Рассчитать
+            </button>
+            <button  class="btn btn-small "  onclick="document.location.href = '/edit_job/{{item.id}}/';" >
+                Изменить
+            </button>
+            <button class="btn btn-small " type="button" onclick='delJob({{item.id}},function(){ return "{{ item.name}}"; } )'>
+                Удалить
+            </button>
+        </div>
+    </td>
+</tr>
+
+<form action="/delete_job/" method="POST" id="del_job" >{% csrf_token %}
+    <input type="hidden"></input>
+</form>

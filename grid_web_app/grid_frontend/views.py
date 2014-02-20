@@ -105,6 +105,24 @@ def logout(request):
 	auth_logout(request)
 	return TemplateResponse(request, "logout.html")
 
+@login_required
+def profile(request):
+	user = request.user
+	if request.method == 'GET':
+		data = {}
+		data['email'] = user.email
+		data['name'] = user.username
+		return TemplateResponse(request, 'profile.html', {'data': data})
+
+	email = request.POST.get('email', "")
+	if email:
+		user.email = email
+		user.save()
+
+	return redirect('/jobs/')
+
+
+
 
 @login_required
 def jobs_list(request):
@@ -156,7 +174,7 @@ def create_job(request):
 
 	name = request.POST.get('name', "")
 	input_parameters = request.POST.get('input_parameters', "")
-	loadcases_ids = request.POST.get('loadcases')
+	loadcases_ids = request.POST.getlist('loadcases')
 
 	job = Job(name=name, user=request.user, input_params=input_parameters,
 			  description=request.POST.get('job_description', ""))

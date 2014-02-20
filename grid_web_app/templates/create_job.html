@@ -7,7 +7,7 @@
             <form action="/create_job/" method="POST" id="create_job" class="navbar-form offset1">{% csrf_token %}
                 <div>
                     <h4>Название задачи:</h4>
-                    <input type="text" id="job_name_id" name="job_name" class="span3"  placeholder="Job name" >
+                    <input type="text" id="job_name_id" name="name" class="span3"  placeholder="Job name" >
                 </div>
 
                 <div>
@@ -17,12 +17,13 @@
 
                 <div>
                     <h4>Расчетные случаи:</h4>
-                    {% comment %}<textarea rows="3" class="span3" id="loadcases_id" name="loadcases" placeholder="Loadcases"></textarea>{% endcomment %}
-                    <select name="loadcases" multiple="multiple" class="span3">
+                    <p style="height: 100px; overflow: auto;">
                         {% for name, id in loadcases %}
-                            <option value="{{ id }}">{{ name }}</option>
+                            <input value="{{ id }}" name="loadcases" type="checkbox">
+                            {{ name }}
+                            <br>
                         {% endfor %}
-                    </select>
+                    </p>
                     <button type="button" onclick="location.href = '/create_loadcase/';">Add new Loadcase</button>
                 </div>
 
