@@ -169,14 +169,24 @@ def delete_job(request, job_id):
 def create_job(request):
 	if request.method == 'GET':
 		loadcases = [(lc.name, lc.id) for lc in Loadcase.objects.all()]
-		#mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
 		return TemplateResponse(request, 'create_job.html', {'loadcases': loadcases})
 
 	name = request.POST.get('name', "")
-	input_parameters = request.POST.get('input_parameters', "")
 	loadcases_ids = request.POST.getlist('loadcases')
+	input_parameters = request.POST.get('input_parameters', "")
 
-	job = Job(name=name, user=request.user, input_params=input_parameters,
+	# input parameters can be get from file
+	input_file = request.FILES.get('input_file', None)
+	if input_file:
+		file_path = 'input_files/%s' % input_file
+		default_storage.save(file_path, ContentFile(input_file.read()))
+		input_parameters = input_file
+		is_input_file = True
+	else:
+		is_input_file = False
+
+
+	job = Job(name=name, user=request.user, input_params=input_parameters, is_input_file=is_input_file,
 			  description=request.POST.get('job_description', ""))
 	if job:
 		job.save()
@@ -264,6 +274,16 @@ def edit_job(request, job_id):
 		job.name = request.POST.get('job_name', "")
 		job.description = request.POST.get('job_description', "")
 		job.input_params = request.POST.get('input_params', "")
+
+		input_file = request.FILES.get('input_file', None)
+		if input_file:
+			file_path = 'input_files/%s' % input_file
+			default_storage.save(file_path, ContentFile(input_file.read()))
+			job.input_params = input_file
+			job.is_input_file = True
+		else:
+			job.is_input_file = False
+
 		job.status = 0.0
 		job.save()
 		return redirect('/jobs/')
@@ -290,13 +310,15 @@ def calc_job(request, job_id):
 		loadcases.append(lc)
 
 	mg = ModelGrid()
-	mg.reinit()
 	mg.set_loadcases(loadcases)
 
-	input_parameters_string = job.input_params.split('|') # list of input parameters in string
-	params_list = []
-	for item in input_parameters_string:
-		params_list.append(parse_input_params(item))
+	if job.is_input_file:
+		params_list = get_input_list_from_file(job.input_params)
+	else:
+		input_parameters_string = job.input_params.split('|') # list of input parameters in string
+		params_list = []
+		for item in input_parameters_string:
+			params_list.append(parse_input_params(item))
 
 	task_ids = mg.calculate(params_list)
 
@@ -326,3 +348,10 @@ def get_job(request, job_id):
 def parse_input_params(param):
 	parameter = json.loads(param, object_hook=util.decode_dict)
 	return parameter
+
+
+def get_input_list_from_file(file_name):
+	"""
+	Return input parameters list from file
+	"""
+	return []

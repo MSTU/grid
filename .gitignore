@@ -14,5 +14,6 @@ DINAMA/plugin/python/grid_web_app/mos
 multigrid/multigrid.iml
 grid_web_app/grid_web_app.iml
 grid_web_app/files
+grid_web_app/input_files
 
 celerybeat-schedule

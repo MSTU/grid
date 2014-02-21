@@ -4,7 +4,7 @@
 
     <div class="row">
         <div class="span8 offset1 ">
-            <form action="/create_job/" method="POST" id="create_job" class="navbar-form offset1">{% csrf_token %}
+            <form action="/create_job/" method="POST" id="create_job" class="navbar-form offset1" enctype="multipart/form-data">{% csrf_token %}
                 <div>
                     <h4>Название задачи:</h4>
                     <input type="text" id="job_name_id" name="name" class="span3"  placeholder="Job name" >
@@ -30,6 +30,8 @@
                 <div>
                     <h4>Входные параметры:</h4>
                     <textarea rows="3" class="span3" name="input_parameters" placeholder="Input Parameters"></textarea>
+                    <p></p>
+                    <input type="file" name="input_file" class="span3">
                 </div>
                 {% comment %}{{ form.non_field_errors }}
                 <div class="fieldWrapper">

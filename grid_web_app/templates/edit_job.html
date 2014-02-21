@@ -4,7 +4,7 @@
 
     <div class="row">
         <div class="span8 offset1 ">
-            <form action="/edit_job/{{ data.job.id }}/" method="POST" id="create_job" name="project_data" class="navbar-form offset1">{% csrf_token %}
+            <form action="/edit_job/{{ data.job.id }}/" method="POST" id="create_job" name="project_data" class="navbar-form offset1" enctype="multipart/form-data">{% csrf_token %}
                 <div>
                     <h4>Название задачи:</h4>
                     <input type="text" id="job_name_id" name="job_name" class="span3" value="{{ data.job.name }}">
@@ -14,16 +14,11 @@
                     <h4>Описание:</h4>
                     <textarea rows="3" class="span3" name="job_description">{{ data.job.description }}</textarea>
                 </div>
-                {% comment %}
-                <div>
-                    <h4>Расчетные случаи:</h4>
-                    <textarea rows="3" class="span3" id="loadcases_id" name="loadcases">{{ data.loadcases }}</textarea>
-                </div>
-                {% endcomment %}
 
                 <div>
                     <h4>Входные параметры:</h4>
                     <textarea rows="3" class="span3" name="input_params">{{ data.job.input_params }}</textarea>
+                    <input type="file" name="input_file" class="span3">
                 </div>
 
                 <div>
