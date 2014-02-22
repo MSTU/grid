@@ -23,8 +23,8 @@ def test_1 ():
 
 	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
 
-	mg = ModelGrid.ModelGrid()
-	mg.reinit()
+	mg = ModelGrid.MultiGrid()
+	mg.clear_tasks()
 	mg.set_loadcases([lc1])
 
 	input_list = []
@@ -48,6 +48,6 @@ def test_1 ():
 		print i
 		print '======================================================'
 
-	mg.reinit()
+	mg.clear_tasks()
 
 test_1()

@@ -27,8 +27,8 @@ def func_1(input_params):
 def test_1():
 	lc = PythonLoadcase(func_1)
 
-	mg = ModelGrid.ModelGrid()
-	mg.reinit()
+	mg = ModelGrid.MultiGrid()
+	mg.clear_tasks()
 	mg.set_loadcases([lc])
 
 	input_list = []
@@ -42,6 +42,6 @@ def test_1():
 
 	for (param, result) in zip(input_list, result_list):
 		print "x = " + str(param['x']) + " y = " + str(result[lc.name])
-	mg.reinit()
+	mg.clear_tasks()
 
 test_1()

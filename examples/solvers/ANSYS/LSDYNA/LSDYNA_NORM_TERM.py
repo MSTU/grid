@@ -26,7 +26,7 @@ def test_1 ():
         desc='loadcase_1')
 
     mg = ModelGrid.ModelGrid()
-    mg.reinit()
+    mg.clear_tasks()
     mg.set_loadcases([lc1])
 
     ma_list = []
@@ -48,6 +48,6 @@ def test_1 ():
     mg.calculate(ma_list)
     ma_list = mg.wait_all()
 
-    mg.reinit()
+    mg.clear_tasks()
 
 test_1()

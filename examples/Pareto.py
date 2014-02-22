@@ -46,7 +46,7 @@ def test_1():
 
 	# подготовка объекта решателя
 	mg = ModelGrid.ModelGrid()
-	mg.reinit()
+	mg.clear_tasks()
 	mg.set_loadcases([lc1, lc2])
 
 	# подготовка параметров
@@ -82,7 +82,7 @@ def test_1():
 	plt.scatter(f1, f2)
 	plt.show()
 
-	mg.reinit()
+	mg.clear_tasks()
 
 
 # main ():

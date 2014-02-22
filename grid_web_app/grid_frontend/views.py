@@ -14,14 +14,14 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import redirect, render
 
 from grid_frontend import util
-from grid_frontend.forms import MathModelForm, JobForm
+from grid_frontend.forms import MathModelForm, JobForm, LoadcaseForm
 
 from grid_frontend.models import Job, MathModel, Loadcase, Task
 
 from multigrid.loadcases.modelicaloadcase import ModelicaLoadcase
 from multigrid.solvers.pythonsolver import PythonSolver
 from multigrid.solvers.modelicasolver import ModelicaSolver
-from multigrid.modelgrid import ModelGrid
+from multigrid.modelgrid import MultiGrid
 
 import logging
 
@@ -228,6 +228,7 @@ def create_job(request):
 def create_loadcase(request):
 	if request.method == 'GET':
 		mathmodels = [(model.name, model.id) for model in MathModel.objects.all()]
+		#loadcase_form = LoadcaseForm()
 		return TemplateResponse(request, 'create_loadcase.html', {'models': mathmodels})
 	name = request.POST.get('loadcase_name', "")
 	description = request.POST.get('loadcase_description', "")
@@ -309,7 +310,7 @@ def calc_job(request, job_id):
 			lc = ModelicaLoadcase(mathmodel.name)
 		loadcases.append(lc)
 
-	mg = ModelGrid()
+	mg = MultiGrid()
 	mg.set_loadcases(loadcases)
 
 	if job.is_input_file:

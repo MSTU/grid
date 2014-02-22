@@ -24,14 +24,16 @@ if configclient.LOCAL_WORK:
 else:
 	from remoteworker import run_task
 
-class ModelGrid:
+class MultiGrid:
 	def __init__(self, config=None):
 		if config is None:
 			self.config = configclient.ConfigClient()
 		else:
 			self.config = config
 		self.loadcases = []
-		self.reinit()
+		self.input_tasks = []
+		self.ready_tasks = []
+		self.task_async_results = dict()
 
 	def set_loadcases(self, loadcases):
 		self.loadcases = loadcases
@@ -52,14 +54,18 @@ class ModelGrid:
 	def clear_loadcases(self):
 		self.loadcases = []
 
-	def calculate(self, input_list):
+	def calculate(self, input_list, input_loadcases=None):
 		"""
 		For all items in input_list create Task instance and run them.
 		Return ids of created Tasks
 		"""
+		if input_loadcases:
+			loadcases = input_loadcases
+		else:
+			loadcases = self.loadcases
 		result_ids = []
 		for item in input_list:
-			task = Task(self.loadcases, item)
+			task = Task(loadcases, item)
 			if not configclient.LOCAL_WORK:
 				self.input_tasks.append(task)
 				async_result = run_task.delay(task)
@@ -69,6 +75,7 @@ class ModelGrid:
 			else:
 				self.ready_tasks.append(run_task(task))
 		return result_ids
+
 
 	def wait_tasks(self, task_ids):
 		"""
@@ -87,10 +94,13 @@ class ModelGrid:
 		for task in self.input_tasks:
 			self.ready_tasks.append(self.task_async_results[task].get())
 		result_list = [task.result_params for task in self.ready_tasks]
-		self.reinit()
+		self.clear_tasks()
 		return result_list
 
-	def reinit(self):
+	def clear_tasks(self):
+		"""
+		Delete all
+		"""
 		self.input_tasks = []
 		self.ready_tasks = []
 		self.task_async_results = dict()
