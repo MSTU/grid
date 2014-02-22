@@ -19,7 +19,7 @@
 # класс конфигурации клиента
 from solvers import pradissolver, modelicasolver, pythonsolver, lsdynasolver, cfxsolver, mechanicalsolver
 
-LOCAL_WORK = False
+LOCAL_WORK = True
 
 class ConfigClient:
 	# инициализация объекта
@@ -35,10 +35,10 @@ class ConfigClient:
 		self.solvers[pradis.name] = pradis
 
 		modelica = modelicasolver.ModelicaSolver()
-		self.solvers[modelica.name] = modelica
+		self.solvers[modelicasolver.name] = modelica
 
 		python = pythonsolver.PythonSolver()
-		self.solvers[python.name] = python
+		self.solvers[pythonsolver.name] = python
 
 		ANSYS_LSDYNA = lsdynasolver.LSDYNASolver()
 		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA

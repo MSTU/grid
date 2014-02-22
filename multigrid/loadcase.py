@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -14,25 +16,20 @@
 #*                                                                         *
 #***************************************************************************/
 import constants
-from loadcase import Loadcase
-from solvers.modelicasolver import ModelicaSolver
 
-class ModelicaLoadcase(Loadcase):
+class Loadcase:
 	"""
-	Loadcase for ModelicaSolver.
-
-	scheme: string
-		Path to Modelica file.
-	desc: string
-		Loadcase name.
-	criterial_list: list
-		List of result parameters, which will included in result dict
-	solver_parms : dict
-		Dictionary of options which will pass to Modelica. For example:
-		  'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1
+	Base class for calculation case specification. It's environment in which task will calculated
 	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		Loadcase.__init__(self, scheme, ModelicaSolver.name, desc)
+	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE):
+		self.scheme = scheme
+		self.name = desc
+		self.solver = solver
+		self.status = constants.DEFAULT_STATUS
+		self.load_data()
 
-		self.criteria_list = criteria_list
-		self.solver_params = solver_params
+	def load_data(self):
+		"""
+		Run while Loadcase creating.
+		"""
+		pass

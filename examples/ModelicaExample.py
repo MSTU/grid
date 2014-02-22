@@ -16,14 +16,14 @@
 #*                                                                         *
 #***************************************************************************/
 
-from multigrid.loadcases.modelicaloadcase import ModelicaLoadcase
-import multigrid.modelgrid as ModelGrid
+from multigrid.solvers.modelicasolver import ModelicaLoadcase
+from multigrid.multigrid import  MultiGrid
 
 def test_1 ():
 
 	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
 
-	mg = ModelGrid.MultiGrid()
+	mg = MultiGrid()
 	mg.clear_tasks()
 	mg.set_loadcases([lc1])
 

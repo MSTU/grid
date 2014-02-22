@@ -37,9 +37,6 @@ class MultiGrid:
 
 	def set_loadcases(self, loadcases):
 		self.loadcases = loadcases
-		for loadcase in loadcases:
-			solver = self.config.solvers[loadcase.solver]
-			solver.load_data(loadcase)
 
 	def add_loadcases(self, loadcases):
 		self.loadcases.extend(loadcases)

@@ -13,8 +13,8 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.pythonloadcase import PythonLoadcase
-import multigrid.modelgrid as ModelGrid
+from multigrid.solvers.pythonsolver import PythonLoadcase
+from multigrid.multigrid import MultiGrid
 
 def func_2(x):
 	return x**2
@@ -27,7 +27,7 @@ def func_1(input_params):
 def test_1():
 	lc = PythonLoadcase(func_1)
 
-	mg = ModelGrid.MultiGrid()
+	mg = MultiGrid()
 	mg.clear_tasks()
 	mg.set_loadcases([lc])
 

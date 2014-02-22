@@ -37,10 +37,10 @@ class ConfigHost:
 		self.solvers[pradis.name] = pradis
 
 		modelica = modelicasolver.ModelicaSolver()
-		self.solvers[modelica.name] = modelica
+		self.solvers[modelicasolver.name] = modelica
 
 		python = pythonsolver.PythonSolver()
-		self.solvers[python.name] = python
+		self.solvers[pythonsolver.name] = python
 
 		ANSYS_LSDYNA = lsdynasolver.LSDYNASolver()
 		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA

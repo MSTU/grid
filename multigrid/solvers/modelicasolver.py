@@ -25,40 +25,87 @@ import hashlib # для чтения хэша файла
 import constants
 import launcher
 import debug
+from loadcase import Loadcase
 
 
-class ModelicaSolver(launcher.Launcher):
-	name = "ModelicaDynamic"
+MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
+name = "ModelicaDynamic"
 
-	def __init__(self):
-		self.MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
-		self.logger = debug.logger
+logger = debug.logger
+
+class ModelicaLoadcase(Loadcase):
+	"""
+	Loadcase for ModelicaSolver.
+
+	scheme: string
+		Path to Modelica file.
+	desc: string
+		Loadcase name.
+	criterial_list: list
+		List of result parameters, which will included in result dict
+	solver_parms : dict
+		Dictionary of options which will pass to Modelica. For example:
+		  'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1
+	"""
+	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
+		self.criteria_list = criteria_list
+		self.solver_params = solver_params
+		Loadcase.__init__(self, scheme, name, desc)
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
-	# keys are mos and mo filenames; values are lists of the file strings
-	def load_data(self, lc):
-		files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
-		with open(lc.scheme, 'r') as f:
-			mos = f.readlines()
-		files_dict[self.MOS_filename] = mos
-		files_dict.update(self.CreateMOfilesDict(lc.scheme))
-		lc.inData = files_dict
+	# keys are mos and mo filenames; values are lists of the file string
+	def load_data(self):
+		Loadcase.load_data(self)
 
+		files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+		# load .mos file
+		with open(self.scheme, 'r') as f:
+			mos = f.readlines()
+		files_dict[MOS_filename] = mos
+		files_dict.update(CreateMOfilesDict(self.scheme))
+		self.inData = files_dict
+
+
+# Returns a dictionary, where keys are mo filenames and values are list of mo file strings
+# dictionary is created using mos file located at MOS_file_path
+def CreateMOfilesDict(MOS_file_path):
+	files_dict = dict()
+	cwd = os.getcwd()
+	#filenames.append(re.search('(\w)+\.mos', MOS_file_path).group())
+	with open(MOS_file_path, 'r') as mos:#mos = open(MOS_file_path, 'r')
+		if (MOS_file_path.rpartition('/')[0] != 0):
+			os.chdir(MOS_file_path.rpartition('/')[0])
+		for line in mos:
+			if (not line.startswith('loadFile')):
+				pass
+			else:
+				mo_filename = re.search('(\w)+\.mo', line).group()
+				#mo_filepath = MOS_file_path.rpartition('/')[0] + '/' + mo_filename
+				with open(re.split('"', line)[1], 'r') as mo:
+					mo_file = mo.readlines()
+					files_dict[mo_filename] = mo_file
+				#filenames.append(re.search('(\w)+\.mo', line).group())
+	os.chdir(cwd)
+
+	return files_dict
+
+
+class ModelicaSolver(launcher.Launcher):
 	# Создание файлов *.mo и *.mos в папке с именем расчетного случая Loadcase.Name.
 	# Получение exe-файла с их помощью
 	def compile(self, MOS_filename):
 		if sys.platform.startswith('win'):
 			command = '%OPENMODELICAHOME%/bin/omc.exe ' + MOS_filename
-			self.logger.info("Begin compiling")
+			logger.info("Begin compiling")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			self.logger.info("End compiling")
+			logger.info("End compiling")
 		elif sys.platform.startswith('linux'):
-			self.logger.info("Begin compiling")
+			logger.info("Begin compiling")
 			subprocess.call(["omc", MOS_filename])
-			self.logger.info("End compiling")
+			logger.info("End compiling")
 		else:
-			self.logger.info("Can't determine platform")
+			logger.info("Can't determine platform")
 			return constants.ERROR_STATUS
 
 	def run(self, loadcase, input_params):
@@ -72,7 +119,7 @@ class ModelicaSolver(launcher.Launcher):
 		for k, v in loadcase.inData.iteritems():
 			self.CreateFileFromList(v, k)
 
-		class_name = self.GetClassName(self.MOS_filename)
+		class_name = self.GetClassName(MOS_filename)
 		''' something for checking file's checksum
 		if sys.platform.startswith('win'):
 			# Проверка, существует ли уже exe-файл модели или нет
@@ -106,24 +153,24 @@ class ModelicaSolver(launcher.Launcher):
 			if (os.path.isfile(class_name + '.exe')):
 				pass
 			else:
-				self.compile(self.MOS_filename) # получение exe-файла по mos-файлу
+				self.compile(MOS_filename) # получение exe-файла по mos-файлу
 			command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
-			self.logger.info("Begin executing")
+			logger.info("Begin executing")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			self.logger.info("End executing")
+			logger.info("End executing")
 
 		elif sys.platform.startswith('linux'):
 			if (os.path.isfile(class_name)):
 				pass
 			else:
-				self.compile(self.MOS_filename) # получение exe-файла по mos-файлу
+				self.compile(MOS_filename) # получение exe-файла по mos-файлу
 			command = ['-overrideFile'] + [PAR_filename] + ['-r'] + [RES_filename]
-			self.logger.info("Begin executing")
+			logger.info("Begin executing")
 			subprocess.call(["./" + class_name] + command)
-			self.logger.info("End executing")
+			logger.info("End executing")
 
 		else:
-			self.logger.info("Can't determine platform")
+			logger.info("Can't determine platform")
 			return constants.ERROR_STATUS
 
 		# получение словаря выходных параметров
@@ -179,28 +226,6 @@ class ModelicaSolver(launcher.Launcher):
 
 		return hasher.hexdigest()
 
-	# Returns a dictionary, where keys are mo filenames and values are list of mo file strings
-	# dictionary is created using mos file located at MOS_file_path
-	def CreateMOfilesDict(self, MOS_file_path):
-		files_dict = dict()
-		cwd = os.getcwd()
-		#filenames.append(re.search('(\w)+\.mos', MOS_file_path).group())
-		with open(MOS_file_path, 'r') as mos:#mos = open(MOS_file_path, 'r')
-			if (MOS_file_path.rpartition('/')[0] != 0):
-				os.chdir(MOS_file_path.rpartition('/')[0])
-			for line in mos:
-				if (not line.startswith('loadFile')):
-					pass
-				else:
-					mo_filename = re.search('(\w)+\.mo', line).group()
-					#mo_filepath = MOS_file_path.rpartition('/')[0] + '/' + mo_filename
-					with open(re.split('"', line)[1], 'r') as mo:
-						mo_file = mo.readlines()
-						files_dict[mo_filename] = mo_file
-						#filenames.append(re.search('(\w)+\.mo', line).group())
-		os.chdir(cwd)
-
-		return files_dict
 
 	# Создает файл с названием filename по списку строк stringList
 	# Пример содержания переменной stringList: ['loadModel(Modelica);\n', 'getErrorString();\n', ...]

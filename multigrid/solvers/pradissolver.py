@@ -15,10 +15,24 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import constants
 
 import launcher
+from loadcase import Loadcase
 
-# Лаунчер решателя. Базовый класс
+
+class PradisLoadcase(Loadcase):
+	"""
+	Loadcase for PradisSolver.
+	"""
+	def __init__(self, scheme, result_file, criteria_list, solver_params, open_sign, close_sign, desc=constants.DEFAULT_LOADCASE):
+		Loadcase.__init__(self, scheme, PRADISSolver.name, desc)
+
+		self.result_file = result_file
+		self.criteria_list = criteria_list
+		self.solver_params = solver_params
+		self.open_sign = open_sign
+		self.close_sign = close_sign
 
 class PRADISSolver(launcher.Launcher):
 	name = "PRADISDynamic"
