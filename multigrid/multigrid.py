@@ -62,13 +62,13 @@ class MultiGrid:
 			try:
 				if not self._is_local_work:
 					async_result = AsyncResult(result_id)
-					result = async_result.get()
+					result_task = async_result.get()
 				else:
-					result = self._id_to_task.pop(result_id)
+					result_task = self._id_to_task.pop(result_id)
 			except Exception as e:
 				#TODO right error handling
-				result = None
-			results.append(result.result_params)
+				result_task = None
+			results.append(result_task.result)
 		result_dict = MultiGrid._list_to_dict(results)
 		# if only one loadcase calculated, return value of the one loadcase
 		# else return all dictionary

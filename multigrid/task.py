@@ -24,7 +24,7 @@ class Task:
 		self.id = None
 		self.loadcases = loadcases
 		self.input_params = input_params
-		self.result_params = dict()
+		self.result = dict()
 		self.status = constants.DEFAULT_STATUS
 
 	# task status is least loadcase status

@@ -20,8 +20,6 @@ import constants
 from launcher import Launcher
 from loadcase import Loadcase
 
-name = "Python"
-
 class PythonLoadcase(Loadcase):
 	"""
 	Loadcase for PythonSolver.
@@ -30,9 +28,10 @@ class PythonLoadcase(Loadcase):
 		if not desc:
 			desc = scheme.__name__
 		func_dump = cloudpickle.dumps(scheme)
-		Loadcase.__init__(self, func_dump, name, desc)
+		Loadcase.__init__(self, func_dump, PythonSolver.name, desc)
 
 class PythonSolver(Launcher):
+	name = "Python"
 
 	def run(self, lc, input_params):
 		result = None
