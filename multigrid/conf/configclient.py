@@ -15,39 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from config import *
 
-# класс конфигурации клиента
-from solvers import pradissolver, modelicasolver, pythonsolver, lsdynasolver, cfxsolver, mechanicalsolver
+LOCAL_WORK = False
 
-LOCAL_WORK = True
-
-class ConfigClient:
-	# инициализация объекта
-	def __init__(self):
-		self.LOCAL_WORK = LOCAL_WORK
-		self.init_solvers()
-
-	# инициализация решателей
-	def init_solvers(self):
-		self.solvers = dict()
-
-		pradis = pradissolver.PRADISSolver()
-		self.solvers[pradis.name] = pradis
-
-		modelica = modelicasolver.ModelicaSolver()
-		self.solvers[modelicasolver.name] = modelica
-
-		python = pythonsolver.PythonSolver()
-		self.solvers[pythonsolver.name] = python
-
-		ANSYS_LSDYNA = lsdynasolver.LSDYNASolver()
-		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
-
-		ANSYS_CFX = cfxsolver.CFXSolver()
-		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
-		ANSYS_Mechanical = mechanicalsolver.MechanicalSolver()
-		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical
-
-	# адрес мастер-хоста
-	def MasterURL(self):
-		return "localhost"

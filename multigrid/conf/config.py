@@ -1,9 +1,9 @@
-from solvers.pythonsolver import PythonSolver
-from solvers.modelicasolver import ModelicaSolver
+from solvers import pythonsolver
+from solvers import modelicasolver
 
 solver_name_to_class = dict()
-solver_name_to_class[PythonSolver.name] = PythonSolver
-solver_name_to_class[ModelicaSolver.name] = ModelicaSolver
+solver_name_to_class[pythonsolver.name] = pythonsolver.PythonSolver
+solver_name_to_class[modelicasolver.name] = modelicasolver.ModelicaSolver
 
 solvers = dict()
 
