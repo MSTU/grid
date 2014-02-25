@@ -40,6 +40,8 @@ class MultiGrid:
 		if not isinstance(loadcases, list):
 			loadcases = [loadcases]
 		result_ids = []
+		if isinstance(input_list, dict):
+			input_list = MultiGrid._dict_to_list(input_list)
 		for item in input_list:
 			task = Task(loadcases, item)
 			if not self._is_local_work:
@@ -120,3 +122,31 @@ class MultiGrid:
 			for key, value in item.iteritems():
 				result[key].append(value)
 		return result
+
+	@staticmethod
+	def _dict_to_list(dict_):
+		"""
+		Convert dictionary of lists to list of dictionaries with equals keys
+		{'a':[1,3], 'b':[2,4]} -> [{'a':1,'b':2}, {'a':3, 'b':4}]
+		"""
+		result = []
+		is_lists_equal = True
+		list_len = 0
+		keys = dict_.keys()
+		# check if list in dictionary is equal
+		for key, value in dict_.iteritems():
+			if list_len:
+				is_lists_equal &= (list_len == len(value))
+			else:
+				list_len = len(value)
+
+		if is_lists_equal:
+			for i in xrange(list_len):
+				item = dict()
+				for key in keys:
+					item[key] = dict_[key][i]
+				result.append(item)
+			return result
+		else:
+			# TODO handle this case
+			return []

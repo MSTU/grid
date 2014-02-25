@@ -15,37 +15,10 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from solvers import pradissolver, modelicasolver, pythonsolver, lsdynasolver, cfxsolver, mechanicalsolver
 
-BACKEND = 'amqp'
-BROKER = 'amqp://guest@localhost//'
+from config import *
 
 USERNAME = ""
 PASSWORD = ""
 CLIENT_NAME = ""
 SHARE_DIR = 'share'
-
-class ConfigHost:
-
-	def __init__(self):
-		self.Solvers()
-
-	def Solvers(self):
-		self.solvers = dict()
-
-		pradis = pradissolver.PRADISSolver()
-		self.solvers[pradis.name] = pradis
-
-		modelica = modelicasolver.ModelicaSolver()
-		self.solvers[modelicasolver.name] = modelica
-
-		python = pythonsolver.PythonSolver()
-		self.solvers[pythonsolver.name] = python
-
-		ANSYS_LSDYNA = lsdynasolver.LSDYNASolver()
-		self.solvers[ANSYS_LSDYNA.name] = ANSYS_LSDYNA
-
-		ANSYS_CFX = cfxsolver.CFXSolver()
-		self.solvers[ANSYS_CFX.name] = ANSYS_CFX
-		ANSYS_Mechanical = mechanicalsolver.MechanicalSolver()
-		self.solvers[ANSYS_Mechanical.name] = ANSYS_Mechanical

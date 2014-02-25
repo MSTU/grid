@@ -27,6 +27,8 @@ import launcher
 import debug
 from loadcase import Loadcase
 
+MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
+name = "ModelicaDynamic"
 
 logger = debug.logger
 
@@ -47,7 +49,7 @@ class ModelicaLoadcase(Loadcase):
 	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
 		self.criteria_list = criteria_list
 		self.solver_params = solver_params
-		Loadcase.__init__(self, scheme, ModelicaSolver.name, desc)
+		Loadcase.__init__(self, scheme, name, desc)
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
@@ -59,7 +61,7 @@ class ModelicaLoadcase(Loadcase):
 		# load .mos file
 		with open(self.scheme, 'r') as f:
 			mos = f.readlines()
-		files_dict[ModelicaSolver.MOS_filename] = mos
+		files_dict[MOS_filename] = mos
 		files_dict.update(CreateMOfilesDict(self.scheme))
 		self.inData = files_dict
 
@@ -89,8 +91,6 @@ def CreateMOfilesDict(MOS_file_path):
 
 
 class ModelicaSolver(launcher.Launcher):
-	MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
-	name = "ModelicaDynamic"
 	# Создание файлов *.mo и *.mos в папке с именем расчетного случая Loadcase.Name.
 	# Получение exe-файла с их помощью
 	def compile(self, MOS_filename):
@@ -118,7 +118,7 @@ class ModelicaSolver(launcher.Launcher):
 		for k, v in loadcase.inData.iteritems():
 			self.CreateFileFromList(v, k)
 
-		class_name = self.GetClassName(ModelicaSolver.MOS_filename)
+		class_name = self.GetClassName(MOS_filename)
 		''' something for checking file's checksum
 		if sys.platform.startswith('win'):
 			# Проверка, существует ли уже exe-файл модели или нет
@@ -152,7 +152,7 @@ class ModelicaSolver(launcher.Launcher):
 			if (os.path.isfile(class_name + '.exe')):
 				pass
 			else:
-				self.compile(ModelicaSolver.MOS_filename) # получение exe-файла по mos-файлу
+				self.compile(MOS_filename) # получение exe-файла по mos-файлу
 			command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
 			logger.info("Begin executing")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
@@ -162,7 +162,7 @@ class ModelicaSolver(launcher.Launcher):
 			if (os.path.isfile(class_name)):
 				pass
 			else:
-				self.compile(ModelicaSolver.MOS_filename) # получение exe-файла по mos-файлу
+				self.compile(MOS_filename) # получение exe-файла по mos-файлу
 			command = ['-overrideFile'] + [PAR_filename] + ['-r'] + [RES_filename]
 			logger.info("Begin executing")
 			subprocess.call(["./" + class_name] + command)

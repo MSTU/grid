@@ -10,6 +10,7 @@ tests/lc1
 DINAMA/plugin/python/multigrid/mos
 tests/mos
 DINAMA/plugin/python/grid_web_app/mos
+lc
 
 multigrid/multigrid.iml
 grid_web_app/grid_web_app.iml
