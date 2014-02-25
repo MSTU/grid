@@ -26,7 +26,9 @@ class PythonLoadcase(Loadcase):
 	"""
 	Loadcase for PythonSolver.
 	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE):
+	def __init__(self, scheme, desc=None):
+		if not desc:
+			desc = scheme.__name__
 		func_dump = cloudpickle.dumps(scheme)
 		Loadcase.__init__(self, func_dump, name, desc)
 
