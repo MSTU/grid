@@ -14,10 +14,10 @@
 #*                                                                         *
 #***************************************************************************/
 import constants
-from loadcase import Loadcase
+from loadcases.solversloadcase import SolversLoadcase
 from solvers.modelicasolver import ModelicaSolver
 
-class ModelicaLoadcase(Loadcase):
+class ModelicaLoadcase(SolversLoadcase):
 	"""
 	Loadcase for ModelicaSolver.
 
@@ -25,14 +25,13 @@ class ModelicaLoadcase(Loadcase):
 		Path to Modelica file.
 	desc: string
 		Loadcase name.
-	criterial_list: list
-		List of result parameters, which will included in result dict
-	solver_parms : dict
-		Dictionary of options which will pass to Modelica. For example:
-		  'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1
+	criteria_list: list
+		List of result parameters, which will be included in result dict
+	solver_params : dict
+		Dictionary of options which will pass to Modelica
+		Example of dictionary of options:
+		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
+
 	"""
 	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		Loadcase.__init__(self, scheme, ModelicaSolver.name, desc)
-
-		self.criteria_list = criteria_list
-		self.solver_params = solver_params
+		SolversLoadcase.__init__(self, scheme, ModelicaSolver.name, desc, criteria_list, solver_params)
