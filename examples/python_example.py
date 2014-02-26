@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,39 +13,23 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from multigrid.solvers.pythonsolver import PythonLoadcase
+from multigrid import map as multimap
 
-from multigrid.solvers.modelicasolver import ModelicaLoadcase
-from multigrid.multigrid import  MultiGrid
+def func_2(x):
+	return x**2
 
-def test_1 ():
 
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
+def func_1(x):
+	return func_2(x)
 
-	mg = MultiGrid()
-	mg.clear_tasks()
-	mg.set_loadcases([lc1])
 
-	input_list = []
+def test_1():
+	lc = PythonLoadcase(func_1)
+	input_list = range(10)
+	result_list = multimap(lc, input_list)[func_1.__name__]
 
-	par = dict()
-	par['resistor1.R'] = 5.0
-	par['inductor1.L'] = 0.4
-	par['load.J'] = 2.0
-	input_list.append(par)
-
-	par = dict()
-	par['resistor1.R'] = 2.0
-	par['inductor1.L'] = 1.0
-	par['load.J'] = 0.5
-	input_list.append(par)
-
-	mg.calculate(input_list)
-	result_list = mg.wait_all()
-
-	for i in result_list:
-		print i
-		print '======================================================'
-
-	mg.clear_tasks()
+	for (param, result) in zip(input_list, result_list):
+		print "x = " + str(param) + " y = " + str(result)
 
 test_1()

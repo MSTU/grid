@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -13,35 +15,34 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+
+from multigrid import map as mulitmap
 from multigrid.solvers.pythonsolver import PythonLoadcase
-from multigrid.multigrid import MultiGrid
 
-def func_2(x):
-	return x**2
+import matplotlib.pyplot as plt
 
 
-def func_1(input_params):
-	return func_2(input_params['x'])
+def func_1(x, y):
+	return (x - 2) ** 2 + (y - 1) ** 2
+
+
+def func_2(x, y):
+	return (x - 5) ** 2 + (y - 5) ** 2
 
 
 def test_1():
-	lc = PythonLoadcase(func_1)
 
-	mg = MultiGrid()
-	mg.clear_tasks()
-	mg.set_loadcases([lc])
+	lc1 = PythonLoadcase(func_1)
+	lc2 = PythonLoadcase(func_2)
 
-	input_list = []
-	for i in xrange(20):
-		par = dict()
-		par['x'] = i
-		input_list.append(par)
-	mg.calculate(input_list)
+	input_list = [(x, y) for y in xrange(6) for x in xrange(6)]
 
-	result_list = mg.wait_all()
+	result = mulitmap([lc1, lc2], input_list)
+	f1 = result[func_1.__name__]
+	f2 = result[func_2.__name__]
 
-	for (param, result) in zip(input_list, result_list):
-		print "x = " + str(param['x']) + " y = " + str(result[lc.name])
-	mg.clear_tasks()
+	plt.scatter(f1, f2)
+	plt.show()
 
 test_1()
+

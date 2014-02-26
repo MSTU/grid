@@ -55,7 +55,7 @@ class MultiGrid:
 				self._id_to_task[self._task_counter] = local_run(task)
 		return result_ids
 
-	def get_result(self, result_ids):
+	def get(self, result_ids):
 		"""
 		Wait and return result of tasks with ids specified in result_ids list
 		"""
@@ -84,7 +84,7 @@ class MultiGrid:
 		Run all tasks, wait results and return them
 		"""
 		result_ids = self.calculate(loadcases, input_list)
-		return self.get_result(result_ids)
+		return self.get(result_ids)
 
 	def ready(self, result_ids):
 		"""

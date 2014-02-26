@@ -1,4 +1,5 @@
 # -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -14,40 +15,23 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import pickle
-import cloudpickle
-import constants
-from launcher import Launcher
-from loadcase import Loadcase
 
-name = "Python"
+from multigrid.solvers.modelicasolver import ModelicaLoadcase
+from multigrid import map as multimap
 
-class PythonLoadcase(Loadcase):
-	"""
-	Loadcase for PythonSolver.
-	"""
-	def __init__(self, scheme, desc=None):
-		if not desc:
-			desc = scheme.__name__
-		func_dump = cloudpickle.dumps(scheme)
-		Loadcase.__init__(self, func_dump, name, desc)
+def test_1 ():
 
-class PythonSolver(Launcher):
+	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
 
-	def run(self, lc, input_params):
-		result = None
-		try:
-			func = pickle.loads(lc.scheme)
-			if isinstance(input_params, tuple) or isinstance(input_params, list):
-				result = func(*input_params)
-			else:
-				result = func(input_params)
+	input = dict()
+	input['resistor1.R'] = [5.0, 2.0]
+	input['inductor1.L'] = [0.4, 1.0]
+	input['load.J'] = [2.0, 0.5]
 
-			status = constants.SUCCESS_STATUS
-		except Exception as e:
-			status = constants.ERROR_STATUS
-			# TODO is it right?
-			#result = e
+	result_list = multimap(lc1, input)['lc1']
 
-		lc.status = status
-		return result
+	for i in result_list:
+		print i
+		print '======================================================'
+
+test_1()

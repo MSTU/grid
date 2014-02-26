@@ -22,6 +22,7 @@ class LocalTest(unittest.TestCase):
 	def test_4(self):
 		pass
 
+
 def test_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(MultiGrid)
 
