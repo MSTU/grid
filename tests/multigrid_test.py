@@ -19,6 +19,9 @@ class LocalTest(unittest.TestCase):
 		b = MultiGrid._dict_to_list(a)
 		self.assertEqual(b, [{'a': 1, 'b': 2}, {'a': 3, 'b': 4}])
 
+	def test_4(self):
+		pass
+
 def test_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(MultiGrid)
 

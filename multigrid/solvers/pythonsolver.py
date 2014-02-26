@@ -41,8 +41,10 @@ class PythonSolver(Launcher):
 			result = func(input_params)
 
 			status = constants.SUCCESS_STATUS
-		except:
+		except Exception as e:
 			status = constants.ERROR_STATUS
+			# TODO is it right?
+			#result = e
 
 		lc.status = status
 		return result

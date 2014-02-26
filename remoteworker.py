@@ -22,4 +22,6 @@ import localworker
 celery = Celery('remoteworker', include=['task', 'cloudpickle'])
 celery.config_from_object(config)
 
-run_task = celery.task(name='grid.remoteworker.run_task')(localworker.run_task)
+@celery.task(name='grid.remoteworker.run_task')
+def run_task(task):
+	return localworker.run_task(task)
