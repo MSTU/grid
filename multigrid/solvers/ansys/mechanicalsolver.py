@@ -18,36 +18,42 @@
 
 import subprocess
 import os
-import re
-import sys
 
+import sys
+import debug
 import constants
 import launcher
+from solvers.ansys.common_methods import create_file_from_list
+from solvers.ansys.ansys_methods import get_ansys_version
 
 
 class MechanicalSolver(launcher.Launcher):
 	name = "ANSYS_Mechanical"
+	_version = get_ansys_version()
+	_exec_path = ["/ansys_inc/v" + _version + "/ansys/bin/ansys" + _version,
+										 "-b", "-p", "ANSYS"]
 	# object initialization
 	def __init__(self):
 		launcher.Launcher.__init__(self)
 		self.error_log_name = "global.err" #global error log (for all runs)
+		self.logger = debug.logger
 
 	# Loads content of *.dat file in special variable inData
 	def load_data(self, lc):
 		if not os.path.isfile(lc.scheme):
-			print "ERROR: " + lc.scheme + " does not exist"
+			self.logger.error("ERROR: " + lc.scheme + " does not exist")
 			return None
 		with open(lc.scheme, 'r') as f:
 			lc.inData = f.readlines()
 
-	def run(self, loadcase, ma_object):
+	def run(self, loadcase, input_params):
 		if loadcase.inData is None:
-			print "ERROR: inData contains nothing"
-			return constants.ERROR_STATUS
+			self.logger.error("ERROR: inData contains nothing")
+			loadcase.status = constants.ERROR_STATUS
 		cwd = os.getcwd()
-		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
-		os.chdir(loadcase.Name)
-		self.DeleteLocalLog()
+		if not os.path.exists(loadcase.name): os.makedirs(loadcase.name)
+		os.chdir(loadcase.name)
+		self.delete_local_log()
 		# ANSYS will write its output to output.log instead of stdout
 		# it is done with "-o output_filename" option
 		output_filename = "output.log"
@@ -58,94 +64,53 @@ class MechanicalSolver(launcher.Launcher):
 		# path = /home/user/mechanical/file.dat
 		# path.rparition("/")[2] = "file.dat"
 		dat_filename = loadcase.scheme.rpartition("/")[2]
-		self.CreateFileFromList(loadcase.inData, dat_filename)
-		# mechanical is a list that contains the only string to launch
-		# ANSYS Mechanical Solver in a batch mode
-		# example for ANSYS version 14.5: ["/path_to_ansys_bin/ansys145"]
-		mechanical = self.CreateMechanicalCommand()
-		if (len(ma_object.options) != 0):
-			options = self.CreateOptionsCommand(ma_object.options)
+		create_file_from_list(loadcase.inData, dat_filename)
+		if(loadcase.solver_params is not None):
+			options = loadcase.solver_params.split()
 		else:
 			options = []
 		options.append("-i")
 		options.append(dat_filename)
 		options.append("-o")
 		options.append(output_filename)
-		if (len(loadcase.ResultFile) != 0):
-			options.append("-j")
-			options.append(loadcase.ResultFile)
-			local_error_log_filename = loadcase.ResultFile + ".err"
+		if("-j" in options):
+			res_index = options.index("-j") + 1
+			local_error_log_filename = options[res_index] + ".err"
 
 		if sys.platform.startswith('win'):
 			pass
 		elif sys.platform.startswith('linux'):
-			print 'executing ANSYS Mechanical Solver'
-			subprocess.call(mechanical + options)
-			print 'ANSYS Mechanical Solver finished'
+			self.logger.info('executing ANSYS Mechanical Solver')
+			subprocess.call(self._exec_path + options)
+			self.logger.info('ANSYS Mechanical Solver finished')
 		else:
-			print 'ERROR: Ñan not determine your platform'
-			return constants.ERROR_STATUS
+			self.logger.error('ERROR: Ñan not determine your platform')
+			loadcase.status = constants.ERROR_STATUS
 
-		self.UpdateGlobalLog(local_error_log_filename)
-		error_flag = self.CheckLog(local_error_log_filename)
+		self.update_global_log(local_error_log_filename)
+		error_flag = self.check_log(local_error_log_filename)
 
 		os.chdir(cwd)
-		if (not error_flag):
-			return constants.SUCCESS_STATUS
-		return constants.ERROR_STATUS
+		if(not error_flag):
+			loadcase.status = constants.SUCCESS_STATUS
+		loadcase.status = constants.ERROR_STATUS
 
-	# Creates file from list of strings
-	def CreateFileFromList(self, stringList, filename):
-		with open(filename, 'w') as f:
-			for line in stringList:
-				f.write(line)
+	def check_log(self, log_filename):
+		"""
+		Checks error log file for warnings and errors,
+		counts and prints them to stdout
 
-	# Creates string to launch ANSYS Mechanical Solver
-	def CreateMechanicalCommand(self):
-		ANSYS_version = self.GetANSYSVersion()
-		if ANSYS_version is not None:
-			mech_command = ["/ansys_inc/v" + ANSYS_version + "/ansys/bin/ansys" + ANSYS_version,
-			                "-b", "-p", "ANSYS"]
-			return mech_command
-		else:
-			return []
-
-	# Creates list of options for ANSYS Mechanical Solver
-	def CreateOptionsCommand(self, options):
-		options_command = options.split()
-		return options_command
-
-	# Determines ANSYS version
-	def GetANSYSVersion(self):
-		if sys.platform.startswith('win'):
-			pass
-		elif sys.platform.startswith('linux'):
-			if (os.path.isdir("/ansys_inc")):
-				dir_list = os.listdir("/ansys_inc")
-				for line in dir_list:
-					temp = re.search("v[\d]+", line)
-					if temp is not None:
-						version = temp.group(0)[1:]
-						return version
-			else:
-				print "ERROR: Ñan not locate your ANSYS installation directory"
-		else:
-			print 'ERROR: Ñan not determine your platform'
-		return None
-
-	# Checks error log file for warnings and errors,
-	# counts and prints them to stdout
-	def CheckLog(self, log_filename):
+		"""
 		error_string = "*** ERROR ***"
 		warning_string = "*** WARNING ***"
 		warn_count = 0
 		err_count = 0
-		error_flag = False
 		i = 0
+		error_flag = False
 		try:
 			log_file = open(log_filename, "r")
 		except IOError:
-			print "Can not open \"" + log_filename + "\" for reading"
+			self.logger.error("Can not open \"" + log_filename + "\" for reading")
 			return None
 		for line in log_file:
 			if error_string in line:
@@ -163,28 +128,34 @@ class MechanicalSolver(launcher.Launcher):
 				print line
 
 		log_file.close()
-		self.PrintProblems(warn_count, err_count)
+		self.print_problems(warn_count, err_count)
 		return error_flag
 
-	# Deletes local error log file (its name is "*.err", but not "global.err") in current directory
-	def DeleteLocalLog(self, ):
+	def delete_local_log(self):
+		"""
+		Deletes local error log file (its name is "*.err", but not "global.err") in current directory
+
+		"""
 		files_list = os.listdir(".")
 		for entry in files_list:
 			if ".err" in entry:
 				if self.error_log_name not in entry:
 					os.remove(entry)
 
-	# Appends lines from local_log_file to global_log_file
-	def UpdateGlobalLog(self, local_log_filename):
+	def update_global_log(self, local_log_filename):
+		"""
+		Appends lines from local_log_file to global_log_file
+
+		"""
 		try:
 			global_log_file = open(self.error_log_name, "a")
 		except IOError:
-			print "Can not open \"" + self.error_log_name + "\" for appending"
+			self.logger.error("Can not open \"" + self.error_log_name + "\" for appending")
 			return None
 		try:
 			local_log_file = open(local_log_filename, "r")
 		except IOError:
-			print "Can not open \"" + local_log_filename + "\" for reading"
+			self.logger.error("Can not open \"" + local_log_filename + "\" for reading")
 			return None
 		#append lines from local_log_file to global_log_file
 		for line in local_log_file:
@@ -193,12 +164,12 @@ class MechanicalSolver(launcher.Launcher):
 		local_log_file.close()
 		global_log_file.close()
 
-	def PrintProblems(self, warn_count, err_count):
+	def print_problems(self, warn_count, err_count):
 		if (warn_count == 1):
-			print str(warn_count) + " warning"
+			self.logger.warning(str(warn_count) + " warning")
 		elif (warn_count > 1):
-			print str(warn_count) + " warnings"
+			self.logger.warning(str(warn_count) + " warnings")
 		if (err_count == 1):
-			print str(err_count) + " error"
+			self.logger.error(str(err_count) + " error")
 		elif (err_count > 1):
-			print str(err_count) + " errors"
+			self.logger.error(str(err_count) + " errors")

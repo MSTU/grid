@@ -1,5 +1,3 @@
-# -*- coding: cp1251 -*-
-
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -15,23 +13,27 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.ansysloadcase import AnsysLoadcase
-from multigrid.modelgrid import ModelGrid
-from solvers.ansys.lsdynasolver import LSDYNASolver
+import constants
+from loadcase import Loadcase
 
+class SolversLoadcase(Loadcase):
+	"""
+	Loadcase for solvers with execution parameters.
 
-def test_1():
-	lc1 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc1", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
-	lc2 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc2", None, "O=result.out ENDTIME=8e-2 NCPU=1")
+	scheme: string
+		Path to input file
+	desc: string
+		Loadcase name (this is the name of the directory, where all files will be saved)
+	criteria_list: list
+		List of result parameters, which will be included in result dict
+	solver_params : dictionary or string
+		Dictionary or string of options which will pass to solvers.
+		Example of dictionary of options for Modelica Solver:
+		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
+	"""
+	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
+		Loadcase.__init__(self, scheme, solver, desc)
 
-test_1()
+		self.criteria_list = criteria_list
+		self.solver_params = solver_params

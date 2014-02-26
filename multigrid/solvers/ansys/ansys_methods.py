@@ -15,23 +15,28 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.ansysloadcase import AnsysLoadcase
-from multigrid.modelgrid import ModelGrid
-from solvers.ansys.lsdynasolver import LSDYNASolver
+import sys
+import os
+import re
+import debug
 
+logger = debug.logger
 
-def test_1():
-	lc1 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc1", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
-	lc2 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc2", None, "O=result.out ENDTIME=8e-2 NCPU=1")
+# Determines ANSYS version
+def get_ansys_version():
+	if sys.platform.startswith('win'):
+		pass
+	elif sys.platform.startswith('linux'):
+		if(os.path.isdir("/ansys_inc")):
+			dir_list = os.listdir("/ansys_inc")
+			for line in dir_list:
+				temp = re.search("v[\d]+", line)
+				if temp is not None:
+					version = temp.group(0)[1:]
+					return version
+		else:
+			logger.error("ERROR: Ñan not locate your ANSYS installation directory")
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
-
-test_1()
+	else:
+		logger.error("ERROR: Ñan not determine your platform")
+		return ""

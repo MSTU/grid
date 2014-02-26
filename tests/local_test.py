@@ -43,17 +43,6 @@ class LocalTest(unittest.TestCase):
 		result = self.mg.map(lc, {'x': x, 'y': y})[f1.__name__]
 		#TODO right error handling and status checking
 
-	def test_4(self):
-		#api test
-		from multigrid.conf import configclient
-		configclient.LOCAL_WORK = True
-		from multigrid import map as gridmap
-
-		lc = PythonLoadcase(f)
-		input_list = range(1, 10)
-		result_list = gridmap(lc, input_list)[f.__name__]
-		self.assertEqual(result_list, map(f, input_list))
-
 
 def test_suite():
 	return unittest.TestLoader().loadTestsFromTestCase(LocalTest)

@@ -17,5 +17,5 @@
 #***************************************************************************/
 from config import *
 
-LOCAL_WORK = False
+LOCAL_WORK = True
 

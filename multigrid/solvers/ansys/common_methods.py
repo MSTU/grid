@@ -15,23 +15,22 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.ansysloadcase import AnsysLoadcase
-from multigrid.modelgrid import ModelGrid
-from solvers.ansys.lsdynasolver import LSDYNASolver
 
+# These are common methods used by most of the solvers
+import debug
 
-def test_1():
-	lc1 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc1", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
-	lc2 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc2", None, "O=result.out ENDTIME=8e-2 NCPU=1")
+logger = debug.logger
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
+def create_file_from_list(stringList, filename):
+	"""
+	Creates a file named "filename" using list of strings "stringList"
 
-test_1()
+	"""
+	try:
+		f = open(filename, "w")
+	except IOError:
+		logger.error("Can not create file \"" + filename + "\"")
+		return None
+	for line in stringList:
+		f.write(line)
+	f.close()

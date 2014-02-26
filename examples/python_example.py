@@ -32,4 +32,5 @@ def test_1():
 	for (param, result) in zip(input_list, result_list):
 		print "x = " + str(param) + " y = " + str(result)
 
+
 test_1()

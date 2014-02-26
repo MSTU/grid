@@ -15,39 +15,22 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Loadcase
-import ModelGrid
-import ModelAnalysis
+from loadcases.ansysloadcase import AnsysLoadcase
+from modelgrid import ModelGrid
+from solvers.ansys.lsdynasolver import LSDYNASolver
 
-def test_1 ():
+def test_1():
+	lc1 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc3", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
+	lc2 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc4_error", None, "O=result.out ENDTIME=ERROR NCPU=1")
 
-    lc1 = Loadcase.Loadcase ([],
-        ['k_files/bouncing.k', 'my_result.out', [], '', 'ANSYS_LS-DYNA', '%', '%'],
-        desc='loadcase_2(ERROR)')
-
-    mg = ModelGrid.ModelGrid()
-    mg.clear_tasks()
-    mg.set_loadcases([lc1])
-
-    ma_list = []
-
-    ma1 = ModelAnalysis.ModelAnalysis()
-    par1 = {}
-    par1['NCPU'] = 4
-    par1['ENDTIME'] = "ERROR IS HERE"
-    ma1.SetParameters(par1)
-    ma_list.append(ma1)
-
-    ma2 = ModelAnalysis.ModelAnalysis()
-    par2 = {}
-    par2['ENDTIME'] = 8e-2
-    par2['NCPU'] = 1
-    ma2.SetParameters(par2)
-    ma_list.append(ma2)
-
-    mg.calculate(ma_list)
-    ma_list = mg.wait_all()
-
-    mg.clear_tasks()
+	mg = ModelGrid()
+	mg.reinit()
+	mg.set_loadcases([lc1])
+	mg.calculate([None])
+	mg.clear_loadcases()
+	mg.set_loadcases([lc2])
+	mg.calculate([None])
+	result_list = mg.wait_all()
+	mg.reinit()
 
 test_1()
