@@ -16,11 +16,12 @@
 #*                                                                         *
 #***************************************************************************/
 
-import re # для использования регулярных выражений
-import subprocess # для вызова скриптов командных строк
-import os # для навигации по каталогам
-import sys # для определения типа операционной системы
-import hashlib # для чтения хэша файла
+import re # for using regular expressions
+import subprocess # for execution of command prompt scripts
+import os # for navigation through catalogs
+import sys # to define OS type
+import hashlib # for reading file's hash
+from common_methods import create_file_from_list
 
 import constants
 import launcher
@@ -45,8 +46,8 @@ class ModelicaSolver(launcher.Launcher):
 		files_dict.update(self.CreateMOfilesDict(lc.scheme))
 		lc.inData = files_dict
 
-	# Создание файлов *.mo и *.mos в папке с именем расчетного случая Loadcase.Name.
-	# Получение exe-файла с их помощью
+	# compiles *.mo file using *.mos file to get exe-file of the model
+
 	def compile(self, MOS_filename):
 		if sys.platform.startswith('win'):
 			command = '%OPENMODELICAHOME%/bin/omc.exe ' + MOS_filename
@@ -70,7 +71,7 @@ class ModelicaSolver(launcher.Launcher):
 
 		# Host creates all required files
 		for k, v in loadcase.inData.iteritems():
-			self.CreateFileFromList(v, k)
+			create_file_from_list(v, k)
 
 		class_name = self.GetClassName(self.MOS_filename)
 		''' something for checking file's checksum
@@ -99,14 +100,14 @@ class ModelicaSolver(launcher.Launcher):
 		PAR_filename = 'pl.txt'
 		RES_filename = 'results.plt'
 
-		# создание файлов входных параметров по словарям входных параметров
+		# create file with input parameters using dictionaries of input parameters
 		self.CreateParFilesFromParDicts(PAR_filename, input_params)
 
 		if sys.platform.startswith('win'):
 			if (os.path.isfile(class_name + '.exe')):
 				pass
 			else:
-				self.compile(self.MOS_filename) # получение exe-файла по mos-файлу
+				self.compile(self.MOS_filename) # getting exe-file using mo and mos files
 			command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
 			self.logger.info("Begin executing")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
@@ -116,7 +117,7 @@ class ModelicaSolver(launcher.Launcher):
 			if (os.path.isfile(class_name)):
 				pass
 			else:
-				self.compile(self.MOS_filename) # получение exe-файла по mos-файлу
+				self.compile(self.MOS_filename) # getting exe-file using mo and mos files
 			command = ['-overrideFile'] + [PAR_filename] + ['-r'] + [RES_filename]
 			self.logger.info("Begin executing")
 			subprocess.call(["./" + class_name] + command)
@@ -126,7 +127,7 @@ class ModelicaSolver(launcher.Launcher):
 			self.logger.info("Can't determine platform")
 			return constants.ERROR_STATUS
 
-		# получение словаря выходных параметров
+		# getting dictionary of output parameters
 		result = self.CreateResultsDict(RES_filename)
 		loadcase.status = constants.SUCCESS_STATUS
 
@@ -154,8 +155,8 @@ class ModelicaSolver(launcher.Launcher):
 		os.rename(temp_file.name, MOS_filename)
 		#changed temp filename to MOS filename, so we can use old filename with new content
 
-	# Возвращает имя класса, прочитанное из mos-файла (simulate(className, ...))
-	# Необходимо для получения кода модели на языке C, его компиляции и запуска
+	# Returns class name readed from mos-file (at this string: (simulate(className, ...))
+	# It's required for getting model's C code, its compilation and execution
 	def GetClassName(self, MOS_filename):
 		className = None
 		with open(MOS_filename, 'r') as f:
@@ -202,28 +203,17 @@ class ModelicaSolver(launcher.Launcher):
 
 		return files_dict
 
-	# Создает файл с названием filename по списку строк stringList
-	# Пример содержания переменной stringList: ['loadModel(Modelica);\n', 'getErrorString();\n', ...]
-	def CreateFileFromList(self, stringList, filename):
-		# Создание файла
-		with open(filename, 'w') as f:
-			for line in stringList:
-				f.write(line)
-
-	# Генерация файлов входных параметров по словарям входных параметров ma1, ma2, ...
+	# Creates files of input parameters using dictionaries of input parameters
 	def CreateParFilesFromParDicts(self, par_filename, par_dic):
 		with open(par_filename, 'w') as PAR_file:
 			for k, v in par_dic.iteritems():
 				PAR_file.write(k + '=' + str(v) + '\n')
 
-	# Создание словаря результатов по файлу результатов RES_filename
-	# для входных параметров parameters
-	# RES_filename - имя файла результатов
+	# Creates dictionary of results using result file named "RES_filename"
 	def CreateResultsDict(self, RES_filename):
-		curvesNumber = 0 #количество выходных переменных
-		result_dict = dict() #словарь результатов
-		value_list = list() #список значений для текущего выходного параметра
-		print os.getcwd()
+		curvesNumber = 0 # amount of output variables
+		result_dict = dict() # dictionary of results
+		value_list = list() # list of values of current output parameter
 
 		with open(RES_filename, 'r') as f:
 			for line in f:
@@ -237,10 +227,10 @@ class ModelicaSolver(launcher.Launcher):
 						value_list.append(float(re.split('[\d.e-], ', line)[1][:-1]))
 					else:
 						break
-				tmp = list(value_list[:-1]) #убрали последний элемент,
-				#т.к. value_list[последний] = value_list[последний-1]
+				tmp = list(value_list[:-1]) # removed last element,
+				# because value_list[last] = value_list[last-1]
 				result_dict[key] = tmp
-				del value_list[:] #очистить содержимое всего списка
+				del value_list[:] # delete content of the whole list
 
 		#MA_object.SetLayer(len(tmp))
 		return result_dict

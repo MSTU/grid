@@ -19,7 +19,7 @@ import constants
 
 class Loadcase:
 	"""
-	Base class for calculation case specification. It's environment in which task will calculated
+	Base class for calculation case specification. It's environment in which task will be calculated
 	"""
 	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE):
 		self.scheme = scheme

@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -13,25 +15,28 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import constants
-from loadcases.solversloadcase import SolversLoadcase
-from solvers.modelicasolver import ModelicaSolver
+import sys
+import os
+import re
+import debug
 
-class ModelicaLoadcase(SolversLoadcase):
-	"""
-	Loadcase for ModelicaSolver.
+logger = debug.logger
 
-	scheme: string
-		Path to Modelica file.
-	desc: string
-		Loadcase name.
-	criteria_list: list
-		List of result parameters, which will be included in result dict
-	solver_params : dict
-		Dictionary of options which will pass to Modelica
-		Example of dictionary of options:
-		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
+# Determines ANSYS version
+def get_ansys_version():
+	if sys.platform.startswith('win'):
+		pass
+	elif sys.platform.startswith('linux'):
+		if(os.path.isdir("/ansys_inc")):
+			dir_list = os.listdir("/ansys_inc")
+			for line in dir_list:
+				temp = re.search("v[\d]+", line)
+				if temp is not None:
+					version = temp.group(0)[1:]
+					return version
+		else:
+			logger.error("ERROR: Ñan not locate your ANSYS installation directory")
 
-	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		SolversLoadcase.__init__(self, scheme, ModelicaSolver.name, desc, criteria_list, solver_params)
+	else:
+		logger.error("ERROR: Ñan not determine your platform")
+		return ""

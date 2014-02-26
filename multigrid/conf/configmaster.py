@@ -16,10 +16,10 @@
 #*                                                                         *
 #***************************************************************************/
 
-# класс конфигурации мастер-узла
+# master-node's configuration class
 
 class ConfigMaster:
-	# инициализация объекта
+	# object's initialization
 	def __init__(self):
 		pass
 

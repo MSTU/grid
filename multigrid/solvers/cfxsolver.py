@@ -21,128 +21,98 @@ import os
 import re
 import sys
 import shutil
+import debug
 
 import constants
 import launcher
+from ansys_methods import get_ansys_version
+from common_methods import create_file_from_list
 
 
 class CFXSolver(launcher.Launcher):
 	name = "ANSYS_CFX"
+	_version = get_ansys_version()
+	_exec_path = ["/ansys_inc/v" + _version + "/CFX/bin/cfx5solve"]
+
+	def __init__(self):
+		launcher.Launcher.__init__(self)
+		self.logger = debug.logger
 
 	# Loads content of *.def file in special variable inData
 	def load_data(self, lc):
 		if not os.path.isfile(lc.scheme):
-			print "ERROR: " + lc.scheme + " does not exist"
+			self.logger.error("ERROR: " + lc.scheme + " does not exist")
 			return None
 		with open(lc.scheme, 'r') as f:
 			lc.inData = f.readlines()
 
-	def run(self, loadcase, ma_object):
+	def run(self, loadcase, input_params):
 		if loadcase.inData is None:
-			print "ERROR: inData contains nothing"
-			return constants.ERROR_STATUS
+			self.logger.error("ERROR: inData contains nothing")
+			loadcase.status = constants.ERROR_STATUS
 		cwd = os.getcwd()
-		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
-		os.chdir(loadcase.Name)
+		if not os.path.exists(loadcase.name): os.makedirs(loadcase.name)
+		os.chdir(loadcase.name)
 		error_log_filename = "CFX_error_log"
 		try:
 			error_log_file = open(error_log_filename, "w")
 		except IOError:
-			print "Can not create \"" + error_log_filename + "\""
-			return constants.ERROR_STATUS
+			self.logger.error("Can not create \"" + error_log_filename + "\"")
+			loadcase.status = constants.ERROR_STATUS
 		# loadcase.scheme.rpartition("/")[2] - actual filename
 		# for example
 		# path = /home/user/cfx/file.def
 		# path.rparition("/")[2] = "file.def"
 		def_filename = loadcase.scheme.rpartition("/")[2]
-		self.CreateFileFromList(loadcase.inData, def_filename)
-		#cfx is a list that contains the only string to launch ANSYS CFX solver
-		#example: ["/path_to_cfx_bin/cfx5solve"]
-		cfx = self.CreateCFXCommand()
-		if (len(ma_object.options) != 0):
-			options = self.CreateOptionsCommand(ma_object.options)
+		create_file_from_list(loadcase.inData, def_filename)
+		if(loadcase.solver_params is not None):
+			options = loadcase.solver_params.split()
 		else:
 			options = []
 		options.append("-def")
 		options.append(def_filename)
-		if (len(loadcase.ResultFile) != 0):
-			options.append("-fullname")
-			options.append(loadcase.ResultFile)
-			temp_dir_path = loadcase.ResultFile + ".dir"
-			self.DeleteTempDir(temp_dir_path)
+		self.check_options(options)
 
 		if sys.platform.startswith('win'):
 			pass
 		elif sys.platform.startswith('linux'):
-			print 'executing ANSYS CFX Solver'
-			subprocess.call(cfx + options, stderr=error_log_file)
-			print 'ANSYS CFX Solver finished'
+			self.logger.info('executing ANSYS CFX Solver')
+			subprocess.call(self._exec_path + options, stderr=error_log_file)
+			self.logger.info('ANSYS CFX Solver finished')
 		else:
-			print 'ERROR: Ñan not determine your platform'
-			return constants.ERROR_STATUS
+			self.logger.error('ERROR: Ñan not determine your platform')
+			loadcase.status = constants.ERROR_STATUS
 		error_log_file.close()
 		if (os.path.getsize(error_log_filename) == 0):
 			error_flag = False
 			os.remove(error_log_filename)
 		else:
-			error_flag = self.checkLog(error_log_filename)
+			error_flag = self.check_log(error_log_filename)
 
 		os.chdir(cwd)
 		if (not error_flag):
-			return constants.SUCCESS_STATUS
-		return constants.ERROR_STATUS
+			loadcase.status = constants.SUCCESS_STATUS
+		loadcase.status = constants.ERROR_STATUS
 
-	# Creates file from list of strings
-	def CreateFileFromList(self, stringList, filename):
-		with open(filename, 'w') as f:
-			for line in stringList:
-				f.write(line)
+	def check_log(self, log_filename):
+		"""
+		Checks error log file for errors, because sometimes CFX Solver writes
+		something in stderr stream, but it is not an error.
+		Example
+		with -v option CFX Solver writes in stderr:
+		"Adding host antonpc (Anton-PC) (linux-amd64) to the parallel environment."
 
-	# Creates string to launch ANSYS CFX solver
-	def CreateCFXCommand(self):
-		ANSYS_version = self.GetANSYSVersion()
-		if ANSYS_version is not None:
-			cfx_command = ["/ansys_inc/v" + ANSYS_version + "/CFX/bin/cfx5solve"]
-			return cfx_command
-		else:
-			return []
+		Returns:
+		True - if error occured
+		False - otherwise
 
-	# Creates list of options for ANSYS CFX solver
-	# option, its arguments
-	def CreateOptionsCommand(self, options):
-		options_command = options.split()
-		return options_command
-
-	# Determines ANSYS version
-	def GetANSYSVersion(self):
-		if sys.platform.startswith('win'):
-			pass
-		elif sys.platform.startswith('linux'):
-			if (os.path.isdir("/ansys_inc")):
-				dir_list = os.listdir("/ansys_inc")
-				for line in dir_list:
-					temp = re.search("v[\d]+", line)
-					if temp is not None:
-						version = temp.group(0)[1:]
-						return version
-			else:
-				print "ERROR: Ñan not locate your ANSYS installation directory"
-		else:
-			print 'ERROR: Ñan not determine your platform'
-		return None
-
-	# Checks error log file for errors, because
-	# sometimes CFX Solver writes something in stderr stream, but it is not an error
-	# example
-	# with -v option CFX Solver writes in stderr:
-	# "Adding host antonpc (Anton-PC) (linux-amd64) to the parallel environment."
-	def checkLog(self, log_filename):
+		"""
 		error_string = "An error has occurred in cfx5solve:"
 		error_flag = False
 		try:
 			log_file = open(log_filename, "r")
 		except IOError:
-			print "Can not open \"" + log_filename + "\" for reading"
+			self.logger.error("Can not open \"" + log_filename + "\" for reading")
 			return None
 		for line in log_file:
 			if error_string in line:
@@ -160,13 +130,23 @@ class CFXSolver(launcher.Launcher):
 
 		return error_flag
 
-	# This function deletes a directory which is created only when you specify -save
-	# option to CFX solver execution command
-	# When you specify -save and loadcase.ResultFile is not empty string CFX Solver will not work after first run.
-	# If that temporary directory already exists and you run CFX solver for second time with the same
-	# loadcase.ResultFile (the same result file name) it will crash and say: "There is already definition file,
-	# refusing to create another one". It is because of "def" file inside that temporary directory
-	# This function was written to fix such behavior of ANSYS CFX Solver
-	def DeleteTempDir(self, dir_name):
-		if (os.path.isdir(dir_name)):
-			shutil.rmtree(dir_name)
+	def check_options(self, options):
+		"""
+		This function is needed for successful sequential runs of CFX solver.
+		When you specify both -fullname <result_name> and -save options to solver,
+		a temporary directory called "result_name.dir" is created and is not deleted after successful run
+		(because of -save option). It is normal behavior, but when you try to run cfx solver again with the same
+		<result_name> in -fullname option and with -save option it raises an error:
+		<<Aborting due to internal error: "There is already a definition file, refusing to create a new one".>>
+		This function gives us an opportunity to successfully perform sequential runs of cfx solver with -save option
+		and with the same name of result file in -fullname option.
+		This function checks if there are -fullname <result_name> and -save options specified in options string.
+		Then it checks if temporary directory called "<result_name>.dir" exists.
+		If it does exist, then this function deletes that temporary directory and all of its contents.
+
+		"""
+		if("-fullname" and "-save" in options):
+			res_index = options.index("-fullname") + 1
+			temp_dir_name = options[res_index] + ".dir"
+			if (os.path.isdir(temp_dir_name)):
+				shutil.rmtree(temp_dir_name)

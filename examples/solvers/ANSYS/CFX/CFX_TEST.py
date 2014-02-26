@@ -15,33 +15,25 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Loadcase
-import ModelGrid
-import ModelAnalysis
+from multigrid.loadcases.ansysloadcase import AnsysLoadcase
+from multigrid.modelgrid import ModelGrid
+from multigrid.solvers.cfxsolver import CFXSolver
+
 
 def test_1():
+	lc1 = AnsysLoadcase('def_files/StaticMixer.def', CFXSolver.name, "lc1", None,
+						"-fullname CFX_result -output-summary-option 2")
+	lc2 = AnsysLoadcase('def_files/StaticMixer.def', CFXSolver.name, "lc2", None,
+						"-fullname CFX_res -v -output-summary-option 0 -save -name CFX_solution")
 
-    lc1 = Loadcase.Loadcase([],
-        ['def_files/StaticMixer.def', 'CFX_result', [], '', 'ANSYS_CFX', '%', '%'],
-        desc='CFX_loadcase_1')
-
-    mg = ModelGrid.ModelGrid()
-    mg.reinit()
-    mg.set_loadcases([lc1])
-
-    ma_list = []
-
-    ma1 = ModelAnalysis.ModelAnalysis()
-    ma1.options = "-output-summary-option 2"
-    ma_list.append(ma1)
-
-    ma2 = ModelAnalysis.ModelAnalysis()
-    ma2.options = "-v -output-summary-option 0 -save -name CFX_solution"
-    ma_list.append(ma2)
-
-    mg.calculate(ma_list)
-    ma_list = mg.wait_all()
-
-    mg.reinit()
+	mg = ModelGrid()
+	mg.reinit()
+	mg.set_loadcases([lc1])
+	mg.calculate([None])
+	mg.clear_loadcases()
+	mg.set_loadcases([lc2])
+	mg.calculate([None])
+	result_list = mg.wait_all()
+	mg.reinit()
 
 test_1()

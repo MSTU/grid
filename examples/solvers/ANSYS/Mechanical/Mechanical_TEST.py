@@ -15,33 +15,24 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import Loadcase
-import ModelGrid
-import ModelAnalysis
+from multigrid.loadcases.ansysloadcase import AnsysLoadcase
+from multigrid.modelgrid import ModelGrid
+from multigrid.solvers.mechanicalsolver import MechanicalSolver
+
 
 def test_1():
 
-    lc1 = Loadcase.Loadcase([],
-        ['dat_files/input.dat', '', [], '', 'ANSYS_Mechanical', '%', '%'],
-        desc='Mechanical_1')
+	lc1 = AnsysLoadcase('dat_files/input.dat', MechanicalSolver.name, "lc1", None, "-np 4 -m 512")
+	lc2 = AnsysLoadcase('dat_files/input_error.dat', MechanicalSolver.name, "lc2", None, "-m 256 -np 2")
 
-    mg = ModelGrid.ModelGrid()
-    mg.reinit()
-    mg.set_loadcases([lc1])
-
-    ma_list = []
-
-    ma1 = ModelAnalysis.ModelAnalysis()
-    ma1.options = "-np 4 -m 512"
-    ma_list.append(ma1)
-
-    ma2 = ModelAnalysis.ModelAnalysis()
-    ma2.options = "-m 256 -np 2"
-    ma_list.append(ma2)
-
-    mg.calculate(ma_list)
-    ma_list = mg.wait_all()
-
-    mg.reinit()
+	mg = ModelGrid()
+	mg.reinit()
+	mg.set_loadcases([lc1])
+	mg.calculate([None])
+	mg.clear_loadcases()
+	mg.set_loadcases([lc2])
+	mg.calculate([None])
+	result_list = mg.wait_all()
+	mg.reinit()
 
 test_1()

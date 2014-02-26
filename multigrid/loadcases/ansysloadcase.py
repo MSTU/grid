@@ -15,23 +15,22 @@
 #***************************************************************************/
 import constants
 from loadcases.solversloadcase import SolversLoadcase
-from solvers.modelicasolver import ModelicaSolver
 
-class ModelicaLoadcase(SolversLoadcase):
+class AnsysLoadcase(SolversLoadcase):
 	"""
-	Loadcase for ModelicaSolver.
+	Loadcase for ANSYS solvers.
 
 	scheme: string
-		Path to Modelica file.
+		Path to input file
 	desc: string
-		Loadcase name.
+		Loadcase name (this is the name of the directory, where all files will be saved)
 	criteria_list: list
 		List of result parameters, which will be included in result dict
-	solver_params : dict
-		Dictionary of options which will pass to Modelica
-		Example of dictionary of options:
-		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
+	solver_params : string
+		String of options which will pass to ANSYS solvers.
+		Example of string of options for ANSYS CFX Solver:
+		"-v -output-summary-option 0 -save -name CFX_solution"
 
 	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		SolversLoadcase.__init__(self, scheme, ModelicaSolver.name, desc, criteria_list, solver_params)
+	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
+		SolversLoadcase.__init__(self, scheme, solver, desc, criteria_list, solver_params)
