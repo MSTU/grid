@@ -21,6 +21,7 @@ import subprocess # for execution of command prompt scripts
 import os # for navigation through catalogs
 import sys # to define OS type
 import hashlib # for reading file's hash
+from common_methods import create_file_from_list
 
 import constants
 import launcher
@@ -70,7 +71,7 @@ class ModelicaSolver(launcher.Launcher):
 
 		# Host creates all required files
 		for k, v in loadcase.inData.iteritems():
-			self.CreateFileFromList(v, k)
+			create_file_from_list(v, k)
 
 		class_name = self.GetClassName(self.MOS_filename)
 		''' something for checking file's checksum
@@ -201,13 +202,6 @@ class ModelicaSolver(launcher.Launcher):
 		os.chdir(cwd)
 
 		return files_dict
-
-	# Creates a file named "filename" using list of strings "stringList"
-	# Example of "stringList" variable content: ['loadModel(Modelica);\n', 'getErrorString();\n', ...]
-	def CreateFileFromList(self, stringList, filename):
-		with open(filename, 'w') as f:
-			for line in stringList:
-				f.write(line)
 
 	# Creates files of input parameters using dictionaries of input parameters
 	def CreateParFilesFromParDicts(self, par_filename, par_dic):

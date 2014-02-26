@@ -18,15 +18,20 @@
 
 import subprocess
 import os
-import re
 import sys
+import debug
 
 import constants
 import launcher
+from ansys_methods import get_ansys_version
+from common_methods import create_file_from_list
 
 
 class LSDYNASolver(launcher.Launcher):
 	name = "ANSYS_LS-DYNA"
+	_version = get_ansys_version()
+	_exec_path = ["/ansys_inc/v" + _version + "/ansys/bin/lsdyna" + _version]
+
 	# object initialization
 	def __init__(self):
 		launcher.Launcher.__init__(self)
@@ -36,133 +41,108 @@ class LSDYNASolver(launcher.Launcher):
 		                     "PARA", "ENDTIME", "NCYCLE",
 		                     "JOBID", "D3PROP", "GMINP", "GMOUT",
 		                     "MCHECK"]
-		#self.exec_pars_dict = dict.fromkeys(keys)
+		self.logger = debug.logger
 
 	# Loads content of *.k file in special variable inData
 	def load_data(self, lc):
 		if not os.path.isfile(lc.scheme):
-			print "ERROR"
-			print lc.scheme + " does not exist"
+			self.logger.error("ERROR: " + lc.scheme + " does not exist")
 			return None
 		with open(lc.scheme, 'r') as f:
 			lc.inData = f.readlines()
 
-	def run(self, loadcase, ma_object):
+	def run(self, loadcase, input_params):
 		if loadcase.inData is None:
-			print "ERROR"
-			print "inData contains nothing"
+			self.logger.error("ERROR: inData contains nothing")
 			return constants.ERROR_STATUS
 		cwd = os.getcwd()
-		if not os.path.exists(loadcase.Name): os.makedirs(loadcase.Name)
-		os.chdir(loadcase.Name)
-		log_filename = "LS-DYNA_log"
+		if not os.path.exists(loadcase.name): os.makedirs(loadcase.name)
+		os.chdir(loadcase.name)
+		log_filename = "ls_dyna_log"
 		try:
 			log_file = open(log_filename, "w")
 		except IOError:
-			print "Can not create \"" + log_filename + "\""
-			return constants.ERROR_STATUS
+			self.logger.error("ERROR: Can not create \"" + log_filename + "\"")
+			loadcase.status = constants.ERROR_STATUS
 		# loadcase.scheme.rpartition("/")[2] - actual filename
-		#for example
-		#path = /home/user/ls-dyna/file.k
-		#path.rparition("/")[2] = "file.k"
+		# for example
+		# path = /home/user/ls-dyna/file.k
+		# path.rparition("/")[2] = "file.k"
 		k_filename = loadcase.scheme.rpartition("/")[2]
-		self.CreateFileFromList(loadcase.inData, k_filename)
-		#lsdyna is a list that contains the only string to launch ANSYS LS-DYNA
-		#example for ANSYS version 14.5: ["/path_to_lsdyna145/lsdyna145"]
-		lsdyna = self.CreateLSDYNACommand()
-		#options is a list of option strings: ["... = ...", "... = ..."]
+		create_file_from_list(loadcase.inData, k_filename)
+		# options is a list of option strings: ["option_1=value_1", "option_2=value_2"]
 		# there are options for LS DYNA command in ModelAnalysis parameters' dictionary
-		user_dict = {}
-		user_dict.update(ma_object.GetParameters())
-		if (user_dict):
-			options = self.CreateOptionsCommand(user_dict)
-			print options
+		if(loadcase.solver_params is not None):
+			options = self.create_options_command(loadcase.solver_params)
 		else:
 			options = []
 		options += ["I=" + k_filename]
-		if (len(loadcase.ResultFile) != 0):
-			options += ["O=" + loadcase.ResultFile]
 
 		if sys.platform.startswith('win'):
 			pass
 		elif sys.platform.startswith('linux'):
-			print 'executing LS-DYNA'
-			print lsdyna + options
-			subprocess.call(lsdyna + options, stdout=log_file)
-			print 'LS-DYNA finished'
+			self.logger.info('executing LS-DYNA')
+			subprocess.call(self._exec_path + options, stdout=log_file)
+			self.logger.info('LS-DYNA finished')
 		else:
-			print 'Ñan not determine your platform'
-			return constants.ERROR_STATUS
+			self.logger.error('Ñan not determine your platform')
+			loadcase.status = constants.ERROR_STATUS
 		log_file.close()
-		return_code = self.CheckTermination(log_filename)
+		return_code = self.check_log(log_filename)
 		os.chdir(cwd)
 
 		if (return_code == 1):
-			return constants.SUCCESS_STATUS
+			loadcase.status = constants.SUCCESS_STATUS
 		else:
-			print "ERROR Termination"
-			print "Check \"" + log_filename + "\" for a more detailed description"
-			return constants.ERROR_STATUS
-
-	# Creates file from list of strings
-	def CreateFileFromList(self, stringList, filename):
-		with open(filename, 'w') as f:
-			for line in stringList:
-				f.write(line)
-
-	# Creates string to launch ANSYS LS-DYNA
-	def CreateLSDYNACommand(self):
-		ANSYS_version = self.GetANSYSVersion()
-		if ANSYS_version is not None:
-			lsdyna_command = ["/ansys_inc/v" + ANSYS_version + "/ansys/bin/lsdyna" + ANSYS_version]
-			return lsdyna_command
-		else:
-			return []
-
-	# Creates string of options for LS-DYNA
-	def CreateOptionsCommand(self, user_dict):
-		# fill exec_dict
-		exec_dict = {}
-		options_command = []
-		for key, value in user_dict.iteritems():
-			if key.upper() in self.exec_options:
-				exec_dict[key] = value
-			else:
-				print "invalid option on the command line " + key
-				print "skipping it"
-		for key, value in exec_dict.iteritems():
-			options_command += [key + "=" + str(value)]
-
-		return options_command
-
-	# Determines ANSYS version
-	def GetANSYSVersion(self):
-		if sys.platform.startswith('win'):
-			pass
-		elif sys.platform.startswith('linux'):
-			if (os.path.isdir("/ansys_inc")):
-				dir_list = os.listdir("/ansys_inc")
-				for line in dir_list:
-					temp = re.search("v[\d]+", line)
-					if temp is not None:
-						version = temp.group(0)[1:]
-						return version
-			else:
-				print "Ñan not locate your ANSYS installation directory"
-		else:
-			print 'Ñan not determine your platform'
+			self.logger.error("ERROR Termination")
+			self.logger.error("Check \"" + log_filename + "\" for a more detailed description")
+			loadcase.status = constants.ERROR_STATUS
 		return None
 
-	def CheckTermination(self, log_filename):
+
+	def create_options_command(self, solver_params):
+		"""
+		Creates string of options for LS-DYNA
+		Args: string of solver parameters
+		Returns: list. Its length is equal to amount of parameters in input string
+
+		"""
+		if((solver_params.find("I=") or solver_params.find("I =")) != -1):
+			self.logger.error("ERROR: You have already specified name of the input file in loadcase definition")
+		index = solver_params.find("=")
+		while(index != -1):
+			temp = solver_params
+			# there are whitespaces on both sides of = ("option = value")
+			if(solver_params[index-1:index] == " " and solver_params[index+1:index+2] == " "):
+				temp = solver_params[:index-1] + "=" + solver_params[index+2:]
+			# there is only one whitespace on left side of = ("option =value")
+			elif(solver_params[index-1:index] == " "):
+				temp = solver_params[:index-1] + solver_params[index:]
+			# there is only one whitespace on the right side of = ("option= value")
+			elif(solver_params[index+1:index+2] == " "):
+				temp = solver_params[:index+1] + solver_params[index+2:]
+			index = temp.find("=", index+1)
+			solver_params = temp
+		options_command = solver_params.split()
+		return options_command
+
+	def check_log(self, log_filename):
+		"""
+		Checks error log file called "log_filename" for errors
+		Returns:
+		-1 -- if error occurred
+		1 -- otherwise
+
+		"""
 		normal_string = "Normaltermination"
 		flag = -1
 		try:
 			log_file = open(log_filename, "r")
 		except IOError:
-			print "Can not open \"" + log_filename + "\" for reading"
+			self.logger.error("Can not open \"" + log_filename + "\" for reading")
 			return None
 		#string about termination is the last line
-		#we move 85 bytes from the end to the beginning of the file,
+		#we move by 90 bytes from the end to the beginning of the file,
 		#because last line is approximately < 90 bytes in length
 
 		#we are using line.replace(" ", "") to delete all whitespaces,
