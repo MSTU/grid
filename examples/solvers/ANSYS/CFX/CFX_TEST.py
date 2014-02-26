@@ -17,13 +17,14 @@
 #***************************************************************************/
 from multigrid.loadcases.ansysloadcase import AnsysLoadcase
 from multigrid.modelgrid import ModelGrid
-from multigrid.solvers.mechanicalsolver import MechanicalSolver
+from multigrid.solvers.cfxsolver import CFXSolver
 
 
 def test_1():
-
-	lc1 = AnsysLoadcase('dat_files/input.dat', MechanicalSolver.name, "lc1", None, "-np 4 -m 512")
-	lc2 = AnsysLoadcase('dat_files/input_error.dat', MechanicalSolver.name, "lc2", None, "-m 256 -np 2")
+	lc1 = AnsysLoadcase('def_files/StaticMixer.def', CFXSolver.name, "lc1", None,
+						"-fullname CFX_result -output-summary-option 2")
+	lc2 = AnsysLoadcase('def_files/StaticMixer.def', CFXSolver.name, "lc2", None,
+						"-fullname CFX_res -v -output-summary-option 0 -save -name CFX_solution")
 
 	mg = ModelGrid()
 	mg.reinit()
