@@ -21,6 +21,9 @@ from celery.result import AsyncResult
 from localworker import run_task as local_run
 from remoteworker import run_task as remote_run
 
+def run_fileserver():
+	pass
+
 class MultiGrid:
 	def __init__(self, is_local_work=False):
 		"""
@@ -39,9 +42,14 @@ class MultiGrid:
 		"""
 		if not isinstance(loadcases, list):
 			loadcases = [loadcases]
+		# if some loadcases needed in filetransfer, run ftp server
+		for loadcase in loadcases:
+			if loadcase.need_filetransfer:
+				run_fileserver()
+				break
 		result_ids = []
 		if isinstance(input_list, dict):
-			input_list = MultiGrid._dict_to_list(input_list)
+			input_list = _dict_to_list(input_list)
 		for item in input_list:
 			task = Task(loadcases, item)
 			if not self._is_local_work:
@@ -71,7 +79,7 @@ class MultiGrid:
 				#TODO right error handling
 				result_task = None
 			results.append(result_task.result)
-		result_dict = MultiGrid._list_to_dict(results)
+		result_dict = _list_to_dict(results)
 		# if only one loadcase calculated, return value of the one loadcase
 		# else return all dictionary
 		#if len(result_dict) is 1:
@@ -108,45 +116,44 @@ class MultiGrid:
 		"""
 		self.__init__(self._is_local_work)
 
-	@staticmethod
-	def _list_to_dict(list_):
-		"""
-		Convert list of dictionaries with equals keys to dictionary of lists
-		[{'a':1,'b':2}, {'a':3, 'b':4}] -> {'a':[1,3], 'b':[2,4]}
-		"""
-		result = dict()
-		# init dict by lists
-		for key, value in list_[0].iteritems():
-			result[key] = []
-		for item in list_:
-			for key, value in item.iteritems():
-				result[key].append(value)
-		return result
 
-	@staticmethod
-	def _dict_to_list(dict_):
-		"""
-		Convert dictionary of lists to list of dictionaries with equals keys
-		{'a':[1,3], 'b':[2,4]} -> [{'a':1,'b':2}, {'a':3, 'b':4}]
-		"""
-		result = []
-		is_lists_equal = True
-		list_len = 0
-		keys = dict_.keys()
-		# check if list in dictionary is equal
-		for key, value in dict_.iteritems():
-			if list_len:
-				is_lists_equal &= (list_len == len(value))
-			else:
-				list_len = len(value)
+def _list_to_dict(list_):
+	"""
+	Convert list of dictionaries with equals keys to dictionary of lists
+	[{'a':1,'b':2}, {'a':3, 'b':4}] -> {'a':[1,3], 'b':[2,4]}
+	"""
+	result = dict()
+	# init dict by lists
+	for key, value in list_[0].iteritems():
+		result[key] = []
+	for item in list_:
+		for key, value in item.iteritems():
+			result[key].append(value)
+	return result
 
-		if is_lists_equal:
-			for i in xrange(list_len):
-				item = dict()
-				for key in keys:
-					item[key] = dict_[key][i]
-				result.append(item)
-			return result
+def _dict_to_list(dict_):
+	"""
+	Convert dictionary of lists to list of dictionaries with equals keys
+	{'a':[1,3], 'b':[2,4]} -> [{'a':1,'b':2}, {'a':3, 'b':4}]
+	"""
+	result = []
+	is_lists_equal = True
+	list_len = 0
+	keys = dict_.keys()
+	# check if list in dictionary is equal
+	for key, value in dict_.iteritems():
+		if list_len:
+			is_lists_equal &= (list_len == len(value))
 		else:
-			# TODO handle this case
-			return []
+			list_len = len(value)
+
+	if is_lists_equal:
+		for i in xrange(list_len):
+			item = dict()
+			for key in keys:
+				item[key] = dict_[key][i]
+			result.append(item)
+		return result
+	else:
+		# TODO handle this case
+		return []

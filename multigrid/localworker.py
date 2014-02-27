@@ -1,4 +1,4 @@
-from conf.config import get_solver
+from solvers.holder import get_solver
 
 def run_task(task):
 	for lc in task.loadcases:
