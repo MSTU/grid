@@ -15,8 +15,8 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.ansysloadcase import AnsysLoadcase
-from multigrid.modelgrid import ModelGrid
+from multigrid import map
+from solvers.ansys.ansysloadcase import AnsysLoadcase
 from solvers.ansys.mechanicalsolver import MechanicalSolver
 
 
@@ -25,14 +25,8 @@ def test_1():
 	lc1 = AnsysLoadcase('dat_files/input.dat', MechanicalSolver.name, "lc1", None, "-np 4 -m 512")
 	lc2 = AnsysLoadcase('dat_files/input_error.dat', MechanicalSolver.name, "lc2", None, "-m 256 -np 2")
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
+	result = map([lc1, lc2], [None])
+	result_1 = result['lc1']
+	result_2 = result['lc2']
 
 test_1()

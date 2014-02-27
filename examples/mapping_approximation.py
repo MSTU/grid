@@ -16,7 +16,7 @@
 #*                                                                         *
 #***************************************************************************/
 
-from multigrid import map as mulitmap
+from multigrid import map as multimap
 from multigrid.solvers.pythonsolver import PythonLoadcase
 
 import matplotlib.pyplot as plt
@@ -37,7 +37,7 @@ def test_1():
 
 	input_list = [(x, y) for y in xrange(6) for x in xrange(6)]
 
-	result = mulitmap([lc1, lc2], input_list)
+	result = multimap([lc1, lc2], input_list)
 	f1 = result[func_1.__name__]
 	f2 = result[func_2.__name__]
 

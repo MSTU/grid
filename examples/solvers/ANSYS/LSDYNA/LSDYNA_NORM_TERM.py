@@ -15,8 +15,8 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.ansysloadcase import AnsysLoadcase
-from multigrid.modelgrid import ModelGrid
+from multigrid import map
+from solvers.ansys.ansysloadcase import AnsysLoadcase
 from solvers.ansys.lsdynasolver import LSDYNASolver
 
 
@@ -24,14 +24,8 @@ def test_1():
 	lc1 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc1", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
 	lc2 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc2", None, "O=result.out ENDTIME=8e-2 NCPU=1")
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
+	result = map([lc1, lc2], [None])
+	result_lc1 = result['lc1']
+	result_lc2 = result['lc2']
 
 test_1()

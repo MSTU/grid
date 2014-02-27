@@ -8,9 +8,7 @@ def f(x):
 	return x * x
 
 
-def f1(input):
-	x = input['x']
-	y = input['y']
+def f1(x, y):
 	return x / y
 
 class LocalTest(unittest.TestCase):
@@ -38,9 +36,9 @@ class LocalTest(unittest.TestCase):
 
 	def test_3(self):
 		lc = PythonLoadcase(f1)
-		x = range(10, 20)
-		y = range(10)
-		result = self.mg.map(lc, {'x': x, 'y': y})[f1.__name__]
+		x_list = range(10, 20)
+		y_list = range(10)
+		result = self.mg.map(lc, [(x, y) for x, y in zip(x_list, y_list)])[f1.__name__]
 		#TODO right error handling and status checking
 
 

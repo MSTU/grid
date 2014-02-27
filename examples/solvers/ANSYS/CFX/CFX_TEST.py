@@ -15,9 +15,11 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.loadcases.ansysloadcase import AnsysLoadcase
-from multigrid.modelgrid import ModelGrid
+from solvers.ansys.ansysloadcase import AnsysLoadcase
 from solvers.ansys.cfxsolver import CFXSolver
+
+from multigrid import calculate
+from multigrid import get
 
 
 def test_1():
@@ -26,14 +28,9 @@ def test_1():
 	lc2 = AnsysLoadcase('def_files/StaticMixer.def', CFXSolver.name, "lc2", None,
 						"-fullname CFX_res -v -output-summary-option 0 -save -name CFX_solution")
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
+	lc1_ids = calculate(lc1, [None])
+	lc2_ids = calculate(lc2, [None])
+	lc1_results = get(lc1_ids)
+	lc2_results = get(lc2_ids)
 
 test_1()

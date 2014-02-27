@@ -15,22 +15,16 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from loadcases.ansysloadcase import AnsysLoadcase
-from modelgrid import ModelGrid
+from multigrid import map
+from solvers.ansys.ansysloadcase import AnsysLoadcase
 from solvers.ansys.lsdynasolver import LSDYNASolver
 
 def test_1():
-	lc1 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc3", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
-	lc2 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc4_error", None, "O=result.out ENDTIME=ERROR NCPU=1")
+	lc3 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc3", None, "NCPU=4 ENDTIME=4e-2 O=my_result.out")
+	lc4 = AnsysLoadcase('k_files/bouncing.k', LSDYNASolver.name, "lc4_error", None, "O=result.out ENDTIME=ERROR NCPU=1")
 
-	mg = ModelGrid()
-	mg.reinit()
-	mg.set_loadcases([lc1])
-	mg.calculate([None])
-	mg.clear_loadcases()
-	mg.set_loadcases([lc2])
-	mg.calculate([None])
-	result_list = mg.wait_all()
-	mg.reinit()
+	result = map([lc3, lc4], [None])
+	result_lc3 = result['lc3']
+	result_lc4 = result['lc4_error']
 
 test_1()
