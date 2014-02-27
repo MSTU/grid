@@ -50,23 +50,25 @@ class ModelicaLoadcase(SolversLoadcase):
 		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
 
 	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		SolversLoadcase.__init__(self, scheme, name, desc, criteria_list, solver_params)
+	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None, need_filetransfer=False):
+		SolversLoadcase.__init__(self, scheme, name, desc, need_filetransfer, criteria_list, solver_params)
+		print self.need_filetransfer
 
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file string
 	def load_data(self):
-		Loadcase.load_data(self)
+		if not self.need_filetransfer:
+			Loadcase.load_data(self)
 
-		files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
-		# load .mos file
-		with open(self.scheme, 'r') as f:
-			mos = f.readlines()
-		files_dict[MOS_filename] = mos
-		files_dict.update(CreateMOfilesDict(self.scheme))
-		self.inData = files_dict
+			files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+			# load .mos file
+			with open(self.scheme, 'r') as f:
+				mos = f.readlines()
+			files_dict[MOS_filename] = mos
+			files_dict.update(CreateMOfilesDict(self.scheme))
+			self.inData = files_dict
 
 
 # Returns a dictionary, where keys are mo filenames and values are list of mo file strings
@@ -91,6 +93,24 @@ def CreateMOfilesDict(MOS_file_path):
 	os.chdir(cwd)
 
 	return files_dict
+
+
+def get_filename_list(scheme):
+	"""
+	Return all filenames needed for this scheme
+	"""
+	file_list = []
+	file_list.append(scheme)
+	# load .mos file
+	with open(scheme, 'r') as f:
+		mos_file = f.readlines()
+		for line in mos_file:
+			if not line.startswith('loadFile'):
+				pass
+			else:
+				mo_filename = re.search('(\w)+\.mo', line).group()
+				file_list.append(mo_filename)
+	return file_list
 
 
 class ModelicaSolver(launcher.Launcher):

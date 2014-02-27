@@ -29,8 +29,8 @@ class SolversLoadcase(Loadcase):
 	solver_params : dictionary or string
 		Dictionary or string of options which will pass to solvers.
 	"""
-	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		Loadcase.__init__(self, scheme, solver, desc)
+	def __init__(self, scheme, solver, desc, need_filetransfer, criteria_list, solver_params):
+		Loadcase.__init__(self, scheme, solver, desc, need_filetransfer)
 
 		self.criteria_list = criteria_list
 		self.solver_params = solver_params

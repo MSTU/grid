@@ -13,7 +13,7 @@ def f1(x, y):
 
 class LocalTest(unittest.TestCase):
 	def setUp(self):
-		self.mg = MultiGrid(True)
+		self.mg = MultiGrid(False)
 
 	def test_1(self):
 		lc = PythonLoadcase(f)
@@ -23,7 +23,7 @@ class LocalTest(unittest.TestCase):
 
 	def test_2(self):
 		lc_name = 'lc'
-		lc = ModelicaLoadcase('mos/mydcmotor.mos', lc_name)
+		lc = ModelicaLoadcase('mos/mydcmotor.mos', lc_name, need_filetransfer=True)
 
 		input = dict()
 		input['resistor1.R'] = [5.0, 2.0]

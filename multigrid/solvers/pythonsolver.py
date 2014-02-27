@@ -30,7 +30,7 @@ class PythonLoadcase(Loadcase):
 		if not desc:
 			desc = scheme.__name__
 		func_dump = cloudpickle.dumps(scheme)
-		Loadcase.__init__(self, func_dump, name, desc)
+		Loadcase.__init__(self, func_dump, name, desc, False)
 
 class PythonSolver(Launcher):
 
