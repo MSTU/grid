@@ -12,22 +12,26 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import redirect, render
+from django.conf import settings
 
 from grid_frontend import util
 from grid_frontend.forms import MathModelForm, JobForm, LoadcaseForm
 
 from grid_frontend.models import Job, MathModel, Loadcase, Task
 
-from multigrid.loadcases.modelicaloadcase import ModelicaLoadcase
+from multigrid import calculate
+from multigrid.solvers.modelicasolver import ModelicaLoadcase
 from multigrid.solvers.pythonsolver import PythonSolver
 from multigrid.solvers.modelicasolver import ModelicaSolver
-from multigrid.modelgrid import MultiGrid
+from multigrid.multigrid import MultiGrid
+from solvers import pythonsolver
+from solvers import modelicasolver
 
 import logging
 
 logger = logging.getLogger('multigrid_web_app')
 
-MODEL_TYPES = [PythonSolver.name, ModelicaSolver.name]
+MODEL_TYPES = [pythonsolver.name, modelicasolver.name]
 
 @login_required
 def get_main(request):
@@ -141,7 +145,7 @@ def jobs_list(request):
 		data = paginator.page(paginator.num_pages)
 
 	return TemplateResponse(request, 'jobs.html',
-							{'errors': errors, 'data': data, 'num_pages': xrange(1, paginator.num_pages + 1)})
+							{'errors': errors, 'data': data, 'num_pages': xrange(1, paginator.num_pages + 1), 'flower': settings.FLOWER_ADDRESS})
 
 
 @login_required
@@ -304,14 +308,11 @@ def calc_job(request, job_id):
 	for web_lc in job.loadcases.all():
 		mathmodel = web_lc.mathmodel
 		lc = None
-		if mathmodel.type == PythonSolver.name:
+		if mathmodel.type == pythonsolver.name:
 			pass
-		elif mathmodel.type == ModelicaSolver.name:
+		elif mathmodel.type == modelicasolver.name:
 			lc = ModelicaLoadcase(mathmodel.name)
 		loadcases.append(lc)
-
-	mg = MultiGrid()
-	mg.set_loadcases(loadcases)
 
 	if job.is_input_file:
 		params_list = get_input_list_from_file(job.input_params)
@@ -321,7 +322,7 @@ def calc_job(request, job_id):
 		for item in input_parameters_string:
 			params_list.append(parse_input_params(item))
 
-	task_ids = mg.calculate(params_list)
+	task_ids = calculate(loadcases, params_list)
 
 	for task_id, param in zip(task_ids, params_list):
 		task = Task(task_id=task_id, input_params=param, job=job)

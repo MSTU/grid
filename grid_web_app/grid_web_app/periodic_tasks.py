@@ -39,7 +39,7 @@ def check_results():
 	for task in all_job_tasks:
 		async_result = AsyncResult(task.task_id)
 		if async_result.ready():
-			#task.result = async_result.get().result_params
+			task.result = async_result.get().result
 			task.is_finished = True
 			task.save()
 			logger.info("Task " + task.task_id + " finished")
