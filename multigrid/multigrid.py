@@ -43,10 +43,10 @@ class MultiGrid:
 		if not isinstance(loadcases, list):
 			loadcases = [loadcases]
 		# if some loadcases needed in filetransfer, run ftp server
-		for loadcase in loadcases:
-			if loadcase.need_filetransfer:
-				run_fileserver()
-				break
+		# for loadcase in loadcases:
+		# 	if loadcase.need_filetransfer:
+		# 		run_fileserver()
+		# 		break
 		result_ids = []
 		if isinstance(input_list, dict):
 			input_list = _dict_to_list(input_list)
@@ -75,6 +75,8 @@ class MultiGrid:
 					result_task = async_result.get()
 				else:
 					result_task = self._id_to_task.pop(result_id)
+				# it's new instance of Task, therefore need to reassign id field
+				result_task.id = result_id
 			except Exception as e:
 				#TODO right error handling
 				result_task = None
@@ -98,17 +100,15 @@ class MultiGrid:
 		"""
 		Check if task is ready
 		"""
-		is_ready = True
 		if not self._is_local_work:
 			if isinstance(result_ids, list):
 				for result_id in result_ids:
-					is_ready &= AsyncResult(result_id).ready()
-					if not is_ready:
-						break
+					if not AsyncResult(result_id).ready():
+						return False
 			else:
-				is_ready &= AsyncResult(result_ids).ready()
+				return AsyncResult(result_ids).ready()
 
-		return is_ready
+		return True
 
 	def reload(self):
 		"""

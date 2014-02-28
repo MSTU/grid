@@ -32,3 +32,6 @@ class Task:
 		for loadcase in self.loadcases:
 			if self.status > loadcase.status:
 				self.status = loadcase.status
+
+	def __repr__(self):
+		return "Task: loadcases = %r, status = %s " % (self.loadcases, self.status)
