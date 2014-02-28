@@ -93,6 +93,28 @@ def CreateMOfilesDict(MOS_file_path):
 	return files_dict
 
 
+def generate_params_string(params):
+	result = ''
+	if isinstance(params, dict):
+		for key, value in params.iteritems():
+			result += key + ' = ' + str(value)
+			result += ', '
+		# delete last comma and space
+		result = result[:-2]
+	else:
+		result = params
+	return result
+
+def create_mos_by_mo(mo_file, simulate_params):
+	mos_file = 'loadModel(Modelica);\n'
+	mos_file += 'getErrorString();\n'
+	mos_file += 'loadFile("' + mo_file + '");\n'
+	mos_file += 'getErrorString();\n'
+	mos_file += 'simulate(dcmotor, ' + generate_params_string(simulate_params) + ', outputFormat = "plt");\n'
+	mos_file += 'getErrorString();\n'
+	return mos_file
+
+
 class ModelicaSolver(launcher.Launcher):
 	# compiles *.mo file using *.mos file to get exe-file of the model
 	def compile(self, MOS_filename):
@@ -113,7 +135,8 @@ class ModelicaSolver(launcher.Launcher):
 		cwd = os.getcwd()
 		#if not os.path.exists(id): os.makedirs(id)
 		#os.chdir(id)
-		if not os.path.exists(loadcase.name): os.makedirs(loadcase.name)
+		if not os.path.exists(loadcase.name):
+			os.makedirs(loadcase.name)
 		os.chdir(loadcase.name)
 
 		# Host creates all required files
