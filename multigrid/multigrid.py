@@ -15,6 +15,8 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import ast
+from conf import configclient
 from task import Task
 from celery.result import AsyncResult
 
@@ -115,6 +117,25 @@ class MultiGrid:
 		Reinit instance
 		"""
 		self.__init__(self._is_local_work)
+
+	def web_get(self, result_ids):
+		import urllib2
+		if not isinstance(result_ids, list):
+			result_ids = [result_ids]
+
+		results = []
+		for result_id in result_ids:
+			try:
+				response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+									   '/api/get_result/' + str(result_id) + '/').read()
+				result = ast.literal_eval(response)
+			except Exception:
+				result = None
+		results.append(result)
+		# result_dict = _list_to_dict(results)
+		# return result_dict
+		return results
+
 
 
 def _list_to_dict(list_):
