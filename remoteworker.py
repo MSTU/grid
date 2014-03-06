@@ -15,6 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+
 from celery import Celery
 from conf import config
 import localworker

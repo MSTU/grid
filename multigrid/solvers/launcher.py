@@ -34,7 +34,7 @@ class Launcher:
 
 	def run(self, lc, input_params):
 		"""
-        Launching one loadcase. Takes loadcase and input parameters as input.
-        Returns result of computation. Sets solution status of loadcase.
+		Launching one loadcase. Takes loadcase and input parameters as input.
+		Returns result of computation. Sets solution status of loadcase.
 		"""
 		pass

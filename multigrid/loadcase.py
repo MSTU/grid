@@ -25,7 +25,6 @@ class Loadcase:
 		self.scheme = scheme
 		self.name = desc
 		self.solver = solver
-		self.status = constants.DEFAULT_STATUS
 		self.load_data()
 
 	def load_data(self):

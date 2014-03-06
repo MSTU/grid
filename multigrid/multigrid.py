@@ -16,12 +16,19 @@
 #*                                                                         *
 #***************************************************************************/
 import ast
+import json
 from conf import configclient
 from task import Task
-from celery.result import AsyncResult
+try:
+	from celery.result import AsyncResult
+except:
+	pass
 
 from localworker import run_task as local_run
-from remoteworker import run_task as remote_run
+try:
+	from remoteworker import run_task as remote_run
+except:
+	pass
 
 def run_fileserver():
 	pass
@@ -128,14 +135,35 @@ class MultiGrid:
 			try:
 				response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
 									   '/api/get_result/' + str(result_id) + '/').read()
-				result = ast.literal_eval(response)
+				result = json.loads(response)
 			except Exception:
 				result = None
 		results.append(result)
 		# result_dict = _list_to_dict(results)
 		# return result_dict
+		if len(results) == 1:
+			return results[0]
 		return results
 
+	def web_get_ids(self, job_name):
+		import urllib2
+		try:
+			response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+									   '/api/get_ids/' + job_name + '/').read()
+			result = json.loads(response)
+		except Exception:
+			result = None
+		return result
+
+	def web_get_results_from_job(self, job_name):
+		import urllib2
+		try:
+			response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+									   '/api/get_results_from_job/' + job_name + '/').read()
+			result = json.loads(response)
+		except Exception:
+			result = None
+		return result
 
 
 def _list_to_dict(list_):

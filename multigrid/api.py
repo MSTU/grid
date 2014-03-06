@@ -1,7 +1,7 @@
 from multigrid import MultiGrid
 from conf.configclient import LOCAL_WORK
 
-__all__ = ['calculate', 'get', 'map', 'reload', 'ready', 'web_get']
+__all__ = ['calculate', 'get', 'map', 'reload', 'ready']
 
 _instance = MultiGrid(LOCAL_WORK)
 
@@ -11,3 +11,5 @@ map = _instance.map
 reload = _instance.reload
 ready = _instance.ready
 web_get = _instance.web_get
+web_get_ids = _instance.web_get_ids
+web_get_results_from_job = _instance.web_get_results_from_job
