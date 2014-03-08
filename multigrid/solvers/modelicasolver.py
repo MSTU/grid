@@ -22,7 +22,7 @@ import os # for navigation through catalogs
 import ntpath
 
 import sys # to define OS type
-from solvers.ansys.common_methods import create_file
+from solvers.common_methods import create_file
 import constants
 import launcher
 import debug

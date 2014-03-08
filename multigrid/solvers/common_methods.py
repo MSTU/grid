@@ -21,9 +21,10 @@ import debug
 
 logger = debug.logger
 
-def create_file(stringList, filename):
+
+def create_file(string_list, filename):
 	"""
-	Creates a file named "filename" using list of strings "stringList"
+	Creates a file named "filename" using list of strings "string_list"
 
 	"""
 	try:
@@ -33,6 +34,6 @@ def create_file(stringList, filename):
 		import traceback
 		traceback.print_exc()
 		return None
-	for line in stringList:
+	for line in string_list:
 		f.write(line)
 	f.close()
