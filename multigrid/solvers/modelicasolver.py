@@ -21,7 +21,7 @@ import subprocess # for execution of command prompt scripts
 import os # for navigation through catalogs
 
 import sys # to define OS type
-from solvers.ansys.common_methods import create_file_from_list
+from solvers.common_methods import create_file_from_list
 import constants
 import launcher
 import debug

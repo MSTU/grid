@@ -24,7 +24,7 @@ import debug
 import constants
 import launcher
 from solvers.ansys.ansys_methods import get_ansys_version
-from solvers.ansys.common_methods import create_file_from_list
+from solvers.common_methods import create_file_from_list
 
 
 class LSDYNASolver(launcher.Launcher):
