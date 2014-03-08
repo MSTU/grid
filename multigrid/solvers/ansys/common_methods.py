@@ -21,7 +21,7 @@ import debug
 
 logger = debug.logger
 
-def create_file_from_list(stringList, filename):
+def create_file(stringList, filename):
 	"""
 	Creates a file named "filename" using list of strings "stringList"
 
@@ -30,6 +30,8 @@ def create_file_from_list(stringList, filename):
 		f = open(filename, "w")
 	except IOError:
 		logger.error("Can not create file \"" + filename + "\"")
+		import traceback
+		traceback.print_exc()
 		return None
 	for line in stringList:
 		f.write(line)

@@ -19,9 +19,10 @@
 import re # for using regular expressions
 import subprocess # for execution of command prompt scripts
 import os # for navigation through catalogs
+import ntpath
 
 import sys # to define OS type
-from solvers.ansys.common_methods import create_file_from_list
+from solvers.ansys.common_methods import create_file
 import constants
 import launcher
 import debug
@@ -29,7 +30,7 @@ from loadcase import Loadcase
 from solversloadcase import SolversLoadcase
 
 
-MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
+#MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
 name = "ModelicaDynamic"
 
 logger = debug.logger
@@ -60,13 +61,13 @@ class ModelicaLoadcase(SolversLoadcase):
 	def load_data(self):
 		Loadcase.load_data(self)
 
-		files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+		#files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
 		# load .mos file
 		with open(self.scheme, 'r') as f:
-			mos = f.readlines()
-		files_dict[MOS_filename] = mos
-		files_dict.update(CreateMOfilesDict(self.scheme))
-		self.inData = files_dict
+			mo = f.readlines()
+		# files_dict[MOS_filename] = mos
+		# files_dict.update(CreateMOfilesDict(self.scheme))
+		self.inData = mo
 
 
 # Returns a dictionary, where keys are mo filenames and values are list of mo file strings
@@ -106,12 +107,13 @@ def generate_params_string(params):
 	return result
 
 def create_mos_by_mo(mo_file, simulate_params):
-	mos_file = 'loadModel(Modelica);\n'
-	mos_file += 'getErrorString();\n'
-	mos_file += 'loadFile("' + mo_file + '");\n'
-	mos_file += 'getErrorString();\n'
-	mos_file += 'simulate(dcmotor, ' + generate_params_string(simulate_params) + ', outputFormat = "plt");\n'
-	mos_file += 'getErrorString();\n'
+	mos_file = []
+	mos_file.append('loadModel(Modelica);\n')
+	mos_file.append('getErrorString();\n')
+	mos_file.append('loadFile("' + mo_file + '");\n')
+	mos_file.append('getErrorString();\n')
+	mos_file.append('simulate(dcmotor, ' + generate_params_string(simulate_params) + ', outputFormat = "plt");\n')
+	mos_file.append('getErrorString();\n')
 	return mos_file
 
 
@@ -140,8 +142,13 @@ class ModelicaSolver(launcher.Launcher):
 		os.chdir(loadcase.name)
 
 		# Host creates all required files
-		for k, v in loadcase.inData.iteritems():
-			create_file_from_list(v, k)
+		# for k, v in loadcase.inData.iteritems():
+		# 	create_file_from_list(v, k)
+
+		mo_filename = ntpath.basename(loadcase.scheme)
+		MOS_filename = mo_filename[:-3] + generate_params_string(loadcase.solver_params) + '.mos'
+		create_file(loadcase.inData, mo_filename)
+		create_file(create_mos_by_mo(mo_filename, loadcase.solver_params), MOS_filename)
 
 		class_name = self.GetClassName(MOS_filename)
 		''' something for checking file's checksum

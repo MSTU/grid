@@ -8,8 +8,8 @@ def f(x):
 	return x * x
 
 
-def f1(x, y):
-	return x / y
+def f1(xy):
+	return xy[0] / xy[1]
 
 class LocalTest(unittest.TestCase):
 	def setUp(self):
@@ -23,7 +23,7 @@ class LocalTest(unittest.TestCase):
 
 	def test_2(self):
 		lc_name = 'lc'
-		lc = ModelicaLoadcase('mos/mydcmotor.mos', lc_name)
+		lc = ModelicaLoadcase('mos/mydcmotor.mo', lc_name, solver_params={'startTime': 0.0, 'stopTime': 10.0, 'numberOfIntervals': 10})
 
 		input = dict()
 		input['resistor1.R'] = [5.0, 2.0]

@@ -22,11 +22,15 @@ from multigrid.solvers.pythonsolver import PythonLoadcase
 import matplotlib.pyplot as plt
 
 
-def func_1(x, y):
+def func_1(pair):
+	x = pair[0]
+	y = pair[1]
 	return (x - 2) ** 2 + (y - 1) ** 2
 
 
-def func_2(x, y):
+def func_2(pair):
+	x = pair[0]
+	y = pair[1]
 	return (x - 5) ** 2 + (y - 5) ** 2
 
 

@@ -23,7 +23,7 @@ import sys
 import debug
 import constants
 import launcher
-from solvers.ansys.common_methods import create_file_from_list
+from solvers.ansys.common_methods import create_file
 from solvers.ansys.ansys_methods import get_ansys_version
 
 
@@ -64,7 +64,7 @@ class MechanicalSolver(launcher.Launcher):
 		# path = /home/user/mechanical/file.dat
 		# path.rparition("/")[2] = "file.dat"
 		dat_filename = loadcase.scheme.rpartition("/")[2]
-		create_file_from_list(loadcase.inData, dat_filename)
+		create_file(loadcase.inData, dat_filename)
 		if(loadcase.solver_params is not None):
 			options = loadcase.solver_params.split()
 		else:
