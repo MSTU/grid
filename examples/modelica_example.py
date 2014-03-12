@@ -19,7 +19,7 @@
 from multigrid.solvers.modelicasolver import ModelicaLoadcase
 from multigrid import map as multimap
 
-def test_1 ():
+def test_1():
 
 	lc1 = ModelicaLoadcase('mos/mydcmotor.mo', desc='lc1', solver_params={'startTime': 0.0, 'stopTime': 10.0, 'numberOfIntervals': 10})
 

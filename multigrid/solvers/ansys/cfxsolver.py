@@ -118,7 +118,7 @@ class CFXSolver(launcher.Launcher):
 				error_flag = True
 				break
 
-		if (error_flag):
+		if(error_flag):
 			log_file.seek(0)
 			for line in log_file:
 				print line
