@@ -127,14 +127,11 @@ def get_class_name_by_mo(mo_filename):
 		logger.error("Can not open \"" + mo_filename + "\" for reading")
 	for line in mo_file:
 		if line.startswith("model"):
-			#starting line: "model dcmotor\n"
-			class_name = line[6:-2]
-			#we are cutting 6 symbols from beginning: 'model '
-			#and 2 symbols from ending: "\n"
+			class_name = line.split()[1]
 	return class_name
 
 class ModelicaSolver(launcher.Launcher):
-	def compile(self, MOS_filename):
+	def compile(self, mos_filename):
 		"""
 		compiles *.mo file using *.mos file to get exe-file of the model
 
@@ -145,10 +142,10 @@ class ModelicaSolver(launcher.Launcher):
 			logger.error("Can not create \"" + log_filename + "\"")
 		logger.info("Begin compiling")
 		if sys.platform.startswith('win'):
-			command = '%OPENMODELICAHOME%/bin/omc.exe ' + MOS_filename
+			command = '%OPENMODELICAHOME%/bin/omc.exe ' + mos_filename
 			subprocess.call(["cmd", "/C", command], stdout=log_file)
 		elif sys.platform.startswith('linux'):
-			subprocess.call(["omc", MOS_filename], stdout=log_file)
+			subprocess.call(["omc", mos_filename], stdout=log_file)
 		else:
 			logger.error("Can't determine platform")
 			return constants.ERROR_STATUS
@@ -182,17 +179,20 @@ class ModelicaSolver(launcher.Launcher):
 		self.create_par_files_from_dicts(par_filename, input_params)
 
 		if sys.platform.startswith('win'):
-			if(os.path.isfile(class_name + '.exe')):
-				pass
-			else:
-				#self.compile(mos_filename) # getting exe-file using mo and mos files
+			if(recomp_flag):
 				if(self.compile(mos_filename) == constants.ERROR_STATUS):
 					loadcase.status = constants.ERROR_STATUS
+					logger.error("ERROR in compilation")
 					os.chdir(cwd)
 					return None
 			command = class_name + '.exe -overrideFile ' + par_filename + ' -r ' + res_filename
 			logger.info("Begin executing")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
+			if not self.check_execution(res_filename):
+				loadcase.status = constants.ERROR_STATUS
+				logger.error("ERROR in execution process")
+				os.chdir(cwd)
+				return None
 			logger.info("End executing")
 		elif sys.platform.startswith('linux'):
 			if(recomp_flag):
@@ -204,7 +204,7 @@ class ModelicaSolver(launcher.Launcher):
 			command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
 			logger.info("Begin executing")
 			subprocess.call(["./" + class_name] + command)
-			if not self.check_execution():
+			if not self.check_execution(res_filename):
 				loadcase.status = constants.ERROR_STATUS
 				logger.error("ERROR in execution process")
 				os.chdir(cwd)
@@ -220,30 +220,8 @@ class ModelicaSolver(launcher.Launcher):
 		result = self.create_results_dict(res_filename)
 		loadcase.status = constants.SUCCESS_STATUS
 
-		os.remove(log_filename)
 		os.chdir(cwd)
 		return result
-
-	# using this function you can specify simulate parameters listed in MOS file
-	# for instance: setSimulateParameters('mos_file.mos', 'stopTime', 35.5)
-	def setSimulateParameter(self, MOS_filename, par_name, par_value):
-		temp_file = open('temp', 'w')
-		with open(MOS_filename, 'r') as f:
-			for line in f:
-				if (not line.startswith('simulate')):
-					temp_file.write(line)
-				else:
-					temp_file.write(re.sub(par_name + '( )?=( )?(\d)+(\.(\d)+)*', par_name + ' = ' + par_value, line))
-					#par_name + '( )?=( )?(\d)+(\.(\d)+)*
-					#line matches above pattern if it contains something like:
-					#par_name(1 or 0 spaces)=(1 or 0 spaces)(any number of digits)
-					#par_name(1 or 0 spaces)=(1 or 0 spaces)(any number of digits).(1 digit or more)
-		temp_file.close()
-		#now temp file is a full copy of MOS file with one difference in parameter value
-		#parameter named "par_name" has changed its old value to "par_value"
-		os.unlink(MOS_filename) #deleting old MOS file
-		os.rename(temp_file.name, MOS_filename)
-		#changed temp filename to MOS filename, so we can use old filename with new content
 
 	def get_class_name(self, mos_filename):
 		"""
@@ -348,10 +326,19 @@ class ModelicaSolver(launcher.Launcher):
 			# if it is first run, then there won't be any mos file and we need to compile
 			print 'NO MOS FILE'
 			return True
+		if sys.platform.startswith('win'):
+			if not os.path.isfile(class_name + ".exe"):
+				# There is no any executable file, so we really need to compile
+				return True
+		elif sys.platform.startswith('linux'):
+			if not os.path.isfile(class_name):
+				return True
+		else:
+			logger.info("Can not determine type of your OS")
 		try:
 			mos_file = open(mos_filename, "r")
 		except IOError:
-			logger.error("Can not open \"" + log_filename + "\" for reading")
+			logger.error("Can not open \"" + mos_filename + "\" for reading")
 			return constants.ERROR_STATUS
 		for line in mos_file:
 			if line.startswith("loadFile("):
