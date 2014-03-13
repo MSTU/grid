@@ -1,3 +1,5 @@
+# -*- coding: cp1251 -*-
+
 #***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
@@ -13,27 +15,25 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import constants
-from loadcase import Loadcase
 
-class SolversLoadcase(Loadcase):
+# These are common methods used by most of the solvers
+import debug
+
+logger = debug.logger
+
+
+def create_file(string_list, filename):
 	"""
-	Loadcase for solvers with execution parameters.
-
-	scheme: string
-		Path to input file
-	desc: string
-		Loadcase name (this is the name of the directory, where all files will be saved)
-	criteria_list: list
-		List of result parameters, which will be included in result dict
-	solver_params : dictionary or string
-		Dictionary or string of options which will pass to solvers.
-		Example of dictionary of options for Modelica Solver:
-		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
+	Creates a file named "filename" using list of strings "string_list"
 
 	"""
-	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		Loadcase.__init__(self, scheme, solver, desc)
-
-		self.criteria_list = criteria_list
-		self.solver_params = solver_params
+	try:
+		f = open(filename, "w")
+	except IOError:
+		logger.error("Can not create file \"" + filename + "\"")
+		import traceback
+		traceback.print_exc()
+		return None
+	for line in string_list:
+		f.write(line)
+	f.close()

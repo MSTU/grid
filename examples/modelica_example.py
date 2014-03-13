@@ -19,14 +19,14 @@
 from multigrid.solvers.modelicasolver import ModelicaLoadcase
 from multigrid import map as multimap
 
-def test_1 ():
+def test_1():
 
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mos', desc='lc1')
+	lc1 = ModelicaLoadcase('mos/mydcmotor.mo', desc='lc1', solver_params={'startTime': 0.0, 'stopTime': 10.0, 'numberOfIntervals': 10})
 
 	input = dict()
-	input['resistor1.R'] = [5.0, 2.0]
-	input['inductor1.L'] = [0.4, 1.0]
-	input['load.J'] = [2.0, 0.5]
+	input['resistor1.R'] = [5.0] * 10
+	input['inductor1.L'] = range(1, 11)
+	input['load.J'] = [2.0] * 10
 
 	result_list = multimap(lc1, input)['lc1']
 

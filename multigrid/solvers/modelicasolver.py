@@ -16,23 +16,21 @@
 #*                                                                         *
 #***************************************************************************/
 
-import re # for using regular expressions
-import subprocess # for execution of command prompt scripts
-import os # for navigation through catalogs
-
-import sys # to define OS type
-from solvers.ansys.common_methods import create_file_from_list
+import re
+import subprocess
+import os
+import ntpath
+import sys
 import constants
 import launcher
 import debug
+from solvers.common_methods import create_file
 from loadcase import Loadcase
 from solversloadcase import SolversLoadcase
 
-
-MOS_filename = 'script.mos' # Host will use this name to create its own MOS file
 name = "ModelicaDynamic"
-
 logger = debug.logger
+log_filename = "compilation.log"
 
 class ModelicaLoadcase(SolversLoadcase):
 	"""
@@ -52,28 +50,28 @@ class ModelicaLoadcase(SolversLoadcase):
 	"""
 	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None, need_filetransfer=False):
 		SolversLoadcase.__init__(self, scheme, name, desc, need_filetransfer, criteria_list, solver_params)
-		print self.need_filetransfer
 
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file string
 	def load_data(self):
-		if not self.need_filetransfer:
-			Loadcase.load_data(self)
+		Loadcase.load_data(self)
 
-			files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
-			# load .mos file
-			with open(self.scheme, 'r') as f:
-				mos = f.readlines()
-			files_dict[MOS_filename] = mos
-			files_dict.update(CreateMOfilesDict(self.scheme))
-			self.inData = files_dict
+		#files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+		# load .mos file
+		with open(self.scheme, 'r') as f:
+			mo = f.readlines()
+		# files_dict[MOS_filename] = mos
+		# files_dict.update(create_mo_files_dict(self.scheme))
+		self.inData = mo
 
+def create_mo_files_dict(MOS_file_path):
+	"""
+	Returns a dictionary, where keys are mo filenames and values are list of mo file strings.
+	Dictionary is created using mos file located at MOS_file_path
 
-# Returns a dictionary, where keys are mo filenames and values are list of mo file strings
-# dictionary is created using mos file located at MOS_file_path
-def CreateMOfilesDict(MOS_file_path):
+	"""
 	files_dict = dict()
 	cwd = os.getcwd()
 	#filenames.append(re.search('(\w)+\.mos', MOS_file_path).group())
@@ -94,110 +92,135 @@ def CreateMOfilesDict(MOS_file_path):
 
 	return files_dict
 
+def generate_params_string(params):
+	result = ''
+	if isinstance(params, dict):
+		for key, value in params.iteritems():
+			result += key + '=' + str(value)
+			result += ', '
+		# delete last comma and space
+		result = result[:-2]
+	else:
+		result = params
+	return result
 
-def get_filename_list(scheme):
-	"""
-	Return all filenames needed for this scheme
-	"""
-	file_list = []
-	file_list.append(scheme)
-	# load .mos file
-	with open(scheme, 'r') as f:
-		mos_file = f.readlines()
-		for line in mos_file:
-			if not line.startswith('loadFile'):
-				pass
-			else:
-				mo_filename = re.search('(\w)+\.mo', line).group()
-				file_list.append(mo_filename)
-	return file_list
+def create_mos_by_mo(mo_filename, class_name, simulate_params):
+	mos_file = []
+	mos_file.append('loadModel(Modelica);\n')
+	mos_file.append('getErrorString();\n')
+	mos_file.append('loadFile("' + mo_filename + '");\n')
+	mos_file.append('getErrorString();\n')
+	#mos_file.append('simulate(dcmotor, ' + generate_params_string(simulate_params) + ', outputFormat = "plt");\n')
+	mos_file.append('simulate('+class_name+', '+generate_params_string(simulate_params)+', outputFormat="plt");\n')
+	mos_file.append('getErrorString();\n')
+	return mos_file
 
+def get_class_name_by_mo(mo_filename):
+	"""
+	Returns last class name readed from mo-file (at this string: (model className)
+	It's required for getting model's C code, its compilation and execution
+
+	"""
+	try:
+		mo_file = open(mo_filename, "r")
+	except IOError:
+		logger.error("Can not open \"" + mo_filename + "\" for reading")
+	for line in mo_file:
+		if line.startswith("model"):
+			#starting line: "model dcmotor\n"
+			class_name = line[6:-2]
+			#we are cutting 6 symbols from beginning: 'model '
+			#and 2 symbols from ending: "\n"
+	return class_name
 
 class ModelicaSolver(launcher.Launcher):
-	# compiles *.mo file using *.mos file to get exe-file of the model
 	def compile(self, MOS_filename):
+		"""
+		compiles *.mo file using *.mos file to get exe-file of the model
+
+		"""
+		try:
+			log_file = open(log_filename, "w")
+		except IOError:
+			logger.error("Can not create \"" + log_filename + "\"")
+		logger.info("Begin compiling")
 		if sys.platform.startswith('win'):
 			command = '%OPENMODELICAHOME%/bin/omc.exe ' + MOS_filename
-			logger.info("Begin compiling")
-			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			logger.info("End compiling")
+			subprocess.call(["cmd", "/C", command], stdout=log_file)
 		elif sys.platform.startswith('linux'):
-			logger.info("Begin compiling")
-			subprocess.call(["omc", MOS_filename])
-			logger.info("End compiling")
+			subprocess.call(["omc", MOS_filename], stdout=log_file)
 		else:
-			logger.info("Can't determine platform")
+			logger.error("Can't determine platform")
 			return constants.ERROR_STATUS
+		logger.info("End compiling")
+		log_file.close()
+		return self.check_log()
 
 	def run(self, loadcase, input_params):
 		cwd = os.getcwd()
-		#if not os.path.exists(id): os.makedirs(id)
-		#os.chdir(id)
-		if not os.path.exists(loadcase.name): os.makedirs(loadcase.name)
+		if not os.path.exists(loadcase.name):
+			os.makedirs(loadcase.name)
 		os.chdir(loadcase.name)
 
 		# Host creates all required files
-		for k, v in loadcase.inData.iteritems():
-			create_file_from_list(v, k)
+		# for k, v in loadcase.inData.iteritems():
+		# 	create_file_from_list(v, k)
 
-		class_name = self.GetClassName(MOS_filename)
-		''' something for checking file's checksum
-		if sys.platform.startswith('win'):
-			# Проверка, существует ли уже exe-файл модели или нет
-			if (os.path.isfile(class_name + '.exe')):
-				pass
-			else:
-				self.Compile(self.MOS_filename) # получение exe-файла по mos-файлу
-				hash = self.hashFile(class_name + '.exe', hashlib.sha256())
-				with open(class_name + '.txt', 'w') as h:
-					h.write(hash)
-		elif sys.platform.startswith('linux'):
-			if (os.path.isfile(class_name)):
-				pass
-			else:
-				self.Compile(self.MOS_filename) # получение exe-файла по mos-файлу
-				hash = self.hashFile(class_name + '.exe', hashlib.sha256())
-				with open(class_name + '.txt', 'w') as h:
-					h.write(hash)
-		else:
-			print 'can not determine your platform'
-			return Constants.TASK_ERROR
-		'''
-
-		PAR_filename = 'pl.txt'
-		RES_filename = 'results.plt'
+		mo_filename = ntpath.basename(loadcase.scheme)
+		#mos_filename = mo_filename[:-3] + generate_params_string(loadcase.solver_params) + '.mos'
+		mos_filename = "script.mos"
+		create_file(loadcase.inData, mo_filename)
+		params_string = generate_params_string(loadcase.solver_params)
+		class_name = get_class_name_by_mo(mo_filename)
+		recomp_flag = self.recompilation(mos_filename, mo_filename, class_name, loadcase.solver_params)
+		#class_name = self.get_class_name(mos_filename)
+		create_file(create_mos_by_mo(mo_filename, class_name, loadcase.solver_params), mos_filename)
+		par_filename = 'pl.txt'
+		res_filename = 'results.plt'
 
 		# create file with input parameters using dictionaries of input parameters
-		self.CreateParFilesFromParDicts(PAR_filename, input_params)
+		self.create_par_files_from_dicts(par_filename, input_params)
 
 		if sys.platform.startswith('win'):
-			if (os.path.isfile(class_name + '.exe')):
+			if(os.path.isfile(class_name + '.exe')):
 				pass
 			else:
-				self.compile(MOS_filename) # getting exe-file using mo and mos files
-			command = class_name + '.exe -overrideFile ' + PAR_filename + ' -r ' + RES_filename
+				#self.compile(mos_filename) # getting exe-file using mo and mos files
+				if(self.compile(mos_filename) == constants.ERROR_STATUS):
+					loadcase.status = constants.ERROR_STATUS
+					os.chdir(cwd)
+					return None
+			command = class_name + '.exe -overrideFile ' + par_filename + ' -r ' + res_filename
 			logger.info("Begin executing")
 			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
 			logger.info("End executing")
-
 		elif sys.platform.startswith('linux'):
-			if (os.path.isfile(class_name)):
-				pass
-			else:
-				self.compile(MOS_filename) # getting exe-file using mo and mos files
-			command = ['-overrideFile'] + [PAR_filename] + ['-r'] + [RES_filename]
+			if(recomp_flag):
+				if(self.compile(mos_filename) == constants.ERROR_STATUS):
+					loadcase.status = constants.ERROR_STATUS
+					logger.error("ERROR in compilation")
+					os.chdir(cwd)
+					return None
+			command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
 			logger.info("Begin executing")
 			subprocess.call(["./" + class_name] + command)
+			if not self.check_execution():
+				loadcase.status = constants.ERROR_STATUS
+				logger.error("ERROR in execution process")
+				os.chdir(cwd)
+				return None
 			logger.info("End executing")
 
 		else:
-			logger.info("Can't determine platform")
-			return constants.ERROR_STATUS
+			logger.info("Can not determine type of your OS")
+			loadcase.status = constants.ERROR_STATUS
+			return None
 
 		# getting dictionary of output parameters
-		result = self.CreateResultsDict(RES_filename)
+		result = self.create_results_dict(res_filename)
 		loadcase.status = constants.SUCCESS_STATUS
 
+		os.remove(log_filename)
 		os.chdir(cwd)
 		return result
 
@@ -222,40 +245,36 @@ class ModelicaSolver(launcher.Launcher):
 		os.rename(temp_file.name, MOS_filename)
 		#changed temp filename to MOS filename, so we can use old filename with new content
 
-	# Returns class name readed from mos-file (at this string: (simulate(className, ...))
-	# It's required for getting model's C code, its compilation and execution
-	def GetClassName(self, MOS_filename):
-		className = None
-		with open(MOS_filename, 'r') as f:
+	def get_class_name(self, mos_filename):
+		"""
+		Returns class name readed from mos-file (at this string: (simulate(className, ...))
+		It's required for getting model's C code, its compilation and execution
+
+		"""
+		class_name = None
+		with open(mos_filename, 'r') as f:
 			for line in f:
-				if (not line.startswith('simulate')):
+				if(not line.startswith('simulate')):
 					pass
 				else:
-					className = re.split('[(,]', line)[1]
+					class_name = re.split('[(,]', line)[1]
 
-		return className
+		return class_name
 
-	# Returns file's checksum
-	# filename - name of file; hasher - hash algorithm (md5, sha1, sha256, ...);
-	# blocksize - the internal block size of the hash algorithm in bytes
-	def hashFile(self, filename, hasher, blocksize=8192):
-		with open(filename, 'rb') as f:
-			buf = f.read(blocksize)
-			while len(buf) > 0:
-				hasher.update(buf)
-				buf = f.read(blocksize)
+	def create_par_files_from_dicts(self, par_filename, par_dic):
+		"""
+		Creates files of input parameters using dictionaries of input parameters
 
-		return hasher.hexdigest()
-
-
-	# Creates files of input parameters using dictionaries of input parameters
-	def CreateParFilesFromParDicts(self, par_filename, par_dic):
+		"""
 		with open(par_filename, 'w') as PAR_file:
 			for k, v in par_dic.iteritems():
 				PAR_file.write(k + '=' + str(v) + '\n')
 
-	# Creates dictionary of results using result file named "RES_filename"
-	def CreateResultsDict(self, RES_filename):
+	def create_results_dict(self, RES_filename):
+		"""
+		Creates dictionary of results using result file named "RES_filename"
+
+		"""
 		curvesNumber = 0 # amount of output variables
 		result_dict = dict() # dictionary of results
 		value_list = list() # list of values of current output parameter
@@ -280,5 +299,122 @@ class ModelicaSolver(launcher.Launcher):
 		#MA_object.SetLayer(len(tmp))
 		return result_dict
 
-	def GetLog(self):
-		pass
+	def check_log(self):
+		"""
+		Checks compilation log file named "log_filename" for errors
+		Returns:
+		constants.ERROR_STATUS - if error occurred
+		constants.SUCCESS_STATUS - otherwise
+
+		"""
+		error_flag = False
+		try:
+			log_file = open(log_filename, "r")
+		except IOError:
+			logger.error("Can not open \"" + log_filename + "\" for reading")
+			return constants.ERROR_STATUS
+		for line in log_file:
+			if "Error" in line:
+				error_flag = True
+				print line
+		log_file.close()
+		if(error_flag):
+			return constants.ERROR_STATUS
+		return constants.SUCCESS_STATUS
+
+	def check_execution(self, res_filename):
+		"""
+		Checks the result of execution. If result file was created, then it counts as successful run.
+		Returns:
+		False - if error occurred and result file was not created
+		True - otherwise
+
+		"""
+		if os.path.exists(res_filename):
+			return True
+		return False
+
+	def recompilation(self, mos_filename, mo_filename, class_name, params_dict):
+		"""
+		Checks the need for compilation. Opens
+		All reasons for compilation are based on checking of mos file:
+		1) if the name of the file to load changed in loadFile(...) string
+		2) if the name of the class changed in simulate(class_name, ...) string
+		3) if values or amount of parameters for solver changed in simulate(class_name, solver_params) string
+		"""
+		recompile_flag = False
+		#params_dict_with_str_values = self.dict_with_str_values(params_dict)
+		if not os.path.isfile(mos_filename):
+			# if it is first run, then there won't be any mos file and we need to compile
+			print 'NO MOS FILE'
+			return True
+		try:
+			mos_file = open(mos_filename, "r")
+		except IOError:
+			logger.error("Can not open \"" + log_filename + "\" for reading")
+			return constants.ERROR_STATUS
+		for line in mos_file:
+			if line.startswith("loadFile("):
+				# line.split('"')[1] is the name of file to load
+				if(line.split('"')[1] != mo_filename):
+					recompile_flag = True
+					print "REASON 1: model's name changed"
+					break
+			if line.startswith("simulate("):
+				model_name = re.search('\(\w+\,', line).group(0)[1:-1]
+				if(model_name != class_name):
+					recompile_flag = True
+					print "REASON 2: class name changed"
+					break
+				mos_params_dict = self.generate_params_dict_by_simulate_string(line)
+				if not self.compare_params_dicts(mos_params_dict, self.dict_with_str_values(params_dict)):
+					recompile_flag = True
+					print "REASON 3: solver params changed"
+					break
+		return recompile_flag
+
+	def generate_params_dict_by_simulate_string(self, simulate_string):
+		"""
+		Generates dictionary of parameters using simulate string from mos file
+		example of simulate string: "simmulate(dcmotor, startTime=0.0, stopTime=10.0, ...)"
+		Returns:
+		dictionary of simulate parameters (for our example it will be: {'startTime': 0.0, 'stopTime': 10.0, ...}
+
+		"""
+		temp_params_list = simulate_string.split(',')
+		params_list = []
+		params_dict = {}
+		# params_list now containts something like this:
+		# ['simulate(dcmotor', ' stopTime=10.0', ' startTime=0.0', ' numberOfIntervals=10', ' outputFormat="plt");']
+		del temp_params_list[0] # removed first element "'simulate(dcmotor'"
+		# remove whitespace from beginning of each element
+		for item in temp_params_list:
+			params_list.append(item[1:])
+		for item in params_list:
+			temp_item = item.split('=')
+			params_dict[temp_item[0]] = temp_item[1]
+		del params_dict['outputFormat']
+		return params_dict
+
+	def compare_params_dicts(self, first_dict, second_dict):
+		"""
+		Compares two dicts.
+		Returns:
+		True - if dictionaries have similar keys and values
+		False - otherwise
+
+		"""
+		result = False
+		first_dict_length = len(first_dict)
+		shared_items = set(first_dict.items()) & set(second_dict.items())
+		if(len(shared_items) == first_dict_length):
+			result = True
+		return result
+
+	def dict_with_str_values(self, dict):
+		"""
+		Converts values of dictionary to string format
+		"""
+		for key, value in dict.iteritems():
+			dict[key] = str(value)
+		return dict

@@ -39,7 +39,8 @@ class PythonSolver(Launcher):
 		try:
 			func = pickle.loads(lc.scheme)
 			if isinstance(input_params, tuple) or isinstance(input_params, list):
-				result = func(*input_params)
+				#result = func(*input_params)
+				result = func(input_params)
 			else:
 				result = func(input_params)
 

@@ -15,6 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+
 from celery import Celery
 from conf import config
 import localworker
@@ -23,6 +24,7 @@ from ftplib import FTP
 
 celery = Celery('remoteworker', include=['task', 'cloudpickle'])
 celery.config_from_object(config)
+
 
 def do_file_transfer(loadcase):
 	ftp = FTP()
@@ -37,7 +39,7 @@ def do_file_transfer(loadcase):
 	ftp.quit()
 
 
-@celery.task(name='grid.remoteworker.run_task')
+@celery.task(name='remoteworker.run_task')
 def run_task(task):
 	for lc in task.loadcases:
 		if lc.need_filetransfer:

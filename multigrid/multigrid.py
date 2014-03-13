@@ -15,11 +15,20 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import ast
+import json
+from conf import configclient
 from task import Task
-from celery.result import AsyncResult
+try:
+	from celery.result import AsyncResult
+except:
+	pass
 
 from localworker import run_task as local_run
-from remoteworker import run_task as remote_run
+try:
+	from remoteworker import run_task as remote_run
+except:
+	pass
 
 def run_fileserver():
 	pass
@@ -43,10 +52,10 @@ class MultiGrid:
 		if not isinstance(loadcases, list):
 			loadcases = [loadcases]
 		# if some loadcases needed in filetransfer, run ftp server
-		for loadcase in loadcases:
-			if loadcase.need_filetransfer:
-				run_fileserver()
-				break
+		# for loadcase in loadcases:
+		# 	if loadcase.need_filetransfer:
+		# 		run_fileserver()
+		# 		break
 		result_ids = []
 		if isinstance(input_list, dict):
 			input_list = _dict_to_list(input_list)
@@ -75,6 +84,8 @@ class MultiGrid:
 					result_task = async_result.get()
 				else:
 					result_task = self._id_to_task.pop(result_id)
+				# it's new instance of Task, therefore need to reassign id field
+				result_task.id = result_id
 			except Exception as e:
 				#TODO right error handling
 				result_task = None
@@ -98,23 +109,61 @@ class MultiGrid:
 		"""
 		Check if task is ready
 		"""
-		is_ready = True
 		if not self._is_local_work:
 			if isinstance(result_ids, list):
 				for result_id in result_ids:
-					is_ready &= AsyncResult(result_id).ready()
-					if not is_ready:
-						break
+					if not AsyncResult(result_id).ready():
+						return False
 			else:
-				is_ready &= AsyncResult(result_ids).ready()
+				return AsyncResult(result_ids).ready()
 
-		return is_ready
+		return True
 
 	def reload(self):
 		"""
 		Reinit instance
 		"""
 		self.__init__(self._is_local_work)
+
+	def web_get(self, result_ids):
+		import urllib2
+		if not isinstance(result_ids, list):
+			result_ids = [result_ids]
+
+		results = []
+		for result_id in result_ids:
+			try:
+				response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+									   '/api/get_result/' + str(result_id) + '/').read()
+				result = json.loads(response)
+			except Exception:
+				result = None
+		results.append(result)
+		# result_dict = _list_to_dict(results)
+		# return result_dict
+		if len(results) == 1:
+			return results[0]
+		return results
+
+	def web_get_ids(self, job_name):
+		import urllib2
+		try:
+			response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+									   '/api/get_ids/' + job_name + '/').read()
+			result = json.loads(response)
+		except Exception:
+			result = None
+		return result
+
+	def web_get_results_from_job(self, job_name):
+		import urllib2
+		try:
+			response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+									   '/api/get_results_from_job/' + job_name + '/').read()
+			result = json.loads(response)
+		except Exception:
+			result = None
+		return result
 
 
 def _list_to_dict(list_):

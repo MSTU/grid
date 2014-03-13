@@ -19,4 +19,9 @@ ERROR_STATUS = -1
 DEFAULT_STATUS = 0
 SUCCESS_STATUS = 1
 
+status_to_string = dict()
+status_to_string[ERROR_STATUS] = "Error"
+status_to_string[DEFAULT_STATUS] = "Default"
+status_to_string[SUCCESS_STATUS] = "Success"
+
 DEFAULT_LOADCASE = "grid_loadcase"

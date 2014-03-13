@@ -24,8 +24,7 @@ import debug
 import constants
 import launcher
 from solvers.ansys.ansys_methods import get_ansys_version
-from solvers.ansys.common_methods import create_file_from_list
-
+from solvers.common_methods import create_file
 
 class LSDYNASolver(launcher.Launcher):
 	name = "ANSYS_LS-DYNA"
@@ -69,7 +68,7 @@ class LSDYNASolver(launcher.Launcher):
 		# path = /home/user/ls-dyna/file.k
 		# path.rparition("/")[2] = "file.k"
 		k_filename = loadcase.scheme.rpartition("/")[2]
-		create_file_from_list(loadcase.inData, k_filename)
+		create_file(loadcase.inData, k_filename)
 		# options is a list of option strings: ["option_1=value_1", "option_2=value_2"]
 		# there are options for LS DYNA command in ModelAnalysis parameters' dictionary
 		if(loadcase.solver_params is not None):
