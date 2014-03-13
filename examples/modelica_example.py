@@ -21,7 +21,7 @@ from multigrid import map as multimap
 
 def test_1():
 
-	lc1 = ModelicaLoadcase('mos/mydcmotor.mo', desc='lc1', solver_params={'startTime': 0.0, 'stopTime': 10.0, 'numberOfIntervals': 10})
+	lc1 = ModelicaLoadcase('mos/mydcmotor.mo', desc='lc1', is_filetransfer=False, transfer_params={'host': 'localhost'}, solver_params={'startTime': 0.0, 'stopTime': 10.0, 'numberOfIntervals': 10})
 
 	input = dict()
 	input['resistor1.R'] = [5.0] * 10

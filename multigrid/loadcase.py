@@ -21,11 +21,10 @@ class Loadcase:
 	"""
 	Base class for calculation case specification. It's environment in which task will be calculated
 	"""
-	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE):
+	def __init__(self, scheme, solver, desc):
 		self.scheme = scheme
 		self.name = desc
 		self.solver = solver
-		self.load_data()
 
 	def load_data(self):
 		"""

@@ -40,6 +40,10 @@ class ModelicaLoadcase(SolversLoadcase):
 		Path to Modelica file.
 	desc: string
 		Loadcase name.
+	is_filetransfer: bool
+		True if files are big and file transfer need, False otherwise
+	transfer_params: dict
+		Contain information about files included in model
 	criteria_list: list
 		List of result parameters, which will be included in result dict
 	solver_params : dict
@@ -48,23 +52,24 @@ class ModelicaLoadcase(SolversLoadcase):
 		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
 
 	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None, need_filetransfer=False):
-		SolversLoadcase.__init__(self, scheme, name, desc, need_filetransfer, criteria_list, solver_params)
+	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, is_filetransfer=False, transfer_params=None, criteria_list=None, solver_params=None):
+		SolversLoadcase.__init__(self, scheme, name, desc, is_filetransfer, transfer_params, criteria_list, solver_params)
+		self.load_data()
 
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file string
 	def load_data(self):
-		Loadcase.load_data(self)
+		if not self.is_filetransfer:
+			#files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+			# load .mos file
+			with open(self.scheme, 'r') as f:
+				mo = f.readlines()
+			# files_dict[MOS_filename] = mos
+			# files_dict.update(CreateMOfilesDict(self.scheme))
+			self.inData = mo
 
-		#files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
-		# load .mos file
-		with open(self.scheme, 'r') as f:
-			mo = f.readlines()
-		# files_dict[MOS_filename] = mos
-		# files_dict.update(create_mo_files_dict(self.scheme))
-		self.inData = mo
 
 def create_mo_files_dict(MOS_file_path):
 	"""
@@ -163,10 +168,12 @@ class ModelicaSolver(launcher.Launcher):
 		# for k, v in loadcase.inData.iteritems():
 		# 	create_file_from_list(v, k)
 
+
 		mo_filename = ntpath.basename(loadcase.scheme)
 		#mos_filename = mo_filename[:-3] + generate_params_string(loadcase.solver_params) + '.mos'
 		mos_filename = "script.mos"
-		create_file(loadcase.inData, mo_filename)
+		if not loadcase.is_filetransfer:
+			create_file(loadcase.inData, mo_filename)
 		params_string = generate_params_string(loadcase.solver_params)
 		class_name = get_class_name_by_mo(mo_filename)
 		recomp_flag = self.recompilation(mos_filename, mo_filename, class_name, loadcase.solver_params)
@@ -174,6 +181,7 @@ class ModelicaSolver(launcher.Launcher):
 		create_file(create_mos_by_mo(mo_filename, class_name, loadcase.solver_params), mos_filename)
 		par_filename = 'pl.txt'
 		res_filename = 'results.plt'
+
 
 		# create file with input parameters using dictionaries of input parameters
 		self.create_par_files_from_dicts(par_filename, input_params)
@@ -276,6 +284,7 @@ class ModelicaSolver(launcher.Launcher):
 
 		#MA_object.SetLayer(len(tmp))
 		return result_dict
+
 
 	def check_log(self):
 		"""
@@ -405,3 +414,4 @@ class ModelicaSolver(launcher.Launcher):
 		for key, value in dict.iteritems():
 			dict[key] = str(value)
 		return dict
+
