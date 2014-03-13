@@ -17,7 +17,7 @@
 #***************************************************************************/
 from config import *
 
-LOCAL_WORK = False
+LOCAL_WORK = True
 
 WEB_SERVER_ADDRESS = 'localhost'
 WEB_SERVER_PORT = '8000'
