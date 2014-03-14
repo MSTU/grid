@@ -125,6 +125,9 @@ class MultiGrid:
 		"""
 		self.__init__(self._is_local_work)
 
+	def download_results(self, result):
+		pass
+
 	def web_get(self, result_ids):
 		import urllib2
 		if not isinstance(result_ids, list):
