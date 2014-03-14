@@ -17,10 +17,12 @@
 #***************************************************************************/
 
 import re
+import shutil
 import subprocess
 import os
 import ntpath
 import sys
+from conf import configworker
 import constants
 import launcher
 import debug
@@ -224,9 +226,20 @@ class ModelicaSolver(launcher.Launcher):
 			loadcase.status = constants.ERROR_STATUS
 			return None
 
-		# getting dictionary of output parameters
-		result = self.create_results_dict(res_filename)
-		loadcase.status = constants.SUCCESS_STATUS
+		# if file transfer doesnt' need parse file result in memory
+		# otherwise return path to result file on worker
+		if not loadcase.is_filetransfer:
+			# getting dictionary of output parameters
+			result = self.create_results_dict(res_filename)
+			loadcase.status = constants.SUCCESS_STATUS
+		else:
+			result_file_path = os.path.join(os.getcwd(), str(loadcase.task_id) + '.plt')
+			# move result file
+			shutil.move(res_filename, result_file_path)
+			# store host and path to file in result
+			result = dict()
+			result['host'] = configworker.IP_ADDRESS
+			result['file'] = result_file_path
 
 		os.chdir(cwd)
 		return result

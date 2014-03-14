@@ -61,4 +61,6 @@ def run_task(task):
 	for lc in task.loadcases:
 		if lc.is_filetransfer:
 			do_file_transfer(lc)
+	# set task id
+	task.id = run_task.request.id
 	return localworker.run_task(task)
