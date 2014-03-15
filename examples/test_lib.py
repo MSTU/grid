@@ -16,18 +16,5 @@
 #*                                                                         *
 #***************************************************************************/
 
-def func_1 (ma):
-	ma.Status = 0
-	return ma.GetParameter ('x')**2
-
-def f1 (ma):
-	ma.Status = 0
-	x = ma.GetParameter ('x')
-	y = ma.GetParameter ('y')
-	return (x-2)**2 + (y-1)**2
-
-def f2(ma):
-	ma.Status = 0
-	x = ma.GetParameter ('x')
-	y = ma.GetParameter ('y')
-	return (x-5)**2 + (y-5)**2
+def func_2(x):
+	return x**2

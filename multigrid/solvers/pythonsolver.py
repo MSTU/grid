@@ -38,17 +38,13 @@ class PythonSolver(Launcher):
 		result = None
 		try:
 			func = pickle.loads(lc.scheme)
-			if isinstance(input_params, tuple) or isinstance(input_params, list):
-				#result = func(*input_params)
-				result = func(input_params)
-			else:
-				result = func(input_params)
+			result = func(input_params)
 
 			status = constants.SUCCESS_STATUS
 		except Exception as e:
 			status = constants.ERROR_STATUS
 			# TODO is it right?
-			#result = e
+			result = e
 
 		lc.status = status
 		return result

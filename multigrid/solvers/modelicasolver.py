@@ -363,7 +363,7 @@ class ModelicaSolver(launcher.Launcher):
 	def generate_params_dict_by_simulate_string(self, simulate_string):
 		"""
 		Generates dictionary of parameters using simulate string from mos file
-		example of simulate string: "simmulate(dcmotor, startTime=0.0, stopTime=10.0, ...)"
+		example of simulate string: "simulate(dcmotor, startTime=0.0, stopTime=10.0, ...)"
 		Returns:
 		dictionary of simulate parameters (for our example it will be: {'startTime': 0.0, 'stopTime': 10.0, ...}
 
