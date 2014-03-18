@@ -19,17 +19,35 @@ import cloudpickle
 import constants
 from launcher import Launcher
 from loadcase import Loadcase
+from debug import logger
 
 name = "Python"
 
 class PythonLoadcase(Loadcase):
 	"""
 	Loadcase for PythonSolver.
+
+	scheme: pickled function
+		Pickled function to run
+	desc: string
+		Description of this loadcase
+	preexecute_filename: string
+		Path to preexecuted file
 	"""
-	def __init__(self, scheme, desc=None):
+	def __init__(self, scheme, desc=None, preexecute_filename=None):
 		if not desc:
 			desc = scheme.__name__
 		func_dump = cloudpickle.dumps(scheme)
+		if preexecute_filename:
+			try:
+				with open(preexecute_filename) as f:
+					self.preexecute_file = f.readlines()
+				import ntpath
+				self.preexecute_filename = ntpath.basename(preexecute_filename)
+			except Exception as e:
+				self.preexecute_file = None
+				self.preexecute_filename = None
+				logger.error("Error while read preexecuted file: " + e.message)
 		Loadcase.__init__(self, func_dump, name, desc)
 
 class PythonSolver(Launcher):
@@ -48,3 +66,16 @@ class PythonSolver(Launcher):
 
 		lc.status = status
 		return result
+
+	def preexecute(self, lc):
+		if lc.preexecute_file:
+			try:
+				preexecute_file = open(lc.preexecute_filename, 'w')
+				preexecute_file.writelines(lc.preexecute_file)
+				preexecute_file.close()
+			except Exception as e:
+				logger.error("Error while create preexecuted file: " + e.message )
+			try:
+				execfile(lc.preexecute_filename)
+			except Exception as e:
+				logger.error("Error while exec preexecuted file: " + e.message)

@@ -15,6 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+import pickle
 import constants
 
 
@@ -23,7 +24,7 @@ class Task:
 	def __init__(self, loadcases, input_params):
 		self.id = None
 		self.loadcases = loadcases
-		self.input_params = input_params
+		self.input_params = pickle.dumps(input_params)
 		self.result = dict()
 		self.status = constants.DEFAULT_STATUS
 

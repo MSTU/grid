@@ -38,3 +38,9 @@ class Launcher:
 		Returns result of computation. Sets solution status of loadcase.
 		"""
 		pass
+
+	def preexecute(self, lc):
+		"""
+		Execute before run
+		"""
+		pass

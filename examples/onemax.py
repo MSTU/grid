@@ -16,6 +16,7 @@ import random
 from deap import base
 from deap import creator
 from deap import tools
+import sys
 
 from multigrid.solvers.pythonsolver import PythonLoadcase
 from multigrid import map as multimap
@@ -32,9 +33,8 @@ def mymap(func, seq):
 		else:
 			return obj
 
-	lc = PythonLoadcase(func)
-	return multimap(lc, standartizate(seq))[func.__name__]
-
+	lc = PythonLoadcase(func, preexecute_filename=sys.argv[0])
+	return multimap(lc, seq)[func.__name__]
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
