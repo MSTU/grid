@@ -18,8 +18,8 @@
 from deap import base, creator, tools
 import numpy as np
 from numpy.random import random_sample
-from solvers.modelicasolver import ModelicaLoadcase
-from solvers.pythonsolver import PythonLoadcase
+from solvers.modelica import ModelicaLoadcase
+from solvers.python import PythonLoadcase
 from multigrid import map as multimap
 from pradis.multi.Variable import Variable #from DINAMA.plugin.python.pradis.multi.Variable import Variable
 import re

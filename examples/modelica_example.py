@@ -16,7 +16,7 @@
 #*                                                                         *
 #***************************************************************************/
 
-from multigrid.solvers.modelicasolver import ModelicaLoadcase
+from multigrid.solvers.modelica import ModelicaLoadcase
 from multigrid import map as multimap
 
 def test_1():

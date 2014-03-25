@@ -1,8 +1,8 @@
 import unittest
 
 from multigrid.multigrid import MultiGrid
-from solvers.modelicasolver import ModelicaLoadcase
-from solvers.pythonsolver import PythonLoadcase
+from solvers.modelica import ModelicaLoadcase
+from solvers.python import PythonLoadcase
 
 def f(x):
 	return x * x

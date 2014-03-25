@@ -1,5 +1,5 @@
 import unittest
-from multigrid.solvers import modelicasolver
+from multigrid.solvers import modelica
 
 
 class ModelicaTest(unittest.TestCase):
@@ -12,7 +12,7 @@ class ModelicaTest(unittest.TestCase):
 		par['stopTime'] = 10.0
 		par['numberOfIntervals'] = 5
 
-		result = modelicasolver.create_mos_by_mo('dcmotor.mo', par)
+		result = modelica.create_mos_by_mo('dcmotor.mo', par)
 		print result
 
 

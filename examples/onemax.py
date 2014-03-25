@@ -18,7 +18,7 @@ from deap import creator
 from deap import tools
 import sys
 
-from multigrid.solvers.pythonsolver import PythonLoadcase
+from multigrid.solvers.python import PythonLoadcase
 from multigrid import map as multimap
 def mymap(func, seq):
 	def standartizate(obj):
