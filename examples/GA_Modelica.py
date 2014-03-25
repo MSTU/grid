@@ -42,7 +42,7 @@ def get_value_from_layer_by_name(dict, key, index):
 
 def objective_function(results):
 	var = get_value_from_layer_by_name(results, 'load.w', 5)
-	return -var**2,
+	return var**2,
 
 def filter(regex, dict):
 	pattern = re.compile(regex)
