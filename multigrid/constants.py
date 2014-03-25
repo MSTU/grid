@@ -25,3 +25,4 @@ status_to_string[DEFAULT_STATUS] = "Default"
 status_to_string[SUCCESS_STATUS] = "Success"
 
 DEFAULT_LOADCASE = "grid_loadcase"
+LOADCASES_DIR = 'loadcases'
