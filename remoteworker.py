@@ -19,10 +19,15 @@
 from celery import Celery
 from conf import config
 import localworker
+from multigrid.solvers.holder import get_solver
 
 celery = Celery('remoteworker', include=['task', 'cloudpickle'])
 celery.config_from_object(config)
 
 @celery.task(name='remoteworker.run_task')
 def run_task(task):
+	for lc in task.loadcases:
+		# TODO May be preexecute must be static method?
+		solver = get_solver(lc.solver)
+		solver.preexecute(lc)
 	return localworker.run_task(task)
