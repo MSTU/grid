@@ -12,8 +12,9 @@ def f1(xy):
 	return xy[0] / xy[1]
 
 class LocalTest(unittest.TestCase):
-	def setUp(self):
-		self.mg = MultiGrid(True)
+	@classmethod
+	def setUpClass(cls):
+		cls.mg = MultiGrid(True)
 
 	def test_1(self):
 		lc = PythonLoadcase(f)
