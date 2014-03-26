@@ -48,6 +48,9 @@ class PythonLoadcase(Loadcase):
 				self.preexecute_file = None
 				self.preexecute_filename = None
 				logger.error("Error while read preexecuted file: " + e.message)
+		else :
+			self.preexecute_file = None
+			self.preexecute_filename = None
 		Loadcase.__init__(self, func_dump, name, desc)
 
 class PythonSolver(Launcher):
