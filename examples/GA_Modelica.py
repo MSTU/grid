@@ -17,32 +17,12 @@
 #***************************************************************************/
 from deap import base, creator, tools
 import numpy as np
-from numpy.random import random_sample
-from solvers.modelica import ModelicaLoadcase
-from solvers.python import PythonLoadcase
-from multigrid import map as multimap
-from pradis.multi.Variable import Variable #from DINAMA.plugin.python.pradis.multi.Variable import Variable
+import random
+from pradis.multigrid.solvers.pythonsolver import PythonLoadcase
+from pradis.multigrid import map as multimap
 import re
 
 tb = base.Toolbox()
-
-def get_value_from_layer_by_name(dict, key, index):
-	"""
-	Returns value from dictionary "dict" for key named "key" from time layer with number "index"
-	index - it is index in the list of values
-	dictionary has following structure:
-	{'key1': [value1, value2, value3, ...], 'key2': [value1, value2, value3, ...], ...}
-
-	"""
-	if key in dict:
-		return dict[key][index]
-	else:
-		print 'ERROR: there is no key "' + key + '" in dictionary "' + dict + '"'
-		return None
-
-def objective_function(results):
-	var = get_value_from_layer_by_name(results, 'load.w', 5)
-	return var**2,
 
 def filter(regex, dict):
 	pattern = re.compile(regex)
@@ -72,8 +52,9 @@ class GA():
 		self.f = pl[2]
 		self.cxpb = pl[3]
 		self.mutpb = pl[4]
-		self.pop_size = pl[5]
-		self.ngen = pl[6]
+		self.indpb = pl[5]
+		self.pop_size = pl[6]
+		self.ngen = pl[7]
 		self.d = len(self.vl)
 		tb.register("individual", self.init_ind, creator.Individual, self.vl)
 		tb.register("population", tools.initRepeat, list, tb.individual, self.pop_size)
@@ -82,7 +63,7 @@ class GA():
 		tb.register("sel_best_half", tools.selBest, k=self.pop_size / 2)
 		tb.register("select", tools.selTournament, tournsize=3)
 		tb.register("mate", self.cxOnePointCopy)
-		tb.register("mutate", self.mutation_operator, vl=self.vl, indpb=0.1)
+		tb.register("mutate", self.mutation_operator, vl=self.vl, indpb=0.05)
 
 	def init_ind(self, ind_class, vl):
 		ind = ind_class(np.random.uniform(variable.Min, variable.Max) for variable in vl)
@@ -111,7 +92,7 @@ class GA():
 
 		"""
 		size = min(len(ind1), len(ind2))
-		cxpoint = np.random.random_integers(1, size - 1)
+		cxpoint = random.randint(1, size - 1)
 		ind1[cxpoint:], ind2[cxpoint:] \
 			= ind2[cxpoint:].copy(), ind1[cxpoint:].copy()
 
@@ -124,8 +105,8 @@ class GA():
 
 		"""
 		size = len(ind1)
-		cxpoint1 = np.random.random_integers(1, size)
-		cxpoint2 = np.random.random_integers(1, size - 1)
+		cxpoint1 = random.randint(1, size)
+		cxpoint2 = random.randint(1, size - 1)
 		if cxpoint2 >= cxpoint1:
 			cxpoint2 += 1
 		else: # Swap the two cx points
@@ -145,16 +126,17 @@ class GA():
 		size = len(individual)
 
 		for i in xrange(size):
-			if random_sample() < indpb:
+			if random.random() < indpb:
 				individual[i] = np.random.uniform(vl[i].Min, vl[i].Max)
 
 		return individual,
 
 	def run(self):
-		# Evaluate the entire population
+		random.seed(64)
 		pop, cxpb, mutpb, ngen = self.pop, self.cxpb, self.mutpb, self.ngen
-		best = 0.0
+		best = np.inf
 		best_ind = None
+		# Evaluate the entire population
 		fitnesses = tb.evaluate(pop)
 		for ind, fit in zip(pop, fitnesses):
 			ind.fitness.values = fit
@@ -164,13 +146,13 @@ class GA():
 
 			# Apply crossover and mutation on the offspring
 			for child1, child2 in zip(offspring[::2], offspring[1::2]):
-				if random_sample() < cxpb:
+				if random.random() < cxpb:
 					tb.mate(child1, child2)
 					del child1.fitness.values
 					del child2.fitness.values
 
 			for mutant in offspring:
-				if random_sample() < mutpb:
+				if random.random() < mutpb:
 					tb.mutate(mutant)
 					del mutant.fitness.values
 
@@ -182,14 +164,10 @@ class GA():
 
 			# The population is entirely replaced by the offspring
 			pop[:] = offspring
-			best_ind = tools.selBest(pop, 1)[0]
-			sample = tb.evaluate([best_ind])
-			print sample[0][0]
-			print best
-			if sample[0][0] < best:
-				best = sample[0][0]
-		print 'best', best
-		print 'best_ind: ', best_ind
+			print('Generation %i created' % g+1)
+		best_ind = tools.selBest(pop, 1)[0]
+		print 'best ind: ', best_ind
+		print 'fitness value: ', best_ind.fitness.values
 		return pop
 
 	def run_2(self):
@@ -197,10 +175,11 @@ class GA():
 		offspring. The second half of the offspring is gotten from crossover and mutation of that first half of
 		individuals.
 		"""
-		# Evaluate the entire population
+		random.seed(64)
 		pop, cxpb, mutpb, ngen = self.pop, self.cxpb, self.mutpb, self.ngen
 		best = 0.0
 		best_ind = None
+		# Evaluate the entire population
 		fitnesses = tb.evaluate(pop)
 		for ind, fit in zip(self.pop, fitnesses):
 			ind.fitness.values = fit
@@ -212,13 +191,13 @@ class GA():
 
 			# Apply crossover and mutation on the offspring
 			for child1, child2 in zip(cx_mut_offspring[::2], cx_mut_offspring[1::2]):
-				if random_sample() < cxpb:
+				if random.random() < cxpb:
 					tb.mate(child1, child2)
 					del child1.fitness.values
 					del child2.fitness.values
 
 			for mutant in cx_mut_offspring:
-				if random_sample() < mutpb:
+				if random.random() < mutpb:
 					tb.mutate(mutant)
 					del mutant.fitness.values
 			offspring = elite_offspring + cx_mut_offspring
@@ -230,23 +209,8 @@ class GA():
 
 			# The population is entirely replaced by the offspring
 			pop[:] = offspring
-			best_ind = tools.selBest(pop, 1)[0]
-			sample = tb.evaluate([best_ind])
-			print sample[0][0]
-			print best
-			if sample[0][0] < best:
-				best = sample[0][0]
-		print 'best', best
-		print 'best_ind: ', best_ind
+			print('Generation %i created' % (g+1))
+		best_ind = tools.selBest(pop, 1)[0]
+		print 'best ind: ', best_ind
+		print 'fitness value: ', best_ind.fitness.values
 		return pop
-
-v1 = Variable("", ['resistor1.R', 5.0, 1.0, 10.0])
-v2 = Variable("", ['inductor1.L', 0.5, 0.1, 1.0])
-v3 = Variable("", ['step1.height', 1.0, 10, 20])
-vl = [v1, v2, v3]
-lc1 = ModelicaLoadcase('../examples/mos/mydcmotor.mo', desc='lc1',
-					   solver_params={'startTime': 0.0, 'stopTime': 10.0, 'numberOfIntervals': 10})
-ga = GA('', [lc1, vl, objective_function, 0.50, 0.20, 30, 3])
-ga.run()
-ga2 = GA('', [lc1, vl, objective_function, 0.50, 0.20, 30, 3])
-ga2.run_2()
