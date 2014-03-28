@@ -19,7 +19,7 @@ from deap import base, creator, tools
 import numpy as np
 from numpy import sin
 from numpy.random import random_sample
-from Variable import Variable
+from pradis.multi.Variable import Variable
 
 tb = base.Toolbox()
 
@@ -27,7 +27,8 @@ def evaluate(args):
 	# minimum at -18.5
 	x = args[0]
 	y = args[1]
-	return x * sin(4*x) + 1.1 * y * sin(2*y),
+	return (1-(x**2+y**3))*np.exp(-(x**2+y**2)/2),
+	#return x * sin(4*x) + 1.1 * y * sin(2*y),
 
 class GA():
 	def __init__(self, nl, pl, desc="GA"):
@@ -194,8 +195,8 @@ class GA():
 		print best
 		return pop
 
-v1 = Variable("", ['v1', 5.0, 1.0, 10.0])
-v2 = Variable("", ['v2', 0.5, 1.0, 10.0])
+v1 = Variable("", ['v1', -0.1, -3.0, 3.0])
+v2 = Variable("", ['v2', -1.6, -3.0, 3.0])
 vl = [v1, v2]
 ga = GA('', [vl, evaluate, 0.50, 0.20, 100, 30])
 ga.run()
