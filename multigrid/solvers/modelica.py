@@ -17,7 +17,6 @@
 #***************************************************************************/
 
 import re
-import subprocess
 import os
 import ntpath
 import sys
@@ -27,6 +26,7 @@ import debug
 from solvers.common_methods import create_file
 from loadcase import Loadcase
 from solversloadcase import SolversLoadcase
+import OMPython as omp
 
 name = "ModelicaDynamic"
 logger = debug.logger
@@ -66,18 +66,17 @@ class ModelicaLoadcase(SolversLoadcase):
 		# files_dict.update(create_mo_files_dict(self.scheme))
 		self.inData = mo
 
-def create_mo_files_dict(MOS_file_path):
+def create_mo_files_dict(mos_file_path):
 	"""
-	Returns a dictionary, where keys are mo filenames and values are list of mo file strings.
-	Dictionary is created using mos file located at MOS_file_path
-
+	:param mos_file_path:
+	:return: dictionary of mo files, listed in specified mos-file
 	"""
-	files_dict = dict()
+	files_dict = {}
 	cwd = os.getcwd()
 	#filenames.append(re.search('(\w)+\.mos', MOS_file_path).group())
-	with open(MOS_file_path, 'r') as mos:#mos = open(MOS_file_path, 'r')
-		if (MOS_file_path.rpartition('/')[0] != 0):
-			os.chdir(MOS_file_path.rpartition('/')[0])
+	with open(mos_file_path, 'r') as mos:#mos = open(MOS_file_path, 'r')
+		if (mos_file_path.rpartition('/')[0] != 0):
+			os.chdir(mos_file_path.rpartition('/')[0])
 		for line in mos:
 			if (not line.startswith('loadFile')):
 				pass
@@ -93,6 +92,10 @@ def create_mo_files_dict(MOS_file_path):
 	return files_dict
 
 def generate_params_string(params):
+	"""
+	:param params: string or dictionary of parameters for simulation of the Modelica model
+	:return: formatted string to use in simulate(...) command
+	"""
 	result = ''
 	if isinstance(params, dict):
 		for key, value in params.iteritems():
@@ -104,22 +107,26 @@ def generate_params_string(params):
 		result = params
 	return result
 
-def create_mos_by_mo(mo_filename, class_name, simulate_params):
-	mos_file = []
-	mos_file.append('loadModel(Modelica);\n')
-	mos_file.append('getErrorString();\n')
-	mos_file.append('loadFile("' + mo_filename + '");\n')
-	mos_file.append('getErrorString();\n')
-	#mos_file.append('simulate(dcmotor, ' + generate_params_string(simulate_params) + ', outputFormat = "plt");\n')
-	mos_file.append('simulate('+class_name+', '+generate_params_string(simulate_params)+', outputFormat="plt");\n')
-	mos_file.append('getErrorString();\n')
-	return mos_file
+def lrp_file_content(mo_filename, class_name, simulate_params):
+	"""
+	lrp - last run parameters
+	:param mo_filename: name of file with Modelica model
+	:param class_name: name of class inside file with Modelica model
+	:param simulate_params: parameters for simulation
+	:return: strings for creating lrp file
+	"""
+	f = []
+	f.append('loadModel(Modelica);\n')
+	f.append('loadFile("' + mo_filename + '");\n')
+	#f.append('simulate('+class_name+', '+simulate_params+', outputFormat="plt");\n')
+	f.append('simulate('+class_name+', '+simulate_params+')')
+	return f
 
 def get_class_name_by_mo(mo_filename):
 	"""
-	Returns last class name readed from mo-file (at this string: (model className)
+	:param mo_filename: name of mo-file
+	:return: last class name read from mo-file (at this string: (model className)
 	It's required for getting model's C code, its compilation and execution
-
 	"""
 	try:
 		mo_file = open(mo_filename, "r")
@@ -131,95 +138,72 @@ def get_class_name_by_mo(mo_filename):
 	return class_name
 
 class ModelicaSolver(launcher.Launcher):
-	def compile(self, mos_filename):
+	def compile(self, mo_filename, class_name, simulate_params):
 		"""
-		compiles *.mo file using *.mos file to get exe-file of the model
-
+		:param mo_filename: name of mo-file
+		:param class_name: name of class inside mo-file
+		:param simulate_params: parameters for simulation
+		:return: constants.SUCCESS_STATUS if compilation was successful
+		constants.ERROR_STATUS otherwise
 		"""
-		try:
-			log_file = open(log_filename, "w")
-		except IOError:
-			logger.error("Can not create \"" + log_filename + "\"")
-		logger.info("Begin compiling")
-		if sys.platform.startswith('win'):
-			command = '%OPENMODELICAHOME%/bin/omc.exe ' + mos_filename
-			subprocess.call(["cmd", "/C", command], stdout=log_file)
-		elif sys.platform.startswith('linux'):
-			subprocess.call(["omc", mos_filename], stdout=log_file)
-		else:
-			logger.error("Can't determine platform")
+		log = []
+		if not omp.execute('loadModel(Modelica)'):
+			omp.execute('getErrorString()')
 			return constants.ERROR_STATUS
-		logger.info("End compiling")
-		log_file.close()
-		return self.check_log()
+		load_file = 'loadFile("' + mo_filename + '")'
+		if not omp.execute(load_file):
+			logger.error('ERROR: could not load file "'+mo_filename+'"')
+			return constants.ERROR_STATUS
+		simulate = 'simulate(' + class_name + ', ' + simulate_params + ')'
+		log.append(omp.execute(simulate))
+		log.append(omp.execute('getErrorString()'))
+		return self.check(log)
 
 	def run(self, loadcase, input_params):
 		cwd = os.getcwd()
+		# how did we come in directory "loadcases"?
 		if not os.path.exists(loadcase.name):
 			os.makedirs(loadcase.name)
 		os.chdir(loadcase.name)
-
-		# Host creates all required files
-		# for k, v in loadcase.inData.iteritems():
-		# 	create_file_from_list(v, k)
-
+		omp.execute('cd("' + os.getcwd() + '")')
 		mo_filename = ntpath.basename(loadcase.scheme)
-		#mos_filename = mo_filename[:-3] + generate_params_string(loadcase.solver_params) + '.mos'
-		mos_filename = "script.mos"
+		par_filename = "last_run_parameters.txt"
 		create_file(loadcase.inData, mo_filename)
+
 		params_string = generate_params_string(loadcase.solver_params)
 		class_name = get_class_name_by_mo(mo_filename)
-		recomp_flag = self.recompilation(mos_filename, mo_filename, class_name, loadcase.solver_params)
-		#class_name = self.get_class_name(mos_filename)
-		create_file(create_mos_by_mo(mo_filename, class_name, loadcase.solver_params), mos_filename)
+		recomp_flag = self.recompilation(par_filename, mo_filename, class_name, loadcase.solver_params)
+		#create mo-file on worker
+		create_file(lrp_file_content(mo_filename, class_name, params_string), par_filename)
 		par_filename = 'pl.txt'
-		res_filename = 'results.plt'
+		res_filename = 'results.mat'
 
 		# create file with input parameters using dictionaries of input parameters
 		self.create_par_files_from_dicts(par_filename, input_params)
-
+		if recomp_flag:
+			if self.compile(mo_filename, class_name, params_string) == constants.ERROR_STATUS:
+				loadcase.status = constants.ERROR_STATUS
+				logger.error("ERROR in compilation")
+				os.chdir(cwd)
+				return None
 		if sys.platform.startswith('win'):
-			if(recomp_flag):
-				if(self.compile(mos_filename) == constants.ERROR_STATUS):
-					loadcase.status = constants.ERROR_STATUS
-					logger.error("ERROR in compilation")
-					os.chdir(cwd)
-					return None
-			command = class_name + '.exe -overrideFile ' + par_filename + ' -r ' + res_filename
-			logger.info("Begin executing")
-			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			if not self.check_execution(res_filename):
-				loadcase.status = constants.ERROR_STATUS
-				logger.error("ERROR in execution process")
-				os.chdir(cwd)
-				return None
-			logger.info("End executing")
+			exec_filename = class_name + '.exe'
 		elif sys.platform.startswith('linux'):
-			if(recomp_flag):
-				if(self.compile(mos_filename) == constants.ERROR_STATUS):
-					loadcase.status = constants.ERROR_STATUS
-					logger.error("ERROR in compilation")
-					os.chdir(cwd)
-					return None
-			command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
-			logger.info("Begin executing")
-			subprocess.call(["./" + class_name] + command)
-			if not self.check_execution(res_filename):
-				loadcase.status = constants.ERROR_STATUS
-				logger.error("ERROR in execution process")
-				os.chdir(cwd)
-				return None
-			logger.info("End executing")
-
+			exec_filename = './' + class_name
 		else:
 			logger.info("Can not determine type of your OS")
 			loadcase.status = constants.ERROR_STATUS
 			return None
-
+		logger.info("Begin executing")
+		if omp.execute('system("'+exec_filename+' -overrideFile '+par_filename+' -r '+res_filename+'")') != 0:
+			loadcase.status = constants.ERROR_STATUS
+			logger.error("ERROR in execution process")
+			os.chdir(cwd)
+			return None
+		logger.info("End executing")
 		# getting dictionary of output parameters
 		result = self.create_results_dict(res_filename)
 		loadcase.status = constants.SUCCESS_STATUS
-
 		os.chdir(cwd)
 		return result
 
@@ -239,128 +223,101 @@ class ModelicaSolver(launcher.Launcher):
 
 		return class_name
 
-	def create_par_files_from_dicts(self, par_filename, par_dic):
+	def create_par_files_from_dicts(self, par_filename, par_dict):
 		"""
 		Creates files of input parameters using dictionaries of input parameters
 
 		"""
 		with open(par_filename, 'w') as PAR_file:
-			for k, v in par_dic.iteritems():
+			for k, v in par_dict.iteritems():
 				PAR_file.write(k + '=' + str(v) + '\n')
 
-	def create_results_dict(self, RES_filename):
+	def create_results_dict(self, res_filename):
 		"""
-		Creates dictionary of results using result file named "RES_filename"
+		Creates dictionary of results using result file named "res_filename"
 
 		"""
-		curvesNumber = 0 # amount of output variables
-		result_dict = dict() # dictionary of results
-		value_list = list() # list of values of current output parameter
+		result_dict = {}
+		# read all names of variables from "res_filename"
+		res = omp.execute('readSimulationResultVars("'+res_filename+'")')
+		# create list of variables' names
+		temp_vars_list = omp.get(res, 'SET1.Values')[0].split(',')
+		# delete first and last " symbols
+		vars_list = [variable[1:-1] for variable in temp_vars_list]
+		for key in vars_list:
+			values_list = omp.execute('readSimulationResult("'+res_filename+'", '+key+')')
+			# delete last value ([:-1]), because it is the same as penultimate
+			result_dict[key] = omp.get(values_list, 'SET2.Set1')[:-1]
+		omp.execute('closeSimulationResultFile()')
 
-		with open(RES_filename, 'r') as f:
-			for line in f:
-				if (not line.startswith('DataSet: ')):
-					continue
-				curvesNumber += 1
-				#MA_object.SetCurves(curvesNumber)
-				key = re.split('DataSet: ', line)[1][:-1]
-				for line in f:
-					if (line != '\n'):
-						value_list.append(float(re.split('[\d.e-], ', line)[1][:-1]))
-					else:
-						break
-				tmp = list(value_list[:-1]) # removed last element,
-				# because value_list[last] = value_list[last-1]
-				result_dict[key] = tmp
-				del value_list[:] # delete content of the whole list
-
-		#MA_object.SetLayer(len(tmp))
 		return result_dict
 
-	def check_log(self):
+	def check(self, log_list):
 		"""
-		Checks compilation log file named "log_filename" for errors
-		Returns:
-		constants.ERROR_STATUS - if error occurred
-		constants.SUCCESS_STATUS - otherwise
-
+		:param log_list: list of output from OpenModelica API commands executed by OMPython
+		:return: constants.SUCCESS_STATUS if there is no errors in output;
+		constants.SUCCESS_STATUS otherwise
 		"""
 		error_flag = False
-		try:
-			log_file = open(log_filename, "r")
-		except IOError:
-			logger.error("Can not open \"" + log_filename + "\" for reading")
-			return constants.ERROR_STATUS
-		for line in log_file:
-			if "Error" in line:
+		for log in log_list:
+			if ('Error' or 'Fail') in log:
+				print log
 				error_flag = True
-				print line
-		log_file.close()
-		if(error_flag):
+		if error_flag:
 			return constants.ERROR_STATUS
 		return constants.SUCCESS_STATUS
 
-	def check_execution(self, res_filename):
-		"""
-		Checks the result of execution. If result file was created, then it counts as successful run.
-		Returns:
-		False - if error occurred and result file was not created
-		True - otherwise
-
-		"""
-		if os.path.exists(res_filename):
-			return True
-		return False
-
-	def recompilation(self, mos_filename, mo_filename, class_name, params_dict):
-		"""
-		Checks the need for compilation. Opens
-		All reasons for compilation are based on checking of mos file:
-		1) if the name of the file to load changed in loadFile(...) string
-		2) if the name of the class changed in simulate(class_name, ...) string
-		3) if values or amount of parameters for solver changed in simulate(class_name, solver_params) string
-		"""
-		recompile_flag = False
-		#params_dict_with_str_values = self.dict_with_str_values(params_dict)
-		if not os.path.isfile(mos_filename):
-			# if it is first run, then there won't be any mos file and we need to compile
-			print 'NO MOS FILE'
-			return True
-		if sys.platform.startswith('win'):
-			if not os.path.isfile(class_name + ".exe"):
-				# There is no any executable file, so we really need to compile
+	def recompilation(self, lrp_filename, mo_filename, class_name, params_dict):
+			"""
+			Checks the need for compilation.
+			All reasons for compilation are based on checking of file called "last_run_parameters.txt".
+			We need to compile if:
+			1) there is no such file ("last_run_parameters.txt" does not exist), so we can suppose it is first run
+			2) the name of the file to load changed in string: "loadFile(...)"
+			3) the name of the class changed in string: "simulate(class_name, ...)"
+			4) values or amount of parameters for solver changed in string: "simulate(class_name, solver_params)"
+			"""
+			recompile_flag = False
+			if sys.platform.startswith('win'):
+				if not os.path.isfile(class_name + ".exe"):
+					# There is no any executable file, so we really need to compile
+					return True
+			elif sys.platform.startswith('linux'):
+				if not os.path.isfile(class_name):
+					return True
+			else:
+				logger.info("Can not determine type of your OS")
+			if os.path.isfile(lrp_filename):
+				try:
+					lrp_file = open(lrp_filename, "r")
+				except IOError:
+					logger.error("Can not open \"" + lrp_filename + "\" for reading")
+					return constants.ERROR_STATUS
+			else:
+				print 'There is no file with last run parameters.'
+				print 'REASON 1: First execution'
 				return True
-		elif sys.platform.startswith('linux'):
-			if not os.path.isfile(class_name):
-				return True
-		else:
-			logger.info("Can not determine type of your OS")
-		try:
-			mos_file = open(mos_filename, "r")
-		except IOError:
-			logger.error("Can not open \"" + mos_filename + "\" for reading")
-			return constants.ERROR_STATUS
-		for line in mos_file:
-			if line.startswith("loadFile("):
-				# line.split('"')[1] is the name of file to load
-				if(line.split('"')[1] != mo_filename):
-					recompile_flag = True
-					print "REASON 1: model's name changed"
-					break
-			if line.startswith("simulate("):
-				model_name = re.search('\(\w+\,', line).group(0)[1:-1]
-				if(model_name != class_name):
-					recompile_flag = True
-					print "REASON 2: class name changed"
-					break
-				mos_params_dict = self.generate_params_dict_by_simulate_string(line)
-				if not self.compare_params_dicts(mos_params_dict, self.dict_with_str_values(params_dict)):
-					recompile_flag = True
-					print "REASON 3: solver params changed"
-					break
-		return recompile_flag
+			for line in lrp_file:
+				if line.startswith("loadFile("):
+					# line.split('"')[1] is the name of file to load
+					if(line.split('"')[1] != mo_filename):
+						recompile_flag = True
+						print "REASON 2: model's name changed"
+						break
+				if line.startswith("simulate("):
+					model_name = re.search('\(\w+\,', line).group(0)[1:-1]
+					if(model_name != class_name):
+						recompile_flag = True
+						print "REASON 3: class name changed"
+						break
+					lrp_params_dict = self.params_dict_from_simulate(line)
+					if not self.compare_params_dicts(lrp_params_dict, self.dict_with_str_values(params_dict)):
+						recompile_flag = True
+						print "REASON 4: solver params changed"
+						break
+			return recompile_flag
 
-	def generate_params_dict_by_simulate_string(self, simulate_string):
+	def params_dict_from_simulate(self, simulate_string):
 		"""
 		Generates dictionary of parameters using simulate string from mos file
 		example of simulate string: "simulate(dcmotor, startTime=0.0, stopTime=10.0, ...)"
@@ -369,6 +326,8 @@ class ModelicaSolver(launcher.Launcher):
 
 		"""
 		temp_params_list = simulate_string.split(',')
+		# [-1][:-1] --> delete ")" symbol from last element of the list
+		temp_params_list[-1] = temp_params_list[-1][:-1]
 		params_list = []
 		params_dict = {}
 		# params_list now containts something like this:
@@ -380,7 +339,7 @@ class ModelicaSolver(launcher.Launcher):
 		for item in params_list:
 			temp_item = item.split('=')
 			params_dict[temp_item[0]] = temp_item[1]
-		del params_dict['outputFormat']
+		#del params_dict['outputFormat']
 		return params_dict
 
 	def compare_params_dicts(self, first_dict, second_dict):
@@ -398,10 +357,10 @@ class ModelicaSolver(launcher.Launcher):
 			result = True
 		return result
 
-	def dict_with_str_values(self, dict):
+	def dict_with_str_values(self, dictionary):
 		"""
 		Converts values of dictionary to string format
 		"""
-		for key, value in dict.iteritems():
-			dict[key] = str(value)
-		return dict
+		for key, value in dictionary.iteritems():
+			dictionary[key] = str(value)
+		return dictionary
