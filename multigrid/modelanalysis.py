@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -22,11 +22,11 @@ class ModelAnalysis:
 	# object initialization
 	def __init__(self):
 		self.par_dict = {}  # dictionary of input parameters
-		self.result_dict = {}   # dictionary of results
-		self.options = ""   # command options for solvers
+		self.result_dict = {}  # dictionary of results
+		self.options = ""  # command options for solvers
 		self.status = 1
 		self.layer = 0  # amount of time layers
-		self.curvesNumber = 0   # amount of output values
+		self.curvesNumber = 0  # amount of output values
 
 	def SetParameters(self, par_dict):
 		self.par_dict.update(par_dict)
@@ -64,11 +64,11 @@ class ModelAnalysis:
 	def GetValueFromLayerByName(self, name, layer):
 		j = 0
 		for i in self.result_dict[name]:
-			if(j == layer-1):
+			if (j == layer - 1):
 				return i
 			else:
 				j += 1
-		return None #if self.par_dict[name] has no such layer
+		return None  #if self.par_dict[name] has no such layer
 
 	def GetResults(self):
 		return self.result_dict
@@ -92,7 +92,7 @@ class ModelAnalysis:
 	def ClearResults(self):
 		self.result_dict = dict()
 
-	def f(self, name, layer = -1):
+	def f(self, name, layer=-1):
 		rs = self.check(name)
 		if rs == None:
 			return None
@@ -129,5 +129,5 @@ class ModelAnalysis:
 			rs = self.result_dict[name]
 			return rs
 		else:
-			self.status = -1 # ошибка доступа
+			self.status = -1  # ошибка доступа
 			return None

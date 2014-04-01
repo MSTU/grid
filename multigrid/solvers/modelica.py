@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -21,6 +21,7 @@ import subprocess
 import os
 import ntpath
 import sys
+
 import constants
 import launcher
 import debug
@@ -28,9 +29,11 @@ from solvers.common_methods import create_file
 from loadcase import Loadcase
 from solversloadcase import SolversLoadcase
 
+
 name = "ModelicaDynamic"
 logger = debug.logger
 log_filename = "compilation.log"
+
 
 class ModelicaLoadcase(SolversLoadcase):
 	"""
@@ -48,6 +51,7 @@ class ModelicaLoadcase(SolversLoadcase):
 		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
 
 	"""
+
 	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
 		SolversLoadcase.__init__(self, scheme, name, desc, criteria_list, solver_params)
 
@@ -66,6 +70,7 @@ class ModelicaLoadcase(SolversLoadcase):
 		# files_dict.update(create_mo_files_dict(self.scheme))
 		self.inData = mo
 
+
 def create_mo_files_dict(MOS_file_path):
 	"""
 	Returns a dictionary, where keys are mo filenames and values are list of mo file strings.
@@ -75,7 +80,7 @@ def create_mo_files_dict(MOS_file_path):
 	files_dict = dict()
 	cwd = os.getcwd()
 	#filenames.append(re.search('(\w)+\.mos', MOS_file_path).group())
-	with open(MOS_file_path, 'r') as mos:#mos = open(MOS_file_path, 'r')
+	with open(MOS_file_path, 'r') as mos:  #mos = open(MOS_file_path, 'r')
 		if (MOS_file_path.rpartition('/')[0] != 0):
 			os.chdir(MOS_file_path.rpartition('/')[0])
 		for line in mos:
@@ -92,6 +97,7 @@ def create_mo_files_dict(MOS_file_path):
 
 	return files_dict
 
+
 def generate_params_string(params):
 	result = ''
 	if isinstance(params, dict):
@@ -104,6 +110,7 @@ def generate_params_string(params):
 		result = params
 	return result
 
+
 def create_mos_by_mo(mo_filename, class_name, simulate_params):
 	mos_file = []
 	mos_file.append('loadModel(Modelica);\n')
@@ -111,9 +118,11 @@ def create_mos_by_mo(mo_filename, class_name, simulate_params):
 	mos_file.append('loadFile("' + mo_filename + '");\n')
 	mos_file.append('getErrorString();\n')
 	#mos_file.append('simulate(dcmotor, ' + generate_params_string(simulate_params) + ', outputFormat = "plt");\n')
-	mos_file.append('simulate('+class_name+', '+generate_params_string(simulate_params)+', outputFormat="plt");\n')
+	mos_file.append(
+		'simulate(' + class_name + ', ' + generate_params_string(simulate_params) + ', outputFormat="plt");\n')
 	mos_file.append('getErrorString();\n')
 	return mos_file
+
 
 def get_class_name_by_mo(mo_filename):
 	"""
@@ -129,6 +138,7 @@ def get_class_name_by_mo(mo_filename):
 		if line.startswith("model"):
 			class_name = line.split()[1]
 	return class_name
+
 
 class ModelicaSolver(launcher.Launcher):
 	def compile(self, mos_filename):
@@ -179,15 +189,15 @@ class ModelicaSolver(launcher.Launcher):
 		self.create_par_files_from_dicts(par_filename, input_params)
 
 		if sys.platform.startswith('win'):
-			if(recomp_flag):
-				if(self.compile(mos_filename) == constants.ERROR_STATUS):
+			if (recomp_flag):
+				if (self.compile(mos_filename) == constants.ERROR_STATUS):
 					loadcase.status = constants.ERROR_STATUS
 					logger.error("ERROR in compilation")
 					os.chdir(cwd)
 					return None
 			command = class_name + '.exe -overrideFile ' + par_filename + ' -r ' + res_filename
 			logger.info("Begin executing")
-			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
+			subprocess.call(["cmd", "/C", command])  #, startupinfo=startupinfo)
 			if not self.check_execution(res_filename):
 				loadcase.status = constants.ERROR_STATUS
 				logger.error("ERROR in execution process")
@@ -195,8 +205,8 @@ class ModelicaSolver(launcher.Launcher):
 				return None
 			logger.info("End executing")
 		elif sys.platform.startswith('linux'):
-			if(recomp_flag):
-				if(self.compile(mos_filename) == constants.ERROR_STATUS):
+			if (recomp_flag):
+				if (self.compile(mos_filename) == constants.ERROR_STATUS):
 					loadcase.status = constants.ERROR_STATUS
 					logger.error("ERROR in compilation")
 					os.chdir(cwd)
@@ -232,7 +242,7 @@ class ModelicaSolver(launcher.Launcher):
 		class_name = None
 		with open(mos_filename, 'r') as f:
 			for line in f:
-				if(not line.startswith('simulate')):
+				if (not line.startswith('simulate')):
 					pass
 				else:
 					class_name = re.split('[(,]', line)[1]
@@ -253,9 +263,9 @@ class ModelicaSolver(launcher.Launcher):
 		Creates dictionary of results using result file named "RES_filename"
 
 		"""
-		curvesNumber = 0 # amount of output variables
-		result_dict = dict() # dictionary of results
-		value_list = list() # list of values of current output parameter
+		curvesNumber = 0  # amount of output variables
+		result_dict = dict()  # dictionary of results
+		value_list = list()  # list of values of current output parameter
 
 		with open(RES_filename, 'r') as f:
 			for line in f:
@@ -269,10 +279,10 @@ class ModelicaSolver(launcher.Launcher):
 						value_list.append(float(re.split('[\d.e-], ', line)[1][:-1]))
 					else:
 						break
-				tmp = list(value_list[:-1]) # removed last element,
+				tmp = list(value_list[:-1])  # removed last element,
 				# because value_list[last] = value_list[last-1]
 				result_dict[key] = tmp
-				del value_list[:] # delete content of the whole list
+				del value_list[:]  # delete content of the whole list
 
 		#MA_object.SetLayer(len(tmp))
 		return result_dict
@@ -296,7 +306,7 @@ class ModelicaSolver(launcher.Launcher):
 				error_flag = True
 				print line
 		log_file.close()
-		if(error_flag):
+		if (error_flag):
 			return constants.ERROR_STATUS
 		return constants.SUCCESS_STATUS
 
@@ -343,13 +353,13 @@ class ModelicaSolver(launcher.Launcher):
 		for line in mos_file:
 			if line.startswith("loadFile("):
 				# line.split('"')[1] is the name of file to load
-				if(line.split('"')[1] != mo_filename):
+				if (line.split('"')[1] != mo_filename):
 					recompile_flag = True
 					print "REASON 1: model's name changed"
 					break
 			if line.startswith("simulate("):
 				model_name = re.search('\(\w+\,', line).group(0)[1:-1]
-				if(model_name != class_name):
+				if (model_name != class_name):
 					recompile_flag = True
 					print "REASON 2: class name changed"
 					break
@@ -373,7 +383,7 @@ class ModelicaSolver(launcher.Launcher):
 		params_dict = {}
 		# params_list now containts something like this:
 		# ['simulate(dcmotor', ' stopTime=10.0', ' startTime=0.0', ' numberOfIntervals=10', ' outputFormat="plt");']
-		del temp_params_list[0] # removed first element "'simulate(dcmotor'"
+		del temp_params_list[0]  # removed first element "'simulate(dcmotor'"
 		# remove whitespace from beginning of each element
 		for item in temp_params_list:
 			params_list.append(item[1:])
@@ -394,7 +404,7 @@ class ModelicaSolver(launcher.Launcher):
 		result = False
 		first_dict_length = len(first_dict)
 		shared_items = set(first_dict.items()) & set(second_dict.items())
-		if(len(shared_items) == first_dict_length):
+		if (len(shared_items) == first_dict_length):
 			result = True
 		return result
 

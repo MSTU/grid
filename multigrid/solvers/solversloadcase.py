@@ -1,4 +1,4 @@
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -16,6 +16,7 @@
 import constants
 from loadcase import Loadcase
 
+
 class SolversLoadcase(Loadcase):
 	"""
 	Loadcase for solvers with execution parameters.
@@ -29,6 +30,7 @@ class SolversLoadcase(Loadcase):
 	solver_params : dictionary or string
 		Dictionary or string of options which will pass to solvers.
 	"""
+
 	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
 		Loadcase.__init__(self, scheme, solver, desc)
 

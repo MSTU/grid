@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -32,6 +32,7 @@ def create_file(string_list, filename):
 	except IOError:
 		logger.error("Can not create file \"" + filename + "\"")
 		import traceback
+
 		traceback.print_exc()
 		return None
 	for line in string_list:

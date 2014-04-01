@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -17,21 +17,27 @@
 #***************************************************************************/
 
 import json
+
 from conf import configclient
 from task import Task
+
+
 try:
 	from celery.result import AsyncResult
 except:
 	pass
 
 from localworker import run_task as local_run
+
 try:
 	from remoteworker import run_task as remote_run
 except:
 	pass
 
+
 def run_fileserver():
 	pass
+
 
 class MultiGrid:
 	def __init__(self, is_local_work=False):
@@ -127,14 +133,16 @@ class MultiGrid:
 
 	def web_get(self, result_ids):
 		import urllib2
+
 		if not isinstance(result_ids, list):
 			result_ids = [result_ids]
 
 		results = []
 		for result_id in result_ids:
 			try:
-				response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
-									   '/api/get_result/' + str(result_id) + '/').read()
+				response = urllib2.urlopen(
+					'http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+					'/api/get_result/' + str(result_id) + '/').read()
 				result = json.loads(response)
 			except Exception:
 				result = None
@@ -147,9 +155,11 @@ class MultiGrid:
 
 	def web_get_ids(self, job_name):
 		import urllib2
+
 		try:
-			response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
-									   '/api/get_ids/' + job_name + '/').read()
+			response = urllib2.urlopen(
+				'http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+				'/api/get_ids/' + job_name + '/').read()
 			result = json.loads(response)
 		except Exception:
 			result = None
@@ -157,9 +167,11 @@ class MultiGrid:
 
 	def web_get_results_from_job(self, job_name):
 		import urllib2
+
 		try:
-			response = urllib2.urlopen('http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
-									   '/api/get_results_from_job/' + job_name + '/').read()
+			response = urllib2.urlopen(
+				'http://' + configclient.WEB_SERVER_ADDRESS + ':' + configclient.WEB_SERVER_PORT +
+				'/api/get_results_from_job/' + job_name + '/').read()
 			result = json.loads(response)
 		except Exception:
 			result = None
@@ -179,6 +191,7 @@ def _list_to_dict(list_):
 		for key, value in item.iteritems():
 			result[key].append(value)
 	return result
+
 
 def _dict_to_list(dict_):
 	"""

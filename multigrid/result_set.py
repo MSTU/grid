@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -21,13 +21,13 @@
 class ResultSet:
 	# инициализация объекта
 	def __init__(self):
-		self.result = []            # словарь функций результата
+		self.result = []  # словарь функций результата
 		self.status = 0
 
 	#		self.layer = -1
 
 	# получить значение функции на нужном слое
-	def get_value(self, layer = -1):
+	def get_value(self, layer=-1):
 		if (layer >= len(self.result)):
 			return self.result[-1]
 		return self.result[layer]

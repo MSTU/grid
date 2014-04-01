@@ -16,12 +16,10 @@
 #*                                                                         *
 #***************************************************************************/
 from pradis.multi.Variable import Variable
-from pradis.multigrid.solvers.modelicasolver import ModelicaLoadcase
-from pradis.multi.GA_Modelica import GA
+from multigrid.solvers.modelica import ModelicaLoadcase
+from GA_Modelica import GA
 from numpy import exp
 from scipy import integrate, interpolate
-from pradis.multigrid import map as multimap
-import matplotlib.pyplot as plt
 import time
 
 def objective_function(results):

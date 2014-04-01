@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -17,10 +17,12 @@
 #***************************************************************************/
 import constants
 
+
 class Loadcase:
 	"""
 	Base class for calculation case specification. It's environment in which task will be calculated
 	"""
+
 	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE):
 		self.scheme = scheme
 		self.name = desc
@@ -38,5 +40,6 @@ class Loadcase:
 
 	def run(self, input_params):
 		from solvers.holder import get_solver
+
 		solver_instance = get_solver(self.solver)
 		return solver_instance.run(self, input_params)

@@ -9,6 +9,7 @@ def setup_logging(level):
 		logging.basicConfig(level=level, stream=sys.stdout, format="%(asctime)s, %(message)s")
 	return logging.getLogger('multigrid')
 
+
 user_level = 'INFO'
 
 # Set logging level to INFO by default

@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -16,11 +16,11 @@
 #*                                                                         *
 #***************************************************************************/
 import pickle
+
 import constants
 
 
 class Task:
-
 	def __init__(self, loadcases, input_params):
 		self.id = None
 		self.loadcases = loadcases

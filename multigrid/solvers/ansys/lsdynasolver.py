@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -18,13 +18,14 @@
 
 import subprocess
 import os
-
 import sys
+
 import debug
 import constants
 import launcher
 from solvers.ansys.ansys_methods import get_ansys_version
 from solvers.common_methods import create_file
+
 
 class LSDYNASolver(launcher.Launcher):
 	name = "ANSYS_LS-DYNA"
@@ -35,11 +36,11 @@ class LSDYNASolver(launcher.Launcher):
 	def __init__(self):
 		launcher.Launcher.__init__(self)
 		self.exec_options = ["G", "D", "F", "T", "A", "M", "S", "Z",
-		                     "L", "B", "W", "E", "X", "C", "K", "V",
-		                     "Y", "BEM", "MEMORY", "NCPU",
-		                     "PARA", "ENDTIME", "NCYCLE",
-		                     "JOBID", "D3PROP", "GMINP", "GMOUT",
-		                     "MCHECK"]
+							 "L", "B", "W", "E", "X", "C", "K", "V",
+							 "Y", "BEM", "MEMORY", "NCPU",
+							 "PARA", "ENDTIME", "NCYCLE",
+							 "JOBID", "D3PROP", "GMINP", "GMOUT",
+							 "MCHECK"]
 		self.logger = debug.logger
 
 	# Loads content of *.k file in special variable inData
@@ -71,7 +72,7 @@ class LSDYNASolver(launcher.Launcher):
 		create_file(loadcase.inData, k_filename)
 		# options is a list of option strings: ["option_1=value_1", "option_2=value_2"]
 		# there are options for LS DYNA command in ModelAnalysis parameters' dictionary
-		if(loadcase.solver_params is not None):
+		if (loadcase.solver_params is not None):
 			options = self.create_options_command(loadcase.solver_params)
 		else:
 			options = []
@@ -106,21 +107,21 @@ class LSDYNASolver(launcher.Launcher):
 		Returns: list. Its length is equal to amount of parameters in input string
 
 		"""
-		if((solver_params.find("I=") or solver_params.find("I =")) != -1):
+		if ((solver_params.find("I=") or solver_params.find("I =")) != -1):
 			self.logger.error("ERROR: You have already specified name of the input file in loadcase definition")
 		index = solver_params.find("=")
-		while(index != -1):
+		while (index != -1):
 			temp = solver_params
 			# there are whitespaces on both sides of = ("option = value")
-			if(solver_params[index-1:index] == " " and solver_params[index+1:index+2] == " "):
-				temp = solver_params[:index-1] + "=" + solver_params[index+2:]
+			if (solver_params[index - 1:index] == " " and solver_params[index + 1:index + 2] == " "):
+				temp = solver_params[:index - 1] + "=" + solver_params[index + 2:]
 			# there is only one whitespace on left side of = ("option =value")
-			elif(solver_params[index-1:index] == " "):
-				temp = solver_params[:index-1] + solver_params[index:]
+			elif (solver_params[index - 1:index] == " "):
+				temp = solver_params[:index - 1] + solver_params[index:]
 			# there is only one whitespace on the right side of = ("option= value")
-			elif(solver_params[index+1:index+2] == " "):
-				temp = solver_params[:index+1] + solver_params[index+2:]
-			index = temp.find("=", index+1)
+			elif (solver_params[index + 1:index + 2] == " "):
+				temp = solver_params[:index + 1] + solver_params[index + 2:]
+			index = temp.find("=", index + 1)
 			solver_params = temp
 		options_command = solver_params.split()
 		return options_command

@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -18,8 +18,8 @@
 
 import subprocess
 import os
-
 import sys
+
 import debug
 import constants
 import launcher
@@ -31,11 +31,11 @@ class MechanicalSolver(launcher.Launcher):
 	name = "ANSYS_Mechanical"
 	_version = get_ansys_version()
 	_exec_path = ["/ansys_inc/v" + _version + "/ansys/bin/ansys" + _version,
-										 "-b", "-p", "ANSYS"]
+				  "-b", "-p", "ANSYS"]
 	# object initialization
 	def __init__(self):
 		launcher.Launcher.__init__(self)
-		self.error_log_name = "global.err" #global error log (for all runs)
+		self.error_log_name = "global.err"  #global error log (for all runs)
 		self.logger = debug.logger
 
 	# Loads content of *.dat file in special variable inData
@@ -65,7 +65,7 @@ class MechanicalSolver(launcher.Launcher):
 		# path.rparition("/")[2] = "file.dat"
 		dat_filename = loadcase.scheme.rpartition("/")[2]
 		create_file(loadcase.inData, dat_filename)
-		if(loadcase.solver_params is not None):
+		if (loadcase.solver_params is not None):
 			options = loadcase.solver_params.split()
 		else:
 			options = []
@@ -73,7 +73,7 @@ class MechanicalSolver(launcher.Launcher):
 		options.append(dat_filename)
 		options.append("-o")
 		options.append(output_filename)
-		if("-j" in options):
+		if ("-j" in options):
 			res_index = options.index("-j") + 1
 			local_error_log_filename = options[res_index] + ".err"
 
@@ -91,7 +91,7 @@ class MechanicalSolver(launcher.Launcher):
 		error_flag = self.check_log(local_error_log_filename)
 
 		os.chdir(cwd)
-		if(not error_flag):
+		if (not error_flag):
 			loadcase.status = constants.SUCCESS_STATUS
 		loadcase.status = constants.ERROR_STATUS
 
@@ -119,7 +119,7 @@ class MechanicalSolver(launcher.Launcher):
 
 		log_file.seek(0)
 		for line in log_file:
-			i += 1 #skipping 2 lines that say when ANSYS was launched
+			i += 1  #skipping 2 lines that say when ANSYS was launched
 			if (i > 2):
 				if warning_string in line:
 					warn_count += 1

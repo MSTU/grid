@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -19,8 +19,8 @@
 import subprocess
 import os
 import shutil
-
 import sys
+
 import debug
 import constants
 import launcher
@@ -64,7 +64,7 @@ class CFXSolver(launcher.Launcher):
 		# path.rparition("/")[2] = "file.def"
 		def_filename = loadcase.scheme.rpartition("/")[2]
 		create_file(loadcase.inData, def_filename)
-		if(loadcase.solver_params is not None):
+		if (loadcase.solver_params is not None):
 			options = loadcase.solver_params.split()
 		else:
 			options = []
@@ -118,7 +118,7 @@ class CFXSolver(launcher.Launcher):
 				error_flag = True
 				break
 
-		if(error_flag):
+		if (error_flag):
 			log_file.seek(0)
 			for line in log_file:
 				print line
@@ -144,7 +144,7 @@ class CFXSolver(launcher.Launcher):
 		If it does exist, then this function deletes that temporary directory and all of its contents.
 
 		"""
-		if("-fullname" and "-save" in options):
+		if ("-fullname" and "-save" in options):
 			res_index = options.index("-fullname") + 1
 			temp_dir_name = options[res_index] + ".dir"
 			if (os.path.isdir(temp_dir_name)):

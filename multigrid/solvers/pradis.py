@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -25,7 +25,9 @@ class PradisLoadcase(Loadcase):
 	"""
 	Loadcase for PradisSolver.
 	"""
-	def __init__(self, scheme, result_file, criteria_list, solver_params, open_sign, close_sign, desc=constants.DEFAULT_LOADCASE):
+
+	def __init__(self, scheme, result_file, criteria_list, solver_params, open_sign, close_sign,
+				 desc=constants.DEFAULT_LOADCASE):
 		Loadcase.__init__(self, scheme, PRADISSolver.name, desc)
 
 		self.result_file = result_file
@@ -33,6 +35,7 @@ class PradisLoadcase(Loadcase):
 		self.solver_params = solver_params
 		self.open_sign = open_sign
 		self.close_sign = close_sign
+
 
 class PRADISSolver(launcher.Launcher):
 	name = "PRADISDynamic"

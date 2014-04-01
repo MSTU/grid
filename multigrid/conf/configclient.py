@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -15,9 +15,8 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from config import *
 
-LOCAL_WORK = True
+LOCAL_WORK = False
 
 WEB_SERVER_ADDRESS = 'localhost'
 WEB_SERVER_PORT = '8000'

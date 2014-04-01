@@ -21,7 +21,7 @@ from conf import config
 import localworker
 from multigrid.solvers.holder import get_solver
 
-celery = Celery('remoteworker', include=['task', 'cloudpickle'])
+celery = Celery('remoteworker')
 celery.config_from_object(config)
 
 @celery.task(name='remoteworker.run_task')

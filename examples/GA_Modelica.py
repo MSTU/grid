@@ -18,8 +18,8 @@
 from deap import base, creator, tools
 import numpy as np
 import random
-from pradis.multigrid.solvers.pythonsolver import PythonLoadcase
-from pradis.multigrid import map as multimap
+from multigrid.solvers.python import PythonLoadcase
+from multigrid import map as multimap
 import re
 
 tb = base.Toolbox()

@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-#***************************************************************************
+# ***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -18,7 +18,9 @@
 import sys
 import os
 import re
+
 import debug
+
 
 logger = debug.logger
 
@@ -27,7 +29,7 @@ def get_ansys_version():
 	if sys.platform.startswith('win'):
 		pass
 	elif sys.platform.startswith('linux'):
-		if(os.path.isdir("/ansys_inc")):
+		if (os.path.isdir("/ansys_inc")):
 			dir_list = os.listdir("/ansys_inc")
 			for line in dir_list:
 				temp = re.search("v[\d]+", line)
