@@ -18,15 +18,17 @@
 from deap import base, creator, tools
 import numpy as np
 from numpy import sin
-from numpy.random import random_sample
 from pradis.multi.Variable import Variable
+from multigrid import map as multimap
+from solvers.python import PythonLoadcase
+import random
 
 tb = base.Toolbox()
 
-def evaluate(args):
+def obj_f(individual):
 	# minimum at -18.5
-	x = args[0]
-	y = args[1]
+	x = individual[0]
+	y = individual[1]
 	return (1-(x**2+y**3))*np.exp(-(x**2+y**2)/2),
 	#return x * sin(4*x) + 1.1 * y * sin(2*y),
 
@@ -45,25 +47,39 @@ class GA():
 		creator.create("Minimization", base.Fitness, weights=(-1.0,))
 		creator.create("Individual", np.ndarray, fitness=creator.Minimization)
 		self.vl = pl[0]
-		self.d = len(self.vl)
 		self.f = pl[1]
 		self.cxpb = pl[2]
 		self.mutpb = pl[3]
-		self.pop_size = pl[4]
-		self.ngen = pl[5]
+		self.indpb = pl[4]
+		self.pop_size = pl[5]
+		self.ngen = pl[6]
+		self.d = len(self.vl)
 		tb.register("individual", self.init_ind, creator.Individual, self.vl)
 		tb.register("population", tools.initRepeat, list, tb.individual, self.pop_size)
 		self.pop = tb.population()
-		tb.register("evaluate", evaluate)
+		tb.register("evaluate", self.evaluate, objective_func=self.f)
 		#tb.register("select", tools.selBest, k=self.pop_size / 2)
 		tb.register("sel_best", tools.selBest, k=self.pop_size / 2)
 		tb.register("select", tools.selTournament, tournsize=3)
 		tb.register("mate", self.cxOnePointCopy)
 		tb.register("mutate", self.mutation_operator, vl=self.vl, indpb=0.1)
+		tb.evaluate(self.pop)
 
 	def init_ind(self, ind_class, vl):
 		ind = ind_class(np.random.uniform(variable.Min, variable.Max) for variable in vl)
 		return ind
+
+	def evaluate(self, individuals, objective_func):
+		# if list "individuals" is empty, then return empty list
+		if not individuals:
+			return []
+		input_list = []
+		for ind in individuals:
+			input_list.append(ind)
+		p_lc = PythonLoadcase(objective_func, desc='p_lc')
+		fitnesses = multimap(p_lc, input_list)[p_lc.name]
+
+		return fitnesses
 
 	def cxOnePointCopy(self, ind1, ind2):
 		"""Execute a one point crossover with copy on the input individuals. The
@@ -72,7 +88,7 @@ class GA():
 
 		"""
 		size = min(len(ind1), len(ind2))
-		cxpoint = np.random.random_integers(1, size - 1)
+		cxpoint = random.randint(1, size - 1)
 		ind1[cxpoint:], ind2[cxpoint:] \
 			= ind2[cxpoint:].copy(), ind1[cxpoint:].copy()
 
@@ -85,8 +101,8 @@ class GA():
 
 		"""
 		size = len(ind1)
-		cxpoint1 = np.random.random_integers(1, size)
-		cxpoint2 = np.random.random_integers(1, size - 1)
+		cxpoint1 = random.randint(1, size)
+		cxpoint2 = random.randint(1, size - 1)
 		if cxpoint2 >= cxpoint1:
 			cxpoint2 += 1
 		else: # Swap the two cx points
@@ -106,15 +122,16 @@ class GA():
 		size = len(individual)
 
 		for i in xrange(size):
-			if random_sample() < indpb:
+			if random.random() < indpb:
 				individual[i] = np.random.uniform(vl[i].Min, vl[i].Max)
 
 		return individual,
 
 	def run(self):
-		# Evaluate the entire population
+		random.seed(64)
 		pop, cxpb, mutpb, ngen = self.pop, self.cxpb, self.mutpb, self.ngen
-		fitnesses = map(tb.evaluate, pop)
+		# Evaluate the entire population
+		fitnesses = tb.evaluate(pop)
 		for ind, fit in zip(self.pop, fitnesses):
 			ind.fitness.values = fit
 
@@ -128,28 +145,28 @@ class GA():
 
 			# Apply crossover and mutation on the offspring
 			for child1, child2 in zip(offspring[::2], offspring[1::2]):
-				if random_sample() < cxpb:
+				if random.random() < cxpb:
 					tb.mate(child1, child2)
 					del child1.fitness.values
 					del child2.fitness.values
 
 			for mutant in offspring:
-				if random_sample() < mutpb:
+				if random.random() < mutpb:
 					tb.mutate(mutant)
 					del mutant.fitness.values
 
 			# Evaluate the individuals with an invalid fitness
 			invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-			fitnesses = map(tb.evaluate, invalid_ind)
+			fitnesses = tb.evaluate(invalid_ind)
 			for ind, fit in zip(invalid_ind, fitnesses):
 				ind.fitness.values = fit
 
 			# The population is entirely replaced by the offspring
 			pop[:] = offspring
-			sample = evaluate(tools.selBest(pop, 1)[0])
-			if sample[0] < best:
-				best = sample[0]
-		print best
+			print('Generation %i created' % (g+1))
+		best_ind = tools.selBest(pop, 1)[0]
+		print 'best ind: ', best_ind
+		print 'fitness value: ', best_ind.fitness.values
 		return pop
 
 	def run_2(self):
@@ -157,9 +174,10 @@ class GA():
 		offspring. The second half of the offspring is gotten from crossover and mutation of that first half of
 		individuals.
 		"""
-		# Evaluate the entire population
+		random.seed(64)
 		pop, cxpb, mutpb, ngen = self.pop, self.cxpb, self.mutpb, self.ngen
-		fitnesses = map(tb.evaluate, pop)
+		# Evaluate the entire population
+		fitnesses = tb.evaluate(pop)
 		for ind, fit in zip(self.pop, fitnesses):
 			ind.fitness.values = fit
 		best = 0.0
@@ -171,32 +189,32 @@ class GA():
 
 			# Apply crossover and mutation on the offspring
 			for child1, child2 in zip(cx_mut_offspring[::2], cx_mut_offspring[1::2]):
-				if random_sample() < cxpb:
+				if random.random() < cxpb:
 					tb.mate(child1, child2)
 					del child1.fitness.values
 					del child2.fitness.values
 
 			for mutant in cx_mut_offspring:
-				if random_sample() < mutpb:
+				if random.random() < mutpb:
 					tb.mutate(mutant)
 					del mutant.fitness.values
 			offspring = elite_offspring + cx_mut_offspring
 			# Evaluate the individuals with an invalid fitness
 			invalid_ind = [ind for ind in offspring if not ind.fitness.valid]
-			fitnesses = map(tb.evaluate, invalid_ind)
+			fitnesses = tb.evaluate(invalid_ind)
 			for ind, fit in zip(invalid_ind, fitnesses):
 				ind.fitness.values = fit
 
 			# The population is entirely replaced by the offspring
 			pop[:] = offspring
-			sample = evaluate(tools.selBest(pop, 1)[0])
-			if sample[0] < best:
-				best = sample[0]
-		print best
+			print('Generation %i created' % (g+1))
+		best_ind = tools.selBest(pop, 1)[0]
+		print 'best ind: ', best_ind
+		print 'fitness value: ', best_ind.fitness.values
 		return pop
 
 v1 = Variable("", ['v1', -0.1, -3.0, 3.0])
 v2 = Variable("", ['v2', -1.6, -3.0, 3.0])
 vl = [v1, v2]
-ga = GA('', [vl, evaluate, 0.50, 0.20, 100, 30])
+ga = GA('', [vl, obj_f, 0.50, 0.20, 0.05, 100, 5])
 ga.run()

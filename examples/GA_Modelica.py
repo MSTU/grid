@@ -18,19 +18,10 @@
 from deap import base, creator, tools
 import numpy as np
 import random
-from pradis.multigrid.solvers.pythonsolver import PythonLoadcase
-from pradis.multigrid import map as multimap
-import re
+from multigrid.solvers.python import PythonLoadcase
+from multigrid import map as multimap
 
 tb = base.Toolbox()
-
-def filter(regex, dict):
-	pattern = re.compile(regex)
-	temp_dict = {}
-	for key, value in dict.iteritems():
-		if pattern.match(key):
-			temp_dict[key] = value
-	print temp_dict
 
 class GA():
 	def __init__(self, nl, pl, desc="GA"):
@@ -164,7 +155,7 @@ class GA():
 
 			# The population is entirely replaced by the offspring
 			pop[:] = offspring
-			print('Generation %i created' % g+1)
+			print('Generation %i created' % (g+1))
 		best_ind = tools.selBest(pop, 1)[0]
 		print 'best ind: ', best_ind
 		print 'fitness value: ', best_ind.fitness.values
