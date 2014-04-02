@@ -1,4 +1,4 @@
-from .. import api
+from multigrid import api
 
 __all__ = ['get_by_id', 'get_id', 'get_by_job']
 

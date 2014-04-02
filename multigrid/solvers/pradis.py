@@ -15,10 +15,10 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import constants
+from multigrid import constants
 
 import launcher
-from loadcase import Loadcase
+from multigrid.loadcase import Loadcase
 
 
 class PradisLoadcase(Loadcase):

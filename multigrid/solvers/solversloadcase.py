@@ -13,8 +13,8 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import constants
-from loadcase import Loadcase
+from multigrid import constants
+from multigrid.loadcase import Loadcase
 
 
 class SolversLoadcase(Loadcase):

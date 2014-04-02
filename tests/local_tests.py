@@ -1,6 +1,6 @@
 import unittest
 
-from multigrid.multigrid import MultiGrid
+from multigrid.modelgrid import ModelGrid
 from solvers.modelica import ModelicaLoadcase
 from solvers.python import PythonLoadcase
 
@@ -14,7 +14,7 @@ def f1(xy):
 class LocalTest(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
-		cls.mg = MultiGrid(True)
+		cls.mg = ModelGrid(True)
 
 	def test_1(self):
 		lc = PythonLoadcase(f)

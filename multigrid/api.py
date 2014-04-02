@@ -1,9 +1,9 @@
-from multigrid import MultiGrid
+from modelgrid import ModelGrid
 from conf.configclient import LOCAL_WORK
 
 __all__ = ['calculate', 'get', 'map', 'reload', 'ready']
 
-_instance = MultiGrid(LOCAL_WORK)
+_instance = ModelGrid(LOCAL_WORK)
 
 calculate = _instance.calculate
 get = _instance.get

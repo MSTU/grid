@@ -20,11 +20,11 @@ import subprocess
 import os
 import sys
 
-import debug
-import constants
-import launcher
-from solvers.ansys.ansys_methods import get_ansys_version
-from solvers.common_methods import create_file
+from multigrid import debug
+from multigrid import constants
+from multigrid.solvers import launcher
+from ansys_methods import get_ansys_version
+from multigrid.solvers.common_methods import create_file
 
 
 class LSDYNASolver(launcher.Launcher):

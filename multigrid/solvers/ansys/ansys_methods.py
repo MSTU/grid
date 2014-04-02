@@ -19,7 +19,7 @@ import sys
 import os
 import re
 
-import debug
+from multigrid import debug
 
 
 logger = debug.logger

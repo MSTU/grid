@@ -39,7 +39,7 @@ def run_fileserver():
 	pass
 
 
-class MultiGrid:
+class ModelGrid:
 	def __init__(self, is_local_work=False):
 		"""
 		is_local_work : bool

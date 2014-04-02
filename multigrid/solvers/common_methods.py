@@ -17,7 +17,7 @@
 #***************************************************************************/
 
 # These are common methods used by most of the solvers
-import debug
+from multigrid import debug
 
 logger = debug.logger
 

@@ -22,12 +22,12 @@ import os
 import ntpath
 import sys
 
-import constants
+from multigrid import constants
 import launcher
-import debug
-from solvers.common_methods import create_file
-from loadcase import Loadcase
-from solversloadcase import SolversLoadcase
+from multigrid import debug
+from multigrid.solvers.common_methods import create_file
+from multigrid.loadcase import Loadcase
+from multigrid.solvers.solversloadcase import SolversLoadcase
 
 
 name = "ModelicaDynamic"

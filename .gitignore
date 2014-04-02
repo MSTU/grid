@@ -15,6 +15,7 @@ build
 dist
 multigrid.egg-info
 files
+env
 
 multigrid/multigrid.iml
 grid_web_app/grid_web_app.iml

@@ -16,11 +16,11 @@
 #***************************************************************************/
 import pickle
 
-import constants
+from multigrid import constants
 from launcher import Launcher
-from loadcase import Loadcase
-from debug import logger
-from serialization import cloudpickle
+from multigrid.loadcase import Loadcase
+from multigrid.debug import logger
+from multigrid.serialization import cloudpickle
 
 
 name = "Python"

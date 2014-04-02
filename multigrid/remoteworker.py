@@ -19,7 +19,7 @@
 from celery import Celery
 from conf import config
 import localworker
-from multigrid.solvers.holder import get_solver
+from solvers.holder import get_solver
 
 celery = Celery('remoteworker')
 celery.config_from_object(config)

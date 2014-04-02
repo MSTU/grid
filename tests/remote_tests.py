@@ -1,17 +1,17 @@
 import os
 import subprocess
 import unittest
-import local_test
-from multigrid.multigrid import MultiGrid
+import local_tests
+from multigrid.modelgrid import ModelGrid
 
 
-class RemoteTest(local_test.LocalTest):
+class RemoteTest(local_tests.LocalTest):
 	@classmethod
 	def setUpClass(cls):
 		cls.subprocesses = []
-		cls.mg = MultiGrid(False)
+		cls.mg = ModelGrid(False)
 		cwd = os.getcwd()
-		os.chdir('..')
+		os.chdir('../multigrid/')
 		worker = subprocess.Popen(['celery', '-A', 'remoteworker', 'worker', '--concurrency', '1' ])
 		cls.subprocesses.append(worker)
 		os.chdir(cwd)
@@ -24,7 +24,7 @@ class RemoteTest(local_test.LocalTest):
 
 
 def test_suite():
-	return unittest.TestLoader().loadTestsFromTestCase(local_test.LocalTest)
+	return unittest.TestLoader().loadTestsFromTestCase(local_tests.LocalTest)
 
 
 if __name__ == '__main__':
