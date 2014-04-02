@@ -128,6 +128,7 @@ def get_class_name_by_mo(mo_filename):
 	:return: last class name read from mo-file (at this string: (model className)
 	It's required for getting model's C code, its compilation and execution
 	"""
+	class_name = ''
 	try:
 		mo_file = open(mo_filename, "r")
 	except IOError:
@@ -153,6 +154,7 @@ class ModelicaSolver(launcher.Launcher):
 		load_file = 'loadFile("' + mo_filename + '")'
 		if not omp.execute(load_file):
 			logger.error('ERROR: could not load file "'+mo_filename+'"')
+			omp.execute('getErrorString()')
 			return constants.ERROR_STATUS
 		simulate = 'simulate(' + class_name + ', ' + simulate_params + ')'
 		log.append(omp.execute(simulate))
@@ -194,13 +196,13 @@ class ModelicaSolver(launcher.Launcher):
 			logger.info("Can not determine type of your OS")
 			loadcase.status = constants.ERROR_STATUS
 			return None
-		logger.info("Begin executing")
+		#logger.info("Begin executing")
 		if omp.execute('system("'+exec_filename+' -overrideFile '+par_filename+' -r '+res_filename+'")') != 0:
 			loadcase.status = constants.ERROR_STATUS
 			logger.error("ERROR in execution process")
 			os.chdir(cwd)
 			return None
-		logger.info("End executing")
+		#logger.info("End executing")
 		# getting dictionary of output parameters
 		result = self.create_results_dict(res_filename)
 		loadcase.status = constants.SUCCESS_STATUS
@@ -246,8 +248,11 @@ class ModelicaSolver(launcher.Launcher):
 		vars_list = [variable[1:-1] for variable in temp_vars_list]
 		for key in vars_list:
 			values_list = omp.execute('readSimulationResult("'+res_filename+'", '+key+')')
-			# delete last value ([:-1]), because it is the same as penultimate
-			result_dict[key] = omp.get(values_list, 'SET2.Set1')[:-1]
+			# it is a workaround, because we have troubles with getting variables with
+			# complex names, for example, der(der(mass1.flange_b.s)) (names with brackets)
+			if len(values_list):
+				# delete last value ([:-1]), because it is the same as penultimate
+				result_dict[key] = omp.get(values_list, 'SET2.Set1')[:-1]
 		omp.execute('closeSimulationResultFile()')
 
 		return result_dict
