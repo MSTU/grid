@@ -33,4 +33,8 @@ setup(name='multigrid',
 		  'Topic :: Scientific/Engineering',
 		  'Topic :: Software Development',
 		  ],
+	  entry_points={
+		  'console_scripts':
+			  ['multigrid = multigrid.api:main']
+	  },
 	  )
