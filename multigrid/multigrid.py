@@ -78,17 +78,15 @@ class MultiGrid:
 		"""
 		results = []
 		for result_id in result_ids:
-			try:
-				if not self._is_local_work:
-					async_result = AsyncResult(result_id)
-					result_task = async_result.get()
-				else:
-					result_task = self._id_to_task.pop(result_id)
+
+			if not self._is_local_work:
+				async_result = AsyncResult(result_id)
+				result_task = async_result.get()
+			else:
+				result_task = self._id_to_task.pop(result_id)
 				# it's new instance of Task, therefore need to reassign id field
-				result_task.id = result_id
-			except Exception as e:
-				#TODO right error handling
-				result_task = None
+			result_task.id = result_id
+
 			results.append(result_task.result)
 		result_dict = _list_to_dict(results)
 		# if only one loadcase calculated, return value of the one loadcase

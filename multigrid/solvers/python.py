@@ -56,18 +56,10 @@ class PythonLoadcase(Loadcase):
 class PythonSolver(Launcher):
 
 	def run(self, lc, input_params):
-		result = None
-		try:
-			func = pickle.loads(lc.scheme)
-			result = func(input_params)
 
-			status = constants.SUCCESS_STATUS
-		except Exception as e:
-			status = constants.ERROR_STATUS
-			# TODO is it right?
-			result = e
+		func = pickle.loads(lc.scheme)
+		result = func(input_params)
 
-		lc.status = status
 		return result
 
 	def preexecute(self, lc):
