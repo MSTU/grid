@@ -20,6 +20,7 @@ import os
 from celery import Celery
 from conf import config
 import localworker
+from multigrid.solvers.holder import get_solver
 
 from ftplib import FTP
 from transfer_util import do_file_transfer
@@ -34,6 +35,10 @@ def run_task(task):
 	for lc in task.loadcases:
 		if lc.is_filetransfer:
 			do_file_transfer(lc.transfer_params['host'], lc.name, lc.scheme)
+
+		# TODO May be preexecute must be static method?
+		solver = get_solver(lc.solver)
+		solver.preexecute(lc)
 	# set task id
 	task.id = run_task.request.id
 	return localworker.run_task(task)

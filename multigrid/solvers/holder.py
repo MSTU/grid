@@ -2,12 +2,12 @@
 Hold instances of solvers
 """
 
-import pythonsolver
-import modelicasolver
+import python
+import modelica
 
 solver_name_to_class = dict()
-solver_name_to_class[pythonsolver.name] = pythonsolver.PythonSolver
-solver_name_to_class[modelicasolver.name] = modelicasolver.ModelicaSolver
+solver_name_to_class[python.name] = python.PythonSolver
+solver_name_to_class[modelica.name] = modelica.ModelicaSolver
 
 solvers = dict()
 

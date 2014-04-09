@@ -35,3 +35,8 @@ class Loadcase:
 
 	def __repr__(self):
 		return self.name
+
+	def run(self, input_params):
+		from solvers.holder import get_solver
+		solver_instance = get_solver(self.solver)
+		return solver_instance.run(self, input_params)

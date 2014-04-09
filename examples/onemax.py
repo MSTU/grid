@@ -12,12 +12,29 @@
 #
 #    You should have received a copy of the GNU Lesser General Public
 #    License along with DEAP. If not, see <http://www.gnu.org/licenses/>.
-
 import random
-
 from deap import base
 from deap import creator
 from deap import tools
+import sys
+
+from multigrid.solvers.python import PythonLoadcase
+from multigrid import map as multimap
+def mymap(func, seq):
+	def standartizate(obj):
+		"""
+		At least cast instanses of list subclasses to list
+		"""
+		if issubclass(type(obj), list):
+			result = []
+			for item in obj:
+				result.append(standartizate(item))
+			return result
+		else:
+			return obj
+
+	lc = PythonLoadcase(func, preexecute_filename=sys.argv[0])
+	return multimap(lc, seq)[func.__name__]
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
@@ -39,25 +56,25 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-import multigrid
-from multigrid.solvers.pythonsolver import PythonLoadcase
-from multigrid import map as multimap
-def mymap(func, seq):
-	lc = PythonLoadcase(func)
-	return multimap(lc, seq)[func.__name__]
-
-mymap = map
+def print_all_types(obj):
+	if hasattr(obj, '__iter__'):
+		print type(obj)
+		print_all_types(obj[0])
+	else:
+		print type(obj)
 
 def main():
 	random.seed(64)
 
-	pop = toolbox.population(n=300)
+	pop = toolbox.population(n=20)
 	CXPB, MUTPB, NGEN = 0.5, 0.2, 40
 
 	print("Start of evolution")
 
 	# Evaluate the entire population
+
 	fitnesses = list(mymap(toolbox.evaluate, pop))
+
 	for ind, fit in zip(pop, fitnesses):
 		ind.fitness.values = fit
 
@@ -69,8 +86,9 @@ def main():
 
 		# Select the next generation individuals
 		offspring = toolbox.select(pop, len(pop))
+
 		# Clone the selected individuals
-		offspring = list(mymap(toolbox.clone, offspring))
+		offspring = list(map(toolbox.clone, offspring))
 
 		# Apply crossover and mutation on the offspring
 		for child1, child2 in zip(offspring[::2], offspring[1::2]):

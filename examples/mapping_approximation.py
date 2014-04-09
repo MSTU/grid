@@ -17,7 +17,7 @@
 #***************************************************************************/
 
 from multigrid import map as multimap
-from multigrid.solvers.pythonsolver import PythonLoadcase
+from multigrid.solvers.python import PythonLoadcase
 
 import matplotlib.pyplot as plt
 

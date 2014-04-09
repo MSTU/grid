@@ -15,7 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import ast
+
 import json
 from conf import configclient
 from task import Task
