@@ -19,11 +19,14 @@ import os
 
 from celery import Celery
 from conf import config
+import constants
 import localworker
 from multigrid.solvers.holder import get_solver
 
 from ftplib import FTP
 from transfer_util import do_file_transfer
+
+from debug import logger
 
 
 celery = Celery('remoteworker', include=[])
@@ -32,13 +35,31 @@ celery.config_from_object(config)
 
 @celery.task(name='remoteworker.run_task')
 def run_task(task):
-	for lc in task.loadcases:
-		if lc.is_filetransfer:
-			do_file_transfer(lc.transfer_params['host'], lc.name, lc.scheme)
+	# save current directory
+	cwd = os.getcwd()
+	# move to 'loadcases' directory
+	directory = os.path.join(cwd, constants.LOADCASES_DIR)
+	if not os.path.exists(directory):
+		os.makedirs(directory)
+	os.chdir(directory)
+	print os.getcwd()
 
-		# TODO May be preexecute must be static method?
-		solver = get_solver(lc.solver)
-		solver.preexecute(lc)
-	# set task id
-	task.id = run_task.request.id
-	return localworker.run_task(task)
+	try:
+		for lc in task.loadcases:
+			if lc.is_filetransfer:
+				do_file_transfer(lc.transfer_params['host'], lc.name, lc.scheme)
+				logger.info('File transfer complete')
+
+			# TODO May be preexecute must be static method?
+			solver = get_solver(lc.solver)
+			solver.preexecute(lc)
+
+		# set task id
+		task.id = run_task.request.id
+		task = localworker.run_task(task)
+
+		return task
+	finally:
+		# move to parent directory
+		os.chdir(cwd)
+

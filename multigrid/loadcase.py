@@ -26,6 +26,7 @@ class Loadcase:
 		self.name = desc
 		self.solver = solver
 		self.status = constants.DEFAULT_STATUS
+		self.is_filetransfer = False
 
 	def load_data(self):
 		"""

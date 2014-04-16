@@ -13,7 +13,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-from multigrid.solvers.pythons import PythonLoadcase
+from multigrid.solvers.python import PythonLoadcase
 from multigrid import map as multimap
 
 def func_2(x):

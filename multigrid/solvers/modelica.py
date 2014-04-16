@@ -131,6 +131,8 @@ def get_class_name_by_mo(mo_filename):
 	try:
 		mo_file = open(mo_filename, "r")
 	except IOError:
+		import traceback
+		traceback.print_exc()
 		logger.error("Can not open \"" + mo_filename + "\" for reading")
 	for line in mo_file:
 		if line.startswith("model"):
@@ -170,79 +172,78 @@ class ModelicaSolver(launcher.Launcher):
 		# for k, v in loadcase.inData.iteritems():
 		# 	create_file_from_list(v, k)
 
+		try:
+			mo_filename = ntpath.basename(loadcase.scheme)
+			#mos_filename = mo_filename[:-3] + generate_params_string(loadcase.solver_params) + '.mos'
+			mos_filename = "script.mos"
+			if not loadcase.is_filetransfer:
+				create_file(loadcase.inData, mo_filename)
+			params_string = generate_params_string(loadcase.solver_params)
+			class_name = get_class_name_by_mo(mo_filename)
+			recomp_flag = self.recompilation(mos_filename, mo_filename, class_name, loadcase.solver_params)
+			#class_name = self.get_class_name(mos_filename)
+			create_file(create_mos_by_mo(mo_filename, class_name, loadcase.solver_params), mos_filename)
+			par_filename = 'pl.txt'
+			res_filename = 'results.plt'
 
-		mo_filename = ntpath.basename(loadcase.scheme)
-		#mos_filename = mo_filename[:-3] + generate_params_string(loadcase.solver_params) + '.mos'
-		mos_filename = "script.mos"
-		if not loadcase.is_filetransfer:
-			create_file(loadcase.inData, mo_filename)
-		params_string = generate_params_string(loadcase.solver_params)
-		class_name = get_class_name_by_mo(mo_filename)
-		recomp_flag = self.recompilation(mos_filename, mo_filename, class_name, loadcase.solver_params)
-		#class_name = self.get_class_name(mos_filename)
-		create_file(create_mos_by_mo(mo_filename, class_name, loadcase.solver_params), mos_filename)
-		par_filename = 'pl.txt'
-		res_filename = 'results.plt'
 
+			# create file with input parameters using dictionaries of input parameters
+			self.create_par_files_from_dicts(par_filename, input_params)
 
-		# create file with input parameters using dictionaries of input parameters
-		self.create_par_files_from_dicts(par_filename, input_params)
-
-		if sys.platform.startswith('win'):
-			if(recomp_flag):
-				if(self.compile(mos_filename) == constants.ERROR_STATUS):
+			if sys.platform.startswith('win'):
+				if(recomp_flag):
+					if(self.compile(mos_filename) == constants.ERROR_STATUS):
+						loadcase.status = constants.ERROR_STATUS
+						logger.error("ERROR in compilation")
+						return None
+				command = class_name + '.exe -overrideFile ' + par_filename + ' -r ' + res_filename
+				logger.info("Begin executing")
+				subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
+				if not self.check_execution(res_filename):
 					loadcase.status = constants.ERROR_STATUS
-					logger.error("ERROR in compilation")
-					os.chdir(cwd)
+					logger.error("ERROR in execution process")
 					return None
-			command = class_name + '.exe -overrideFile ' + par_filename + ' -r ' + res_filename
-			logger.info("Begin executing")
-			subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
-			if not self.check_execution(res_filename):
-				loadcase.status = constants.ERROR_STATUS
-				logger.error("ERROR in execution process")
-				os.chdir(cwd)
-				return None
-			logger.info("End executing")
-		elif sys.platform.startswith('linux'):
-			if(recomp_flag):
-				if(self.compile(mos_filename) == constants.ERROR_STATUS):
+				logger.info("End executing")
+			elif sys.platform.startswith('linux'):
+				if(recomp_flag):
+					if(self.compile(mos_filename) == constants.ERROR_STATUS):
+						loadcase.status = constants.ERROR_STATUS
+						logger.error("ERROR in compilation")
+						return None
+				command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
+				logger.info("Begin executing")
+				subprocess.call(["./" + class_name] + command)
+				if not self.check_execution(res_filename):
 					loadcase.status = constants.ERROR_STATUS
-					logger.error("ERROR in compilation")
-					os.chdir(cwd)
+					logger.error("ERROR in execution process")
 					return None
-			command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
-			logger.info("Begin executing")
-			subprocess.call(["./" + class_name] + command)
-			if not self.check_execution(res_filename):
+				logger.info("End executing")
+
+			else:
+				logger.info("Can not determine type of your OS")
 				loadcase.status = constants.ERROR_STATUS
-				logger.error("ERROR in execution process")
-				os.chdir(cwd)
 				return None
-			logger.info("End executing")
 
-		else:
-			logger.info("Can not determine type of your OS")
-			loadcase.status = constants.ERROR_STATUS
-			return None
+			# if file transfer doesn't need parse file result in memory
+			# otherwise return path to result file on worker
+			if not loadcase.is_filetransfer:
+				# getting dictionary of output parameters
+				result = self.create_results_dict(res_filename)
+			else:
+				# store result file in FTP directory with name = task.id + .plt
+				filename = str(loadcase.task_id) + '.plt'
+				result_file_path = os.path.join(configworker.FTP_PATH, filename)
+				# move result file
+				shutil.move(res_filename, result_file_path)
+				# store host and path to file in result
+				result = dict()
+				result['host'] = configworker.IP_ADDRESS
+				result['file'] = filename
 
-		# if file transfer doesnt' need parse file result in memory
-		# otherwise return path to result file on worker
-		if not loadcase.is_filetransfer:
-			# getting dictionary of output parameters
-			result = self.create_results_dict(res_filename)
 			loadcase.status = constants.SUCCESS_STATUS
-		else:
-			result_file_path = os.path.join(os.getcwd(), str(loadcase.task_id) + '.plt')
-			# move result file
-			shutil.move(res_filename, result_file_path)
-			# store host and path to file in result
-			result = dict()
-			result['host'] = configworker.IP_ADDRESS
-			result['file'] = result_file_path
-
-		os.chdir(cwd)
-		return result
+			return result
+		finally:
+			os.chdir(cwd)
 
 	def get_class_name(self, mos_filename):
 		"""
