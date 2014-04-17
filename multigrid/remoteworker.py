@@ -42,7 +42,6 @@ def run_task(task):
 	if not os.path.exists(directory):
 		os.makedirs(directory)
 	os.chdir(directory)
-	print os.getcwd()
 
 	try:
 		for lc in task.loadcases:
