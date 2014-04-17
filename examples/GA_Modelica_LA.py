@@ -20,19 +20,24 @@ from multigrid.solvers.modelica import ModelicaLoadcase
 from GA_Modelica import GA
 from numpy import exp
 from scipy import integrate, interpolate
+import solvers.modelica_api as api
+from multigrid import map as multimap
+import matplotlib.pyplot as plt
 import time
 
 def objective_function(results):
-	last_layer = 0.0
+	#last_layer = api.layer_count(results)-1
+	'''
 	for key in results:
 		last_layer = len(results[key])-1
 		break
-	t = get_value_from_layer_by_name(results, 'time', last_layer)
-	return integrate.quad(integrand, 0, t, args=results, limit=1000)[0],
+	'''
+	#t = api.value_from_layer(results, 'time', last_layer)
+	return integrate.quad(integrand, 0, 4.0, args=results, epsabs=1.49e-05, epsrel=1.49e-05, limit=200)[0],
 
 def integrand(t, results_dict):
 	y_ref = 0.5 * (1.0 - exp(-5.0*t))
-	y = get_value(results_dict, 'mass1.s', t)
+	y = api.value(results_dict, 'mass1.s', t)
 	return (y_ref - y)**2
 
 def get_value_from_layer_by_name(result_dict, key, index):
@@ -73,30 +78,29 @@ def y_ref(t):
 
 def test():
 	la = ModelicaLoadcase('mos/linear_actuator.mo', desc='linear_actuator',
-						  solver_params={'startTime': 0.0, 'stopTime': 4.0, 'stepSize': 0.05})
+						  solver_params={'startTime': 0.0, 'stopTime': 4.0, 'stepSize': 0.01})
 	var1 = Variable([], ['springdamper1.d', 2.0, 1, 40], desc='sd1')
 	var2 = Variable([], ['springdamper2.d', 3.0, 1, 40], desc='sd2')
 	ga = GA('', [la, [var1, var2], objective_function, 0.5, 0.2, 0.05, 100, 10])
-	time.clock()
-	ga.run_2()
-	end = time.clock()
-	print 'execution time:', end, 'seconds'
+	start_time = time.time()
+	ga.run()
+	print 'execution time:', time.time() - start_time, "seconds"
 	'''
 	par_dict = {}
-	par_dict['springdamper1.d'] = 35.75184286#19.88
-	par_dict['springdamper2.d'] = 4.94689962#4.90
+	par_dict['springdamper1.d'] = 20.26010902#19.88
+	par_dict['springdamper2.d'] = 4.06789479#4.90
 	input_list = []
 	input_list.append(par_dict)
 	results = multimap(la, input_list)[la.name][0]
 	print objective_function(results)
-	t = f(results, 'time')
-	v = f(results, 'mass1.s')
+	t = api.value_list(results, 'time')
+	v = api.value_list(results, 'mass1.s')
 	func = interpolate.interp1d(t, v)
 	plt.plot(t, func(t))
 	plt.plot(t, y_ref(t))
-	plt.text(0.5, 0.3, 'd1=35.75184286')
-	plt.text(0.5, 0.2, 'd2=4.94689962')
-	plt.text(0.5, 0.1, 'fitness=0.005942344714417873')
+	plt.text(0.5, 0.3, 'd1=20.26010902')
+	plt.text(0.5, 0.2, 'd2=4.06789479')
+	plt.text(0.5, 0.1, 'fitness=0.006849501332322377')
 	plt.show()
 	'''
 

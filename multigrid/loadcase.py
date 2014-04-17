@@ -1,6 +1,6 @@
 # -*- coding: cp1251 -*-
 
-# ***************************************************************************
+#***************************************************************************
 #
 #    copyright            : (C) 2013 by Valery Ovchinnikov (LADUGA Ltd.)
 #                                       Anton Lapshin
@@ -22,11 +22,12 @@ class Loadcase:
 	"""
 	Base class for calculation case specification. It's environment in which task will be calculated
 	"""
-
-	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE):
+	def __init__(self, scheme, solver, desc):
 		self.scheme = scheme
 		self.name = desc
 		self.solver = solver
+		self.status = constants.DEFAULT_STATUS
+		self.is_filetransfer = False
 		self.load_data()
 
 	def load_data(self):
