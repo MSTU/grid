@@ -17,7 +17,9 @@
 #***************************************************************************/
 
 import json
+import os
 from conf import configclient
+from debug import logger
 from task import Task
 try:
 	from celery.result import AsyncResult
@@ -82,6 +84,22 @@ class MultiGrid:
 				if not self._is_local_work:
 					async_result = AsyncResult(result_id)
 					result_task = async_result.get()
+					# transfer files if need
+					for lc in result_task.loadcases:
+						try:
+							if lc.is_filetransfer:
+								logger.info('Begin filetransfer')
+								from transfer_util import do_file_transfer
+
+								# create directory for loadcase
+								directory = os.path.join(os.getcwd(), lc.name)
+								if not os.path.exists(directory):
+									os.makedirs(directory)
+
+								do_file_transfer(result_task.result[lc.name]['host'], directory, result_task.result[lc.name]['file'])
+						except Exception as ex:
+							import traceback
+							traceback.print_exc()
 				else:
 					result_task = self._id_to_task.pop(result_id)
 				# it's new instance of Task, therefore need to reassign id field
@@ -124,6 +142,9 @@ class MultiGrid:
 		Reinit instance
 		"""
 		self.__init__(self._is_local_work)
+
+	def download_results(self, result):
+		pass
 
 	def web_get(self, result_ids):
 		import urllib2

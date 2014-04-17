@@ -32,5 +32,5 @@ class AnsysLoadcase(SolversLoadcase):
 		"-v -output-summary-option 0 -save -name CFX_solution"
 
 	"""
-	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		SolversLoadcase.__init__(self, scheme, solver, desc, criteria_list, solver_params)
+	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None, need_filetransfer=False):
+		SolversLoadcase.__init__(self, scheme, solver, desc, criteria_list, solver_params, need_filetransfer)

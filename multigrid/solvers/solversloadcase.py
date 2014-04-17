@@ -13,7 +13,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
-import constants
+from conf import configclient
 from loadcase import Loadcase
 
 class SolversLoadcase(Loadcase):
@@ -29,8 +29,12 @@ class SolversLoadcase(Loadcase):
 	solver_params : dictionary or string
 		Dictionary or string of options which will pass to solvers.
 	"""
-	def __init__(self, scheme, solver, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
+	def __init__(self, scheme, solver, desc, is_filetransfer, transfer_params, criteria_list=None, solver_params=None):
 		Loadcase.__init__(self, scheme, solver, desc)
 
 		self.criteria_list = criteria_list
 		self.solver_params = solver_params
+		self.is_filetransfer = is_filetransfer
+		self.transfer_params = transfer_params
+		if self.is_filetransfer and not self.transfer_params:
+			self.transfer_params = {'host': configclient.IP_ADDRESS}

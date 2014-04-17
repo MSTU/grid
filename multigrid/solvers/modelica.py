@@ -17,9 +17,12 @@
 #***************************************************************************/
 
 import re
+import shutil
+import subprocess
 import os
 import ntpath
 import sys
+from conf import configworker
 import constants
 import launcher
 import debug
@@ -40,6 +43,10 @@ class ModelicaLoadcase(SolversLoadcase):
 		Path to Modelica file.
 	desc: string
 		Loadcase name.
+	is_filetransfer: bool
+		True if files are big and file transfer need, False otherwise
+	transfer_params: dict
+		Contain information about files included in model
 	criteria_list: list
 		List of result parameters, which will be included in result dict
 	solver_params : dict
@@ -48,23 +55,24 @@ class ModelicaLoadcase(SolversLoadcase):
 		{'startTime' = 0.0, 'endTime' = 10.0, 'interval' = 0.1}
 
 	"""
-	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, criteria_list=None, solver_params=None):
-		SolversLoadcase.__init__(self, scheme, name, desc, criteria_list, solver_params)
+	def __init__(self, scheme, desc=constants.DEFAULT_LOADCASE, is_filetransfer=False, transfer_params=None, criteria_list=None, solver_params=None):
+		SolversLoadcase.__init__(self, scheme, name, desc, is_filetransfer, transfer_params, criteria_list, solver_params)
+		self.load_data()
 
 
 	# preparing of data for calculation
 	# writes dictionary in Loadcase variable inData
 	# keys are mos and mo filenames; values are lists of the file string
 	def load_data(self):
-		Loadcase.load_data(self)
+		if not self.is_filetransfer:
+			#files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
+			# load .mos file
+			with open(self.scheme, 'r') as f:
+				mo = f.readlines()
+			# files_dict[MOS_filename] = mos
+			# files_dict.update(CreateMOfilesDict(self.scheme))
+			self.inData = mo
 
-		#files_dict = dict() #files dictionary, where keys are filenames and values are list of file strings
-		# load .mos file
-		with open(self.scheme, 'r') as f:
-			mo = f.readlines()
-		# files_dict[MOS_filename] = mos
-		# files_dict.update(create_mo_files_dict(self.scheme))
-		self.inData = mo
 
 def create_mo_files_dict(mos_file_path):
 	"""
@@ -132,6 +140,8 @@ def get_class_name_by_mo(mo_filename):
 	try:
 		mo_file = open(mo_filename, "r")
 	except IOError:
+		import traceback
+		traceback.print_exc()
 		logger.error("Can not open \"" + mo_filename + "\" for reading")
 	for line in mo_file:
 		if line.startswith("model"):
@@ -163,51 +173,69 @@ class ModelicaSolver(launcher.Launcher):
 
 	def run(self, loadcase, input_params):
 		cwd = os.getcwd()
-		# how did we come in directory "loadcases"?
 		if not os.path.exists(loadcase.name):
 			os.makedirs(loadcase.name)
 		os.chdir(loadcase.name)
-		omp.execute('cd("' + os.getcwd() + '")')
-		mo_filename = ntpath.basename(loadcase.scheme)
-		par_filename = "last_run_parameters.txt"
-		create_file(loadcase.inData, mo_filename)
 
-		params_string = generate_params_string(loadcase.solver_params)
-		class_name = get_class_name_by_mo(mo_filename)
-		recomp_flag = self.recompilation(par_filename, mo_filename, class_name, loadcase.solver_params)
-		#create mo-file on worker
-		create_file(lrp_file_content(mo_filename, class_name, params_string), par_filename)
-		par_filename = 'pl.txt'
-		res_filename = 'results.mat'
+		try:
+			omp.execute('cd("' + os.getcwd() + '")')
+			mo_filename = ntpath.basename(loadcase.scheme)
+			par_filename = "last_run_parameters.txt"
+			if not loadcase.is_filetransfer:
+				create_file(loadcase.inData, mo_filename)
 
-		# create file with input parameters using dictionaries of input parameters
-		self.create_par_files_from_dicts(par_filename, input_params)
-		if recomp_flag:
-			if self.compile(mo_filename, class_name, params_string) == constants.ERROR_STATUS:
+			params_string = generate_params_string(loadcase.solver_params)
+			class_name = get_class_name_by_mo(mo_filename)
+			recomp_flag = self.recompilation(par_filename, mo_filename, class_name, loadcase.solver_params)
+			#create mo-file on worker
+			create_file(lrp_file_content(mo_filename, class_name, params_string), par_filename)
+			par_filename = 'pl.txt'
+			res_filename = 'results.mat'
+
+			# create file with input parameters using dictionaries of input parameters
+			self.create_par_files_from_dicts(par_filename, input_params)
+			if recomp_flag:
+				if self.compile(mo_filename, class_name, params_string) == constants.ERROR_STATUS:
+					loadcase.status = constants.ERROR_STATUS
+					logger.error("ERROR in compilation")
+					return None
+			if sys.platform.startswith('win'):
+				exec_filename = class_name + '.exe'
+			elif sys.platform.startswith('linux'):
+				exec_filename = './' + class_name
+			else:
+				logger.info("Can not determine type of your OS")
 				loadcase.status = constants.ERROR_STATUS
-				logger.error("ERROR in compilation")
-				os.chdir(cwd)
 				return None
-		if sys.platform.startswith('win'):
-			exec_filename = class_name + '.exe'
-		elif sys.platform.startswith('linux'):
-			exec_filename = './' + class_name
-		else:
-			logger.info("Can not determine type of your OS")
-			loadcase.status = constants.ERROR_STATUS
-			return None
-		#logger.info("Begin executing")
-		if omp.execute('system("'+exec_filename+' -overrideFile '+par_filename+' -r '+res_filename+'")') != 0:
-			loadcase.status = constants.ERROR_STATUS
-			logger.error("ERROR in execution process")
+			#logger.info("Begin executing")
+			if omp.execute('system("'+exec_filename+' -overrideFile '+par_filename+' -r '+res_filename+'")') != 0:
+				loadcase.status = constants.ERROR_STATUS
+				logger.error("ERROR in execution process")
+				return None
+			#logger.info("End executing")
+
+			# if file transfer doesn't need parse file result in memory
+			# otherwise return path to result file on worker
+			if not loadcase.is_filetransfer:
+				# getting dictionary of output parameters
+				result = self.create_results_dict(res_filename)
+			else:
+				# store result file in FTP directory with name = task.id + .plt
+				filename = str(loadcase.task_id) + '.plt'
+				result_file_path = os.path.join(configworker.FTP_PATH, filename)
+				# move result file
+				shutil.move(res_filename, result_file_path)
+				# store host and path to file in result
+				result = dict()
+				result['host'] = configworker.IP_ADDRESS
+				result['file'] = filename
+
+			loadcase.status = constants.SUCCESS_STATUS
 			os.chdir(cwd)
-			return None
-		#logger.info("End executing")
-		# getting dictionary of output parameters
-		result = self.create_results_dict(res_filename)
-		loadcase.status = constants.SUCCESS_STATUS
-		os.chdir(cwd)
-		return result
+			return result
+		finally:
+			os.chdir(cwd)
+
 
 	def get_class_name(self, mos_filename):
 		"""
@@ -256,6 +284,7 @@ class ModelicaSolver(launcher.Launcher):
 		omp.execute('closeSimulationResultFile()')
 
 		return result_dict
+
 
 	def check(self, log_list):
 		"""
