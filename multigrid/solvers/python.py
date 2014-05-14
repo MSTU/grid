@@ -38,7 +38,7 @@ class PythonLoadcase(Loadcase):
 		Path to preexecuted file
 	"""
 
-	def __init__(self, scheme, desc=None, preexecute_filename=None):
+	def __init__(self, scheme, desc=None, preexecute_filename=None, is_local=False):
 		if not desc:
 			desc = scheme.__name__
 		func_dump = cloudpickle.dumps(scheme)
@@ -56,7 +56,7 @@ class PythonLoadcase(Loadcase):
 		else:
 			self.preexecute_file = None
 			self.preexecute_filename = None
-		Loadcase.__init__(self, func_dump, name, desc)
+		Loadcase.__init__(self, func_dump, name, desc, is_local)
 
 
 class PythonSolver(Launcher):
