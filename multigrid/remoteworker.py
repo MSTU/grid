@@ -53,12 +53,14 @@ def run_task(task):
 			solver = get_solver(lc.solver)
 			solver.preexecute(lc)
 
-		# set task id
-		task.id = run_task.request.id
-		task = localworker.run_task(task)
-
 		return task
 	finally:
 		# move to parent directory
 		os.chdir(cwd)
+
+	# set task id
+	task.id = run_task.request.id
+	task = localworker.run_task(task)
+
+	return task
 
