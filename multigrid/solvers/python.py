@@ -38,7 +38,7 @@ class PythonLoadcase(Loadcase):
 		Path to preexecuted file
 	"""
 
-	def __init__(self, scheme, desc=None, preexecute_filename=None, is_local=False):
+	def __init__(self, scheme, desc=None, preexecute_filename=None, criteria_list=None, is_local=False):
 		if not desc:
 			desc = scheme.__name__
 		func_dump = cloudpickle.dumps(scheme)
@@ -56,6 +56,7 @@ class PythonLoadcase(Loadcase):
 		else:
 			self.preexecute_file = None
 			self.preexecute_filename = None
+		self.criteria_list = criteria_list
 		Loadcase.__init__(self, func_dump, name, desc, is_local)
 
 
@@ -64,7 +65,13 @@ class PythonSolver(Launcher):
 		result = None
 		try:
 			func = pickle.loads(lc.scheme)
-			result = func(input_params)
+			func_result = func(input_params)
+			if isinstance(func_result, dict) or lc.criteria_list is None:
+				result = func_result
+			else:
+				d = {}
+				d[lc.criteria_list[0]] = func_result
+				result = d.copy()
 
 			status = constants.SUCCESS_STATUS
 		except Exception as e:
