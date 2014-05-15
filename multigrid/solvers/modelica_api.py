@@ -30,10 +30,23 @@ def value(result_dict, var_name, time, kind='linear'):
 	of the spline interpolator to use. Default is ‘linear’.
 	:return: value of variable called "var_name" at time "time" (var_name(time))
 	"""
-	t = value_list(result_dict, 'time')
-	v = value_list(result_dict, var_name)
-	f = interpolate.interp1d(t, v, kind)
-	return f(time)
+	# t = value_list(result_dict, 'time')
+	# v = value_list(result_dict, var_name)
+	# f = interpolate.interp1d(t, v, kind)
+	# return f(time)
+	if var_name in result_dict.keys():
+		t = value_list(result_dict, 'time')
+		v = value_list(result_dict, var_name)
+		f = interpolate.interp1d(t, v, kind)
+		return f(time)
+	else:
+		lc_name = var_name.split('.')[0]
+		var_name = var_name.replace(lc_name+'.', '')
+		t = value_list(result_dict[lc_name], 'time')
+		v = value_list(result_dict[lc_name], var_name)
+		f = interpolate.interp1d(t, v, kind)
+		return f(time)
+
 
 def value_from_layer(result_dict, var_name, layer_index):
 	"""
@@ -72,3 +85,45 @@ def layer_count(result_dict):
 	:return: number of time layers
 	"""
 	return len(result_dict.values()[0])
+
+def convert_keys(results):
+	"""
+	Converts loadcase keys in dictionary of results.
+	After this conversion you can use PRADIS loadcase names to access results
+	Parameters:
+	1) results - dictionary of results
+	keys - loadcases' names
+	values - list of values for Python loadcases and list of dictionaries for Modelica loadcases.
+	Returns:
+	dictionary with modified keys and the same values
+	"""
+	temp_keys = results.keys()
+	keys = []
+	d = {}
+	for key in temp_keys:
+		key = key.split('.')[-1]
+		keys.append(key)
+	values = results.values()
+	for key, value in zip(keys, values):
+		d[key] = value
+	return d
+
+def criterion_dictionary(index, results):
+	"""
+	Creates input dictionary for use in criterions.
+	keys - loadcases' names
+	values - scalar value for Python loadcase and dictionary for Modelica loadcase
+	(key - name of output variable, value - value of output variable)
+	Parameters:
+	1) index - index of required data in list of results for each loadcase.
+	Format of "results" dictionary:
+	{'loadcase_1_name': [{}, {}, ...], 'loadcase_2_name': [{}, {}, ...], ...}
+	results[loadcase_name][index] = {}
+	2) results - dictionary of results that was returned by MultiGRID function "map"
+	Returns:
+	dictionary to use in criterions
+	"""
+	d = {}
+	for loadcase in results:
+		d[loadcase] = results[loadcase][index]
+	return d
