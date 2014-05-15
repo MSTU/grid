@@ -52,8 +52,6 @@ def run_task(task):
 			# TODO May be preexecute must be static method?
 			solver = get_solver(lc.solver)
 			solver.preexecute(lc)
-
-		return task
 	finally:
 		# move to parent directory
 		os.chdir(cwd)
