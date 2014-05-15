@@ -67,7 +67,7 @@ class ModelGrid:
 		if isinstance(input_list, dict):
 			input_list = _dict_to_list(input_list)
 		# if even though one loadcase need local work, run all all loadcases on client computer
-		#  TODO think about case, when client coudn't run particular loadcase
+		#  TODO think about case, when client couldn't run particular loadcase
 		is_local_loadcases = False
 		for lc in loadcases:
 			is_local_loadcases |= lc.is_local
