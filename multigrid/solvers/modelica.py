@@ -174,7 +174,6 @@ class ModelicaSolver(launcher.Launcher):
 	def compile(self, mos_filename):
 		"""
 		compiles *.mo file using *.mos file to get exe-file of the model
-
 		"""
 		try:
 			log_file = open(log_filename, "w")
@@ -268,7 +267,6 @@ class ModelicaSolver(launcher.Launcher):
 		"""
 		Returns class name readed from mos-file (at this string: (simulate(className, ...))
 		It's required for getting model's C code, its compilation and execution
-
 		"""
 		class_name = None
 		with open(mos_filename, 'r') as f:
@@ -292,30 +290,6 @@ class ModelicaSolver(launcher.Launcher):
 	def create_results_dict(self, res_filename):
 		"""
 		Creates dictionary of results using result file named "res_filename"
-
-		"""
-		'''
-		result_dict = {}
-		# read all names of variables from "res_filename"
-		res = omp.execute('readSimulationResultVars("'+res_filename+'")')
-		# create list of variables' names
-		temp_vars_list = omp.get(res, 'SET1.Values')[0].split(',')
-		# delete first and last " symbols
-		vars_list = [variable[1:-1] for variable in temp_vars_list]
-		for key in vars_list:
-			values_list = omp.execute('readSimulationResult("'+res_filename+'", '+key+')')
-			# it is a workaround, because we have troubles with getting variables with
-			# complex names, for example, der(der(mass1.flange_b.s)) (names with brackets)
-			if len(values_list):
-				# delete last value ([:-1]), because it is the same as penultimate
-				result_dict[key] = omp.get(values_list, 'SET2.Set1')[:-1]
-		omp.execute('closeSimulationResultFile()')
-
-		return result_dict
-		'''
-		"""
-		Creates dictionary of results using result file named "res_filename"
-
 		"""
 		result_dict = {} # dictionary of results
 		value_list = [] # list of values of current output parameter
@@ -422,7 +396,6 @@ class ModelicaSolver(launcher.Launcher):
 		Returns:
 		True - if dictionaries have similar keys and values
 		False - otherwise
-
 		"""
 		result = False
 		first_dict_length = len(first_dict)
@@ -448,7 +421,6 @@ class ModelicaSolver(launcher.Launcher):
 		Returns:
 		constants.ERROR_STATUS - if error occurred
 		constants.SUCCESS_STATUS - otherwise
-
 		"""
 		error_flag = False
 		try:
@@ -471,7 +443,6 @@ class ModelicaSolver(launcher.Launcher):
 		Returns:
 		False - if error occurred and result file was not created
 		True - otherwise
-
 		"""
 		if os.path.exists(res_filename):
 			return True
@@ -572,7 +543,6 @@ class ModelicaSolver(launcher.Launcher):
 	def omp_create_results_dict(self, res_filename):
 		"""
 		Creates dictionary of results using result file named "res_filename"
-
 		"""
 		import OMPython as omp
 		result_dict = {}
@@ -595,15 +565,15 @@ class ModelicaSolver(launcher.Launcher):
 
 	def omp_recompilation(self, lrp_filename, mo_filename, class_name, solver_params):
 		"""
-			Checks the need for compilation.
-			All reasons for compilation are based on checking of file called "last_run_parameters.txt".
-			We need to compile if:
-			1) there is no executable file
-			2) there is no such file ("last_run_parameters.txt" does not exist), so we can suppose it is first run
-			3) the name of the file to load changed in string: "loadFile(...)"
-			4) the name of the class changed in string: "simulate(class_name, ...)"
-			5) values or amount of parameters for solver changed in string: "simulate(class_name, solver_params)"
-			"""
+		Checks the need for compilation.
+		All reasons for compilation are based on checking of file called "last_run_parameters.txt".
+		We need to compile if:
+		1) there is no executable file
+		2) there is no such file ("last_run_parameters.txt" does not exist), so we can suppose it is first run
+		3) the name of the file to load changed in string: "loadFile(...)"
+		4) the name of the class changed in string: "simulate(class_name, ...)"
+		5) values or amount of parameters for solver changed in string: "simulate(class_name, solver_params)"
+		"""
 		recompile_flag = False
 		if sys.platform.startswith('win'):
 			exec_name = class_name + '.exe'
