@@ -13,8 +13,7 @@ setup(name='multigrid',
 	  author=', '.join(multigrid.__author__),
 	  author_email='AntonEvgenich@gmail.com',
 	  install_requires=['celery>=3.0.0',
-						'argparse>=1.1',
-						'dill>=0.1.0'
+						'argparse>=1.1'
 						],
 	  packages=find_packages(),
 	  platforms=['any'],

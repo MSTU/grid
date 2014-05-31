@@ -15,6 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from config import *
 
 USERNAME = ""
 PASSWORD = ""

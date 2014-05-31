@@ -29,7 +29,6 @@ class Loadcase:
 		self.status = constants.DEFAULT_STATUS
 		self.is_filetransfer = False
 		self.is_local = is_local
-		self.load_data()
 
 	def load_data(self):
 		"""
