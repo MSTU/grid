@@ -2,6 +2,7 @@ import os
 import pickle
 
 import constants
+from loadcase import SuperLoadcase
 from solvers.holder import get_solver
 
 
@@ -16,7 +17,10 @@ def run_task(task):
 
 	try:
 		for lc in task.loadcases:
-			solver = get_solver(lc.solver)
+			if isinstance(lc, SuperLoadcase):
+				solver = get_solver(lc.solver)
+			else:
+				solver = get_solver(lc.solver)
 			lc.task_id = task.id
 			try:
 				task.result[lc.name] = solver.run(lc, pickle.loads(task.input_params))

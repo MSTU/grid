@@ -15,6 +15,7 @@
 #*   (at your option) any later version.                                   *
 #*                                                                         *
 #***************************************************************************/
+from serialization import cloudpickle
 import constants
 
 
@@ -44,3 +45,21 @@ class Loadcase:
 
 		solver_instance = get_solver(self.solver)
 		return solver_instance.run(self, input_params)
+
+
+class SuperLoadcase:
+	def __init__(self, nl, pl, desc=constants.DEFAULT_LOADCASE):
+		scheme_name = pl[0]
+		result_name = pl[1]
+		self.functions_list = [cloudpickle.dumps(func) for func in pl[2]]
+		self.criteria_list = pl[3]
+		solver = pl[4]
+
+		self.name = desc
+		self.scheme = scheme_name
+		self.result_file = result_name
+		self.solver = solver
+
+		self.solver_parameters = []
+		self.open_sign = pl[5]
+		self.close_sign = pl[6]
