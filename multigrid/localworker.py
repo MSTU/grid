@@ -18,7 +18,18 @@ def run_task(task):
 		for lc in task.loadcases:
 			solver = get_solver(lc.solver)
 			lc.task_id = task.id
-			task.result[lc.name] = solver.run(lc, pickle.loads(task.input_params))
+			try:
+				task.result[lc.name] = solver.run(lc, pickle.loads(task.input_params))
+			except Exception as e:
+				if task.is_exceptions_used:
+					raise e
+				else:
+					lc.status = constants.ERROR_STATUS
+					task.result[lc.name] = {'error': True, 'exception': e}
+			# if exceptions doesn't occur and status not set to error set it to success
+			if not lc.status is constants.ERROR_STATUS:
+				lc.status = constants.SUCCESS_STATUS
+
 		task.recalc_status()
 
 		return task

@@ -19,6 +19,7 @@
 import json
 import os
 from conf import configclient
+import constants
 from debug import logger
 from task import Task
 
@@ -36,8 +37,22 @@ except:
 	pass
 
 
-def run_fileserver():
-	pass
+def _transfer_files(task):
+	for lc in task.loadcases:
+		try:
+			if lc.is_filetransfer:
+				logger.info('Begin filetransfer')
+				from transfer_util import do_file_transfer
+
+				# create directory for loadcase
+				directory = os.path.join(os.getcwd(), lc.name)
+				if not os.path.exists(directory):
+					os.makedirs(directory)
+
+				do_file_transfer(task.result[lc.name]['host'], directory, task.result[lc.name]['file'])
+		except Exception as ex:
+			import traceback
+			traceback.print_exc()
 
 
 class ModelGrid:
@@ -51,7 +66,7 @@ class ModelGrid:
 			self._id_to_task = dict()
 			self._task_counter = 0
 
-	def calculate(self, loadcases, input_list):
+	def calculate(self, loadcases, input_list, is_exceptions_used=False):
 		"""
 		For all items in input_list create Task instance and run them.
 		Return ids of created Tasks
@@ -72,7 +87,7 @@ class ModelGrid:
 		for lc in loadcases:
 			is_local_loadcases |= lc.is_local
 		for item in input_list:
-			task = Task(loadcases, item)
+			task = Task(loadcases, item, is_exceptions_used)
 			if not self._is_local_work and not is_local_loadcases:
 				async_result = remote_run.delay(task)
 				task.id = async_result.task_id
@@ -90,33 +105,16 @@ class ModelGrid:
 		"""
 		results = []
 		for result_id in result_ids:
-			try:
-				if not self._is_local_work:
-					async_result = AsyncResult(result_id)
-					result_task = async_result.get()
-					# transfer files if need
-					for lc in result_task.loadcases:
-						try:
-							if lc.is_filetransfer:
-								logger.info('Begin filetransfer')
-								from transfer_util import do_file_transfer
-
-								# create directory for loadcase
-								directory = os.path.join(os.getcwd(), lc.name)
-								if not os.path.exists(directory):
-									os.makedirs(directory)
-
-								do_file_transfer(result_task.result[lc.name]['host'], directory, result_task.result[lc.name]['file'])
-						except Exception as ex:
-							import traceback
-							traceback.print_exc()
-				else:
-					result_task = self._id_to_task.pop(result_id)
+			if not self._is_local_work:
+				async_result = AsyncResult(result_id)
+				result_task = async_result.get()
+				# transfer files if need
+				_transfer_files(result_task)
+			else:
+				result_task = self._id_to_task.pop(result_id)
 				# it's new instance of Task, therefore need to reassign id field
-				result_task.id = result_id
-			except Exception as e:
-				#TODO right error handling
-				result_task = None
+			result_task.id = result_id
+
 			results.append(result_task.result)
 		result_dict = _list_to_dict(results)
 		# if only one loadcase calculated, return value of the one loadcase
@@ -147,6 +145,44 @@ class ModelGrid:
 
 		return True
 
+
+	def is_error(self, result_ids):
+		"""
+		Return true even if one task's loadcase result contain error
+		"""
+		is_error = False
+		if isinstance(result_ids, list):
+			for result_id in result_ids:
+				if AsyncResult(result_id).ready():
+					result = AsyncResult(result_id).get()
+					if result.status == constants.ERROR_STATUS:
+						is_error = True
+		else:
+			if AsyncResult(result_ids).ready():
+				result = AsyncResult(result_ids).get()
+				if result.status == constants.ERROR_STATUS:
+					is_error = True
+		return is_error
+
+
+	def which_error(self, result_ids):
+		"""
+		Return list of task's ids which contain error
+		"""
+		error_list = []
+		if isinstance(result_ids, list):
+			for result_id in result_ids:
+				if AsyncResult(result_id).ready():
+					result = AsyncResult(result_id).get()
+					if result.status == constants.ERROR_STATUS:
+						error_list.append(result_id)
+		else:
+			if AsyncResult(result_ids).ready():
+				result = AsyncResult(result_ids).get()
+				if result.status == constants.ERROR_STATUS:
+					error_list.append(result_ids)
+		return error_list
+
 	def reload(self):
 		"""
 		Reinit instance
@@ -171,7 +207,7 @@ class ModelGrid:
 				result = json.loads(response)
 			except Exception:
 				result = None
-		results.append(result)
+			results.append(result)
 		# result_dict = _list_to_dict(results)
 		# return result_dict
 		if len(results) == 1:

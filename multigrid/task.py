@@ -21,12 +21,13 @@ import constants
 
 
 class Task:
-	def __init__(self, loadcases, input_params):
+	def __init__(self, loadcases, input_params, is_excpetions_used=False):
 		self.id = None
 		self.loadcases = loadcases
 		self.input_params = pickle.dumps(input_params)
 		self.result = dict()
 		self.status = constants.DEFAULT_STATUS
+		self.is_exceptions_used = is_excpetions_used
 
 	# task status is least loadcase status
 	def recalc_status(self):
@@ -35,4 +36,4 @@ class Task:
 				self.status = loadcase.status
 
 	def __repr__(self):
-		return "Task: loadcases = %r, status = %s " % (self.loadcases, self.status)
+		return "Task: loadcases = %r, status = %s " % (self.loadcases, constants.status_to_string(self.status))

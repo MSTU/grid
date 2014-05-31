@@ -62,24 +62,15 @@ class PythonLoadcase(Loadcase):
 
 class PythonSolver(Launcher):
 	def run(self, lc, input_params):
-		result = None
-		try:
-			func = pickle.loads(lc.scheme)
-			func_result = func(input_params)
-			if isinstance(func_result, dict) or lc.criteria_list is None:
-				result = func_result
-			else:
-				d = {}
-				d[lc.criteria_list[0]] = func_result
-				result = d.copy()
+		func = pickle.loads(lc.scheme)
+		func_result = func(input_params)
+		if isinstance(func_result, dict) or lc.criteria_list is None:
+			result = func_result
+		else:
+			d = {}
+			d[lc.criteria_list[0]] = func_result
+			result = d.copy()
 
-			status = constants.SUCCESS_STATUS
-		except Exception as e:
-			status = constants.ERROR_STATUS
-			# TODO is it right?
-			result = e
-
-		lc.status = status
 		return result
 
 	def preexecute(self, lc):
