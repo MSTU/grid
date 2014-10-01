@@ -36,4 +36,4 @@ class Task:
 				self.status = loadcase.status
 
 	def __repr__(self):
-		return "Task: loadcases = %r, status = %s " % (self.loadcases, constants.status_to_string(self.status))
+		return "Task: loadcases = %r, status = %s " % (self.loadcases, constants.status_to_string[self.status])

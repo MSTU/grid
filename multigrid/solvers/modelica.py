@@ -185,8 +185,11 @@ class ModelicaSolver(launcher.Launcher):
 			subprocess.call(["cmd", "/C", command], stdout=log_file)
 		elif sys.platform.startswith('linux'):
 			subprocess.call(["omc", mos_filename], stdout=log_file)
+		elif sys.platform.startswith('darwin'):
+			subprocess.call(["omc", mos_filename], stdout=log_file)
 		else:
 			logger.error("Can't determine platform")
+			logger.error(sys.platform)
 			return constants.ERROR_STATUS
 		logger.info("End compiling")
 		log_file.close()
@@ -226,6 +229,12 @@ class ModelicaSolver(launcher.Launcher):
 				subprocess.call(["cmd", "/C", command])#, startupinfo=startupinfo)
 				#logger.info("End executing")
 			elif sys.platform.startswith('linux'):
+				command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
+				logger.info("Begin executing")
+				#logger.info("Begin executing")
+				subprocess.call(["./" + class_name] + command)
+				#logger.info("End executing")]
+			elif sys.platform.startswith('darwin'):
 				command = ['-overrideFile'] + [par_filename] + ['-r'] + [res_filename]
 				logger.info("Begin executing")
 				#logger.info("Begin executing")
@@ -324,6 +333,8 @@ class ModelicaSolver(launcher.Launcher):
 		if sys.platform.startswith('win'):
 			exec_name = class_name + '.exe'
 		elif sys.platform.startswith('linux'):
+			exec_name = class_name
+		elif sys.platform.startswith('darwin'):
 			exec_name = class_name
 		else:
 			logger.info("Can not determine type of your OS")
@@ -507,6 +518,8 @@ class ModelicaSolver(launcher.Launcher):
 				exec_filename = class_name + '.exe'
 			elif sys.platform.startswith('linux'):
 				exec_filename = './' + class_name
+			elif sys.platform.startswith('darwin'):
+				exec_filename = './' + class_name
 			else:
 				logger.info("Can not determine type of your OS")
 				loadcase.status = constants.ERROR_STATUS
@@ -578,6 +591,8 @@ class ModelicaSolver(launcher.Launcher):
 		if sys.platform.startswith('win'):
 			exec_name = class_name + '.exe'
 		elif sys.platform.startswith('linux'):
+			exec_name = class_name
+		elif sys.platform.startswith('darwin'):
 			exec_name = class_name
 		else:
 			logger.info("Can not determine type of your OS")
